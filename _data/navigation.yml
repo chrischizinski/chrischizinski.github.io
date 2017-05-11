@@ -3,7 +3,7 @@ main:
    - title: "Home"
      url: home.md
    - title: "The Lab"
-     url: _pages/about.md
+     url: about.md
    - title: "Publications"
      url: http://publicationslist.org/chris.chizinski
    - title: "Teaching"
