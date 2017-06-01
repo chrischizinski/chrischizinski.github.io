@@ -1,12 +1,14 @@
 # main links
 main:
-   - title: "Home"
-     url: home.md
    - title: "The Lab"
-     url: /_pages/about.md
+     url: /lab-page/
+   - title: "Teaching"
+     url: /teach/
+   - title: "Research"
+     url: /research/
    - title: "Publications"
      url: http://publicationslist.org/chris.chizinski
-   - title: "Teaching"
-     url: http://snr.unl.edu
+   - title:  "R Notes"
+     url: /year-archive/
 
  

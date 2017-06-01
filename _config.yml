@@ -10,11 +10,11 @@ locale                   : "en"
 title                    : "Christopher Chizinski"
 title_separator          : "-"
 name                     : "Christopher Chizinski"
-description              : "Lab website."
+description              : "Lab website"
 url                      : "https://chrischizinski.github.io"
 baseurl                  : ""
 repository               : "chrischizinski"
-teaser                   : /assets/images/sandhills.jpg
+teaser                   : /assets/images/sandhills.jpeg
 breadcrumbs              : true
 words_per_minute         : 200
 comments:
@@ -210,6 +210,11 @@ category_archive:
 tag_archive:
   type: liquid
   path: /tags/
+
+collections:
+  portfolio:
+    output: true
+    permalink: /:collection/:path/
 # https://github.com/jekyll/jekyll-archives
 # jekyll-archives:
 #   enabled:
@@ -237,9 +242,24 @@ defaults:
       path: ""
       type: posts
     values:
-      layout: single
+      layout: splash
       author_profile: true
-      read_time: true
+      read_time: false
       comments: true
       share: true
       related: true
+  # _portfolio
+  - scope:
+      path: ""
+      type: portfolio
+    values:
+      layout: single
+      author_profile: false
+      share: true
+  # _pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
