@@ -1,9 +1,9 @@
 ---
+layout: post
 title: "Models by a factor"
-categories:
-  - rstats
-tags:
-  - rstats
+description: ""
+category: rstats
+tags: [rstats]
 ---
 
 

@@ -1,14 +1,12 @@
 ---
-title:  "A few of my favorite themes"
-categories:
-  - rstats
-tags:
-  - rstats
-  - ggplot2
+layout: post
+description: ""
+category: rstats
+tags: [rstats,ggplot2]
 ---
 
 
-
+A few of my favorite themes
 ========================================================
 
 The RMarkdown source to this file can be found [here](\Rmd\2014-06-10-favorite-themes.Rmd)

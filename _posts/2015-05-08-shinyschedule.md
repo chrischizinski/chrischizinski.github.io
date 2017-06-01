@@ -1,10 +1,8 @@
 ---
+layout: post
 title: "A Shiny Creel Scheduler"
-categories:
-  - rstats
-tags:
-  - rstats
-  - creel
+description: ""
+category: rstats
 
 ---
 

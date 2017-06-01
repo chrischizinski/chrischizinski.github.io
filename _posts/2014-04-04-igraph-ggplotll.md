@@ -1,11 +1,9 @@
 ---
+layout: post
 title: "Plotting igraph objects with ggplot2"
-categories:
-  - rstats
-tags:
-  - rstats
-  - ggplot2
-  - igraph
+description: ""
+category: rstats
+tags: [rstats,ggplot2,igraph]
 ---
 
 
