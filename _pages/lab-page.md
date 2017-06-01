@@ -8,7 +8,7 @@ header:
   overlay_filter: "0.5"
   overlay_image: /assets/images/sandhills.jpeg
 feature_row:
-  - image_path: assets/images/me.jpg
+  - image_path: assets/images/me.JPG
     alt: "placeholder image 1"
     title: Christopher Chizinski
     excerpt: 'Principal Investigator' 
