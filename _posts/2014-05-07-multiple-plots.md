@@ -1,14 +1,13 @@
 ---
-layout: post
-description: ""
-category: rstats
-tags: [rstats,ggplot2,igraph]
+title: "Multiple plots in ggplot2"
+categories:
+  - rstats
+tags:
+  - rstats
+  - ggplot2
+  - gridExtra
 ---
 
-
-
-Multiple plots in ggplot2
-========================================================
 
 The RMarkdown source to this file can be found [here](\Rmd\22014-05-07-multiple-plots.Rmd)
 

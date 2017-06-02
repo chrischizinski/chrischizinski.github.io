@@ -1,8 +1,7 @@
 ---
-layout: post
 title: "Postdoc position"
-description: ""
-category: labnotes
+categories:
+  - labnotes
 
 ---
 

@@ -1,8 +1,7 @@
 ---
-layout: post
 title: "Two graduate assistantships"
-description: ""
-category: labnotes
+categories:
+  - labnotes
 
 ---
 

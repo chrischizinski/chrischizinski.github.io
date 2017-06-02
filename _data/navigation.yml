@@ -8,7 +8,7 @@ main:
      url: /research/
    - title: "Publications"
      url: http://publicationslist.org/chris.chizinski
-   - title:  "R Notes"
-     url: /year-archive/
+   - title:  "Blog and R Notes"
+     url: /categories/
 
  

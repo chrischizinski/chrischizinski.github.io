@@ -1,9 +1,10 @@
 ---
-layout: post
 title: "Models by a factor"
-description: ""
-category: rstats
-tags: [rstats]
+categories:
+  - rstats
+tags:
+  - rstats
+  - model building
 ---
 
 

@@ -1,12 +1,13 @@
 ---
-layout: post
 title: "Plotting NMDS plots with ggplot2"
-description: ""
-category: rstats
-tags: [rstats,ggplot2]
+categories: 
+  - rstats
+tags:
+  - rstats
+  - ggplot2
+  - multivariate
 ---
 
-========================================================
 
 The RMarkdown source to this file can be found [here](\Rmd\2014-04-13-vegan-ggplot2.Rmd)
 

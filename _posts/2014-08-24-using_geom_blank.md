@@ -1,9 +1,10 @@
 ---
-layout: post
 title: "Using geom_blank for better axis ranges in ggplot"
-description: ""
-category: rstats
-tags: [rstats,ggplot2]
+categories:
+  - rstats
+tags:
+  - rstats
+  - ggplot2
 ---
 
 

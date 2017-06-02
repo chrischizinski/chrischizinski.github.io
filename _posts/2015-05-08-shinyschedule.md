@@ -1,8 +1,11 @@
 ---
-layout: post
 title: "A Shiny Creel Scheduler"
-description: ""
-category: rstats
+categories:
+  - rstats
+tags:
+  - anglers
+  - rstats
+  - creel
 
 ---
 

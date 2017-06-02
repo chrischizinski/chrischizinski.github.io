@@ -1,9 +1,12 @@
 ---
-layout: post
 title: "Simulating angler survey data"
-description: ""
-category: rstats
-tags: [rstats,anglers]
+
+categories:
+  - rstats
+tags:
+  - rstats
+  - anglers
+  - simulation
 ---
 
 
