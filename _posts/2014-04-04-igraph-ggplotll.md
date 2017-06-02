@@ -6,7 +6,6 @@ tags:
   - rstats
   - ggplot2
   - igraph
-comments: true
 ---
 
 
