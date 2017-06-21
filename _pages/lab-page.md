@@ -22,11 +22,11 @@ feature_row:
     url: "lab/mgruntorad"
     btn_label: "Read More"
     btn_class: "btn--inverse"
-  - image_path: /assets/images/unsplash-gallery-image-3-th.jpg
+  - image_path: /assets/images/nprice.png
     alt: "placeholder image 3"
     title: "Nathan Price"
     excerpt: "Data Scientist"
-    url: "#test"
+    url: "lab/nprice"
     btn_label: "Read More"
     btn_class: "btn--inverse"
 feature_row2:
