@@ -11,6 +11,8 @@ feature_row2:
   - image_path: /assets/images/SES2.png
 ---
 
+![Logo](/assets/images/UpdatedLogo_HuskerwText.png)
+
 # Creel surveys
 
 {% include feature_row %}
