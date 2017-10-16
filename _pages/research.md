@@ -12,12 +12,3 @@ feature_row2:
 
 ![Logo](/assets/images/UpdatedLogo_HuskerwText.png)
 
-# Creel surveys
-
-{% include feature_row %}
-
-# Recreational fisheries as social ecological systems
-
-
-
-# Identities of sportspersons
