@@ -19,8 +19,10 @@ Courses that I teach at the [University of Nebraska - Lincoln](www.unl.edu).
 
 {% include feature_row %}
 
-Managers and researchers increasingly must contend with the problem of understanding and managing complex, social-ecological systems.To be effective in the job requires understanding how people value, experience, use, care for, interact with, and are sustained by the natural environment. 
-This course provides an introduction to the theory and methods necessary to understand human dimensions as well as applications and case studies of human dimensions in fisheries and wildlife management.
+Managers and researchers increasingly must contend with the problem of understanding and managing complex, social-ecological systems.
+To be effective in the job requires understanding how people value, experience, use, care for, interact with, and are sustained by the natural environment. 
+
+This course provides an introduction to the theory and methods necessary to understand human dimensions as well as applications and case studies of human dimensions in fisheries and wildlife management.
 
 # [Special topics using R](https://bulletin.unl.edu/courses/NRES/898)
 
