@@ -19,6 +19,6 @@ feature_row2:
 
 # Recreational fisheries as social ecological systems
 
-{% include feature_row id="feature_row2" type="left" %}
+
 
 # Identities of sportspersons
