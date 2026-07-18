@@ -1,5 +1,6 @@
 /_site/
 /.quarto/
+/.ai/
 *.html.bak
 
 **/*.quarto_ipynb
