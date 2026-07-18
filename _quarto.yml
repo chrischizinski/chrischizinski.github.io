@@ -1,0 +1,44 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "posts/**/*.qmd"
+  resources:
+    - figs/
+    - assets/
+    - CNAME
+
+website:
+  title: "Christopher Chizinski"
+  description: "Human dimensions of wildlife & fisheries — research, code, and R notes."
+  site-url: "https://chrischizinski.com"
+  favicon: assets/images/logo.png
+  navbar:
+    left:
+      - text: "About"
+        href: index.qmd
+      - text: "Blog"
+        href: blog.qmd
+      - text: "Projects"
+        href: projects.qmd
+      - text: "CV"
+        href: cv.qmd
+    right:
+      - icon: github
+        href: https://github.com/chrischizinski
+        aria-label: GitHub
+      - text: "Lab"
+        href: https://humandimensions.unl.edu
+  page-footer:
+    left: "© 2026 Christopher Chizinski"
+    right: "Built with [Quarto](https://quarto.org)"
+
+format:
+  html:
+    theme:
+      - cosmo
+      - assets/styles.scss
+    toc: true
+    code-copy: true
+    code-overflow: wrap

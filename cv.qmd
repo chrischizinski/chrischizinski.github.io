@@ -1,0 +1,10 @@
+---
+title: "CV"
+---
+
+A PDF of my full curriculum vitae is available below.
+
+[Download CV (PDF)](assets/Chizinski-CV2.pdf){.btn .btn-primary}
+
+<!-- TODO: replace assets/Chizinski-CV2.pdf with current CV export from
+     github.com/chrischizinski/chizinski_cv, or embed a Quarto-rendered CV. -->
