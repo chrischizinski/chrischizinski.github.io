@@ -3,5 +3,9 @@ freeze: true
 comments:
   giscus:
     repo: chrischizinski/chrischizinski.github.io
-    # TODO: enable GitHub Discussions on the repo, install the giscus app,
-    # then fill repo-id / category / category-id from https://giscus.app
+    repo-id: MDEwOlJlcG9zaXRvcnk5MDI5NDA0OA==
+    category: Announcements
+    category-id: DIC_kwDOBWHHIM4DBiNi
+    mapping: pathname
+    reactions-enabled: true
+    theme: preferred_color_scheme
