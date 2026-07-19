@@ -9,6 +9,9 @@ about:
     - icon: github
       text: GitHub
       href: https://github.com/chrischizinski
+    - icon: cloud
+      text: Bluesky
+      href: https://bsky.app/profile/chrischizinski.bsky.social
     - icon: mortarboard
       text: Lab (UNL)
       href: https://humandimensions.unl.edu
@@ -19,17 +22,26 @@ about:
 
 [Professor · Assoc. Director of Research & Graduate Education · School of Natural Resources · UNL]{.specimen-label}
 
-I study the **human dimensions of wildlife and fisheries** — the decisions
-behind who hunts, fishes, and forages, how those choices change over time, and
-what they mean for the agencies charged with managing the resource.
+I study how people interact with fish, wildlife, and other natural
+resources—and how those interactions shape conservation policy and management.
+My research focuses on the decisions behind who hunts, fishes, and forages, how
+participation changes over time, and what those patterns mean for the agencies
+responsible for managing public resources.
 
-Most of that work runs on survey data and quantitative methods: creel and
-angler surveys, capture–recapture, recruitment and retention (R3), and a lot
-of reproducible R. Alongside the research, I help lead research and graduate
-education in the School of Natural Resources at the University of
-Nebraska–Lincoln.
+I combine survey science, quantitative methods, and reproducible data analysis
+to study participation, behavior, harvest, and decision-making. Much of this
+work involves creel and angler surveys, capture–recapture methods, recruitment,
+retention, and reactivation (R3), and the development of open-source tools in R
+for conservation research and management.
 
-This site collects my [blog](blog.qmd) (mostly R notes), the
-[software and dashboards](projects.qmd) my lab builds, and my [CV](cv.qmd).
-For lab members, current projects, and openings, see
+I am a Professor in the School of Natural Resources at the University of
+Nebraska–Lincoln, where I also help lead the school's research enterprise and
+graduate programs. I teach undergraduate courses in human dimensions and
+natural resource policy, as well as graduate courses in R programming, data
+visualization, and reproducible science.
+
+This site brings together my [blog](blog.qmd)—mostly notes on R, data analysis,
+and quantitative methods—the [software and dashboards](projects.qmd) developed
+by my lab, and my [curriculum vitae](cv.qmd). For information about lab members,
+current projects, and opportunities to join the group, visit
 [humandimensions.unl.edu](https://humandimensions.unl.edu).
