@@ -1,0 +1,7 @@
+# Applies to all posts
+freeze: true
+comments:
+  giscus:
+    repo: chrischizinski/chrischizinski.github.io
+    # TODO: enable GitHub Discussions on the repo, install the giscus app,
+    # then fill repo-id / category / category-id from https://giscus.app

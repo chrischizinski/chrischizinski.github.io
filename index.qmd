@@ -1,0 +1,29 @@
+---
+title: "Christopher Chizinski"
+subtitle: "Human Dimensions of Wildlife & Fisheries"
+about:
+  template: trestles
+  image: assets/images/Chizinski.jpeg
+  image-shape: rounded
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/chrischizinski
+    - icon: mortarboard
+      text: Lab (UNL)
+      href: https://humandimensions.unl.edu
+    - icon: envelope
+      text: Email
+      href: mailto:cchizinski2@unl.edu
+---
+
+I am an Associate Professor in the School of Natural Resources at the
+University of Nebraska–Lincoln, studying the **human dimensions of wildlife
+and fisheries** — how and why people hunt, fish, and forage, and what that
+means for management.
+
+My work blends survey science, quantitative ecology, and reproducible
+research in R. This site holds my [blog](blog.qmd) (mostly R notes),
+[projects](projects.qmd) and software, and my [CV](cv.qmd). For lab members,
+current research, and openings, see
+[humandimensions.unl.edu](https://humandimensions.unl.edu).

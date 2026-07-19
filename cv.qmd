@@ -1,0 +1,12 @@
+---
+title: "CV"
+---
+
+A PDF of my full curriculum vitae is generated from structured data in a
+separate Quarto project.
+
+[Download CV (PDF)](https://raw.githubusercontent.com/chrischizinski/chizinski_cv/main/chizinski_cv.pdf){.btn .btn-primary}
+[View source](https://github.com/chrischizinski/chizinski_cv){.btn .btn-outline-secondary}
+
+The CV project maintains the data, bibliography, and reproducible PDF build
+independently from this website.
