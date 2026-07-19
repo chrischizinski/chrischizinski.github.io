@@ -74,7 +74,7 @@
     "href": "index.html",
     "title": "Christopher Chizinski",
     "section": "",
-    "text": "Associate Professor · School of Natural Resources · UNL\nI study the human dimensions of wildlife and fisheries — how and why people hunt, fish, and forage, and what that means for management — at the University of Nebraska–Lincoln.\nMy work blends survey science, quantitative ecology, and reproducible research in R. This site holds my blog (mostly R notes), projects and software, and my CV. For lab members, current research, and openings, see humandimensions.unl.edu."
+    "text": "Professor · Assoc. Director of Research & Graduate Education · School of Natural Resources · UNL\nI study the human dimensions of wildlife and fisheries — the decisions behind who hunts, fishes, and forages, how those choices change over time, and what they mean for the agencies charged with managing the resource.\nMost of that work runs on survey data and quantitative methods: creel and angler surveys, capture–recapture, recruitment and retention (R3), and a lot of reproducible R. Alongside the research, I help lead research and graduate education in the School of Natural Resources at the University of Nebraska–Lincoln.\nThis site collects my blog (mostly R notes), the software and dashboards my lab builds, and my CV. For lab members, current projects, and openings, see humandimensions.unl.edu."
   },
   {
     "objectID": "posts/2014-04-08-models-by-variable.html",
