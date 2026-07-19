@@ -4,35 +4,7 @@
     "href": "projects.html",
     "title": "Projects & Software",
     "section": "",
-    "text": "Open-source tools and dashboards from my lab and research."
-  },
-  {
-    "objectID": "projects.html#tidycreel",
-    "href": "projects.html#tidycreel",
-    "title": "Projects & Software",
-    "section": "tidycreel",
-    "text": "tidycreel\nTidy R tools for creel survey design, estimation, validation, and management-ready reporting. GitHub"
-  },
-  {
-    "objectID": "projects.html#wildlife-grad-dashboard",
-    "href": "projects.html#wildlife-grad-dashboard",
-    "title": "Projects & Software",
-    "section": "Wildlife Grad Dashboard",
-    "text": "Wildlife Grad Dashboard\nPublic trends dashboard tracking U.S. wildlife and natural resources graduate assistantship postings — salaries, timing, and geography. GitHub"
-  },
-  {
-    "objectID": "projects.html#huntfishapp",
-    "href": "projects.html#huntfishapp",
-    "title": "Projects & Software",
-    "section": "huntfishapp",
-    "text": "huntfishapp\nWeb-based exploratory data analysis application for hunting, fishing, and outdoor recreation sales data. GitHub"
-  },
-  {
-    "objectID": "projects.html#pradel-jax",
-    "href": "projects.html#pradel-jax",
-    "title": "Projects & Software",
-    "section": "pradel-jax",
-    "text": "pradel-jax\nModern JAX-based optimization framework for Pradel capture–recapture models. GitHub"
+    "text": "Open source · lab & research tools\nOpen-source tools and dashboards from my lab and research.\n\n\n\n\ntidycreel\nTidy R tools for creel survey design, estimation, validation, and management-ready reporting.\nGitHub →\n\n\n\n\n\n\nWildlife Grad Dashboard\nPublic trends dashboard tracking U.S. wildlife and natural resources graduate assistantship postings — salaries, timing, and geography.\nGitHub →\n\n\n\n\n\n\nhuntfishapp\nWeb-based exploratory data analysis application for hunting, fishing, and outdoor recreation sales data.\nGitHub →\n\n\n\n\n\n\npradel-jax\nModern JAX-based optimization framework for Pradel capture–recapture models.\nGitHub →"
   },
   {
     "objectID": "posts/2014-11-24-adonis.html",
@@ -102,7 +74,7 @@
     "href": "index.html",
     "title": "Christopher Chizinski",
     "section": "",
-    "text": "I am an Associate Professor in the School of Natural Resources at the University of Nebraska–Lincoln, studying the human dimensions of wildlife and fisheries — how and why people hunt, fish, and forage, and what that means for management.\nMy work blends survey science, quantitative ecology, and reproducible research in R. This site holds my blog (mostly R notes), projects and software, and my CV. For lab members, current research, and openings, see humandimensions.unl.edu."
+    "text": "Associate Professor · School of Natural Resources · UNL\nI study the human dimensions of wildlife and fisheries — how and why people hunt, fish, and forage, and what that means for management — at the University of Nebraska–Lincoln.\nMy work blends survey science, quantitative ecology, and reproducible research in R. This site holds my blog (mostly R notes), projects and software, and my CV. For lab members, current research, and openings, see humandimensions.unl.edu."
   },
   {
     "objectID": "posts/2014-04-08-models-by-variable.html",
