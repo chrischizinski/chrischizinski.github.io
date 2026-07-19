@@ -2,23 +2,61 @@
 title: "Projects & Software"
 ---
 
+[Open source · lab & research tools]{.specimen-label}
+
 Open-source tools and dashboards from my lab and research.
 
-## tidycreel
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
+[tidycreel]{.card-title}
+
 Tidy R tools for creel survey design, estimation, validation, and
 management-ready reporting.
-[GitHub](https://github.com/chrischizinski/tidycreel)
 
-## Wildlife Grad Dashboard
+[GitHub →](https://github.com/chrischizinski/tidycreel)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
+[Wildlife Grad Dashboard]{.card-title}
+
 Public trends dashboard tracking U.S. wildlife and natural resources graduate
 assistantship postings — salaries, timing, and geography.
-[GitHub](https://github.com/chrischizinski/wildlife-grad-dashboard)
 
-## huntfishapp
+[GitHub →](https://github.com/chrischizinski/wildlife-grad-dashboard)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
+[huntfishapp]{.card-title}
+
 Web-based exploratory data analysis application for hunting, fishing, and
 outdoor recreation sales data.
-[GitHub](https://github.com/chrischizinski/huntfishapp)
 
-## pradel-jax
+[GitHub →](https://github.com/chrischizinski/huntfishapp)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
+[pradel-jax]{.card-title}
+
 Modern JAX-based optimization framework for Pradel capture–recapture models.
-[GitHub](https://github.com/chrischizinski/pradel-jax)
+
+[GitHub →](https://github.com/chrischizinski/pradel-jax)
+:::
+:::
+:::
+
+:::

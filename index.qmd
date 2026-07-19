@@ -17,10 +17,11 @@ about:
       href: mailto:cchizinski2@unl.edu
 ---
 
-I am an Associate Professor in the School of Natural Resources at the
-University of Nebraska–Lincoln, studying the **human dimensions of wildlife
-and fisheries** — how and why people hunt, fish, and forage, and what that
-means for management.
+[Associate Professor · School of Natural Resources · UNL]{.specimen-label}
+
+I study the **human dimensions of wildlife and fisheries** — how and why
+people hunt, fish, and forage, and what that means for management — at the
+University of Nebraska–Lincoln.
 
 My work blends survey science, quantitative ecology, and reproducible
 research in R. This site holds my [blog](blog.qmd) (mostly R notes),

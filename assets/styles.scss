@@ -1,7 +1,226 @@
 /*-- scss:defaults --*/
-$primary: #d00000;   // Husker-ish red accent; tune to taste
-$body-color: #222;
-$link-color: $primary;
+
+// ── Fonts ────────────────────────────────────────────────────────────────
+// Fraunces (display serif), Public Sans (body), JetBrains Mono (code + labels)
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// ── Palette: field guide meets data paper ────────────────────────────────
+$ink:      #1c1c1a;   // near-black text
+$paper:    #fbfaf7;   // warm off-white ground (clean, not AI-cream)
+$water:    #2f6f68;   // primary — reservoir teal-green
+$deep:     #1f4f4a;   // darker water, for hover/emphasis
+$crimson:  #c8102e;   // small institutional tie (UNL)
+$sand:     #ece6da;   // muted borders / card fields
+$stone:    #6f6b60;   // secondary / muted text
+
+// ── Bootstrap overrides ──────────────────────────────────────────────────
+$primary:        $water;
+$body-color:     $ink;
+$body-bg:        $paper;
+$link-color:     $water;
+$link-hover-color: $deep;
+
+$font-family-sans-serif: "Public Sans", system-ui, -apple-system, sans-serif;
+$font-family-monospace:  "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+$headings-font-family:   "Fraunces", Georgia, serif;
+$headings-font-weight:   600;
+
+$font-size-base:   1.06rem;
+$line-height-base: 1.65;
+$border-radius:    4px;
+$border-radius-lg: 6px;
+
+// Cosmo navbar → paper with a rule instead of a colored bar
+$navbar-bg:  $paper;
+$navbar-fg:  $ink;
 
 /*-- scss:rules --*/
-.navbar-brand { font-weight: 600; }
+
+// ── Type scale & rhythm ──────────────────────────────────────────────────
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, .quarto-title h1 {
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+h1 { font-size: clamp(2.1rem, 4.4vw, 3.1rem); font-weight: 600; }
+h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin-top: 2.4rem; }
+h3 { font-size: 1.28rem; }
+
+// Signature: monospace "specimen label" eyebrow
+.eyebrow, .specimen-label {
+  font-family: $font-family-monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $water;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 0.6rem;
+}
+
+// ── Navbar: field-guide header rule ──────────────────────────────────────
+.navbar {
+  border-bottom: 1px solid $ink;
+  box-shadow: 0 1px 0 0 $sand;   // double-hairline motif
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+.navbar-brand {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+.navbar .nav-link {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: relative;
+}
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+  color: $water !important;
+}
+.navbar .nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem; right: 0.5rem; bottom: 0.15rem;
+  height: 2px;
+  background: $water;
+}
+
+// ── About / hero (trestles) ──────────────────────────────────────────────
+.about-entity .about-image {
+  border-radius: $border-radius-lg;
+  border: 1px solid $sand;
+  box-shadow: 0 10px 30px -18px rgba($ink, 0.5);
+}
+.about-links .about-link {
+  border: 1px solid $sand;
+  border-radius: $border-radius;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.about-links .about-link:hover {
+  border-color: $water;
+  color: $water;
+}
+
+// ── Links ────────────────────────────────────────────────────────────────
+a {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+p a {
+  text-decoration-color: rgba($water, 0.4);
+}
+p a:hover {
+  text-decoration-color: $deep;
+}
+
+// ── Blockquote as field note ─────────────────────────────────────────────
+blockquote, .blockquote {
+  border-left: 3px solid $water;
+  background: rgba($sand, 0.5);
+  padding: 0.9rem 1.2rem;
+  margin: 1.5rem 0;
+  color: $ink;
+  font-style: normal;
+  border-radius: 0 $border-radius $border-radius 0;
+}
+
+// ── Code: R notes are the hero ───────────────────────────────────────────
+code:not(.sourceCode), p code, li code {
+  color: $crimson;
+  background: rgba($sand, 0.55);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.88em;
+}
+div.sourceCode {
+  border: 1px solid $sand;
+  border-radius: $border-radius;
+  background: #fdfcfa;
+}
+pre.sourceCode {
+  padding: 0.9rem 1rem;
+}
+
+// ── Listing (blog) ───────────────────────────────────────────────────────
+.quarto-listing {
+  margin-top: 1.5rem;
+}
+.quarto-post {
+  border-bottom: 1px solid $sand;
+  padding: 1.3rem 0;
+  transition: background 0.15s ease;
+}
+.quarto-post:hover {
+  background: rgba($sand, 0.3);
+}
+.quarto-post .listing-title {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 1.35rem;
+}
+.quarto-post .listing-date,
+.listing-date {
+  font-family: $font-family-monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: $stone;
+}
+.listing-category, .quarto-category {
+  font-family: $font-family-monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid $sand;
+  border-radius: 999px;
+  color: $stone;
+  background: transparent;
+}
+.listing-category:hover, .quarto-category:hover {
+  border-color: $water;
+  color: $water;
+}
+
+// ── Project cards (grid on projects.qmd) ─────────────────────────────────
+.card.project-card {
+  border: 1px solid $sand;
+  border-radius: $border-radius-lg;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  height: 100%;
+}
+.card.project-card:hover {
+  border-color: $water;
+  box-shadow: 0 14px 34px -22px rgba($ink, 0.55);
+  transform: translateY(-2px);
+}
+.card.project-card .card-title {
+  font-family: $font-family-monospace;
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: $ink;
+}
+.card.project-card .card-title::before {
+  content: "› ";
+  color: $water;
+}
+
+// ── Footer ───────────────────────────────────────────────────────────────
+.nav-footer {
+  border-top: 1px solid $ink;
+  box-shadow: 0 -1px 0 0 $sand inset;
+  font-size: 0.85rem;
+  color: $stone;
+}
+
+// ── Table of contents ────────────────────────────────────────────────────
+#TOC .active, .sidebar nav a.active {
+  color: $water !important;
+  border-left-color: $water !important;
+}
