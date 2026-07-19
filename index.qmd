@@ -17,14 +17,19 @@ about:
       href: mailto:cchizinski2@unl.edu
 ---
 
-[Associate Professor · School of Natural Resources · UNL]{.specimen-label}
+[Professor · Assoc. Director of Research & Graduate Education · School of Natural Resources · UNL]{.specimen-label}
 
-I study the **human dimensions of wildlife and fisheries** — how and why
-people hunt, fish, and forage, and what that means for management — at the
-University of Nebraska–Lincoln.
+I study the **human dimensions of wildlife and fisheries** — the decisions
+behind who hunts, fishes, and forages, how those choices change over time, and
+what they mean for the agencies charged with managing the resource.
 
-My work blends survey science, quantitative ecology, and reproducible
-research in R. This site holds my [blog](blog.qmd) (mostly R notes),
-[projects](projects.qmd) and software, and my [CV](cv.qmd). For lab members,
-current research, and openings, see
+Most of that work runs on survey data and quantitative methods: creel and
+angler surveys, capture–recapture, recruitment and retention (R3), and a lot
+of reproducible R. Alongside the research, I help lead research and graduate
+education in the School of Natural Resources at the University of
+Nebraska–Lincoln.
+
+This site collects my [blog](blog.qmd) (mostly R notes), the
+[software and dashboards](projects.qmd) my lab builds, and my [CV](cv.qmd).
+For lab members, current projects, and openings, see
 [humandimensions.unl.edu](https://humandimensions.unl.edu).
