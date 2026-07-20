@@ -1,5 +1,5 @@
 ---
-title: "Projects & Software"
+title: "Projects"
 ---
 
 [Open source · lab & research tools]{.specimen-label}
@@ -16,7 +16,10 @@ Open-source tools and dashboards from my lab and research.
 Tidy R tools for creel survey design, estimation, validation, and
 management-ready reporting.
 
-[GitHub →](https://github.com/chrischizinski/tidycreel)
+<div class="project-links">
+<a href="https://chrischizinski.github.io/tidycreel/"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/tidycreel"><i class="bi bi-github"></i> GitHub</a>
+</div>
 :::
 :::
 :::
@@ -29,7 +32,10 @@ management-ready reporting.
 Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
 — design, estimation, diagnostics, and reporting. Companion to the package.
 
-[Read online →](https://modern-creel-surveys.netlify.app/)
+<div class="project-links">
+<a href="https://modern-creel-surveys.netlify.app"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/modern-creel-surveys"><i class="bi bi-github"></i> GitHub</a>
+</div>
 :::
 :::
 :::
@@ -42,7 +48,10 @@ Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
 Public trends dashboard tracking U.S. wildlife and natural resources graduate
 assistantship postings — salaries, timing, and geography.
 
-[GitHub →](https://github.com/chrischizinski/wildlife-grad-dashboard)
+<div class="project-links">
+<a href="https://chrischizinski.github.io/wildlife-grad-dashboard/"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/wildlife-grad-dashboard"><i class="bi bi-github"></i> GitHub</a>
+</div>
 :::
 :::
 :::
@@ -55,7 +64,10 @@ assistantship postings — salaries, timing, and geography.
 Web-based exploratory data analysis application for hunting, fishing, and
 outdoor recreation sales data.
 
-[GitHub →](https://github.com/chrischizinski/huntfishapp)
+<div class="project-links">
+<a href="https://chrischizinski.github.io/huntfishapp"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/huntfishapp"><i class="bi bi-github"></i> GitHub</a>
+</div>
 :::
 :::
 :::
@@ -67,7 +79,9 @@ outdoor recreation sales data.
 
 Modern JAX-based optimization framework for Pradel capture–recapture models.
 
-[GitHub →](https://github.com/chrischizinski/pradel-jax)
+<div class="project-links">
+<a href="https://github.com/chrischizinski/pradel-jax"><i class="bi bi-github"></i> GitHub</a>
+</div>
 :::
 :::
 :::
