@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" role="img" aria-label="Modern Creel Survey Analysis book hex logo">
+  <defs><clipPath id="c"><path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z"/></clipPath></defs>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="#f5f0e7"/>
+  <g clip-path="url(#c)">
+    <rect x="0" y="150" width="260" height="150" fill="#e7eef1"/>
+    <path d="M0 168 q32 -14 64 0 t64 0 t64 0 t64 0 v140 H0 Z" fill="#dbe7ec"/>
+  </g>
+  <!-- leaping fish above book -->
+  <g transform="translate(130 74) rotate(-14)">
+    <path d="M-34 0 C-20 -15 20 -15 34 0 C20 15 -20 15 -34 0 Z" fill="#1f6f8b"/>
+    <path d="M-34 0 L-48 -11 L-42 0 L-48 11 Z" fill="#3b6ea5"/>
+    <path d="M4 -12 C11 -18 20 -16 24 -9 C17 -11 11 -8 9 -4 C9 -8 7 -11 4 -12 Z" fill="#f47d65"/>
+    <circle cx="22" cy="-2" r="3" fill="#f5f0e7"/><circle cx="23" cy="-2" r="1.6" fill="#1b2a3a"/>
+  </g>
+  <!-- open book -->
+  <g transform="translate(130 150)">
+    <path d="M-64 -18 C-40 -32 -12 -32 0 -22 C12 -32 40 -32 64 -18 L64 24 C40 10 12 10 0 20 C-12 10 -40 10 -64 24 Z"
+          fill="#ffffff" stroke="#1b2a3a" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M0 -22 L0 20" stroke="#1b2a3a" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="#9fb3bd" stroke-width="3" stroke-linecap="round">
+      <path d="M-52 -8 H-14"/><path d="M-52 2 H-18"/>
+      <path d="M14 -8 H52"/><path d="M18 2 H52"/>
+    </g>
+  </g>
+  <text x="130" y="232" text-anchor="middle" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="32" fill="#1b2a3a">creel book</text>
+  <text x="130" y="248" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="500" font-size="9" fill="#1f6f8b" letter-spacing="1.0">SURVEY ANALYSIS · R</text>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="none" stroke="#1b2a3a" stroke-width="10" stroke-linejoin="round"/>
+</svg>

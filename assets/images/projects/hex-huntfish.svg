@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" role="img" aria-label="huntfishapp hex logo">
+  <defs><clipPath id="c"><path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z"/></clipPath></defs>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="#f5f0e7"/>
+  <g clip-path="url(#c)">
+    <rect x="0" y="150" width="260" height="150" fill="#e7eef1"/>
+    <path d="M0 168 q32 -14 64 0 t64 0 t64 0 t64 0 v140 H0 Z" fill="#dbe7ec"/>
+  </g>
+  <!-- flying duck (hunt) -->
+  <g transform="translate(120 78)">
+    <path d="M-40 8 C-24 2 -6 2 8 8 C16 11 24 10 30 4 C26 12 18 16 8 15 C0 22 -18 22 -34 15 C-38 13 -40 11 -40 8 Z" fill="#1b2a3a"/>
+    <path d="M30 4 C34 2 40 1 45 3 C40 4 37 6 36 9 C33 7 31 5 30 4 Z" fill="#f47d65"/>
+    <path d="M-6 6 C-2 -10 8 -16 18 -12 C10 -8 6 -2 6 6 C2 4 -2 4 -6 6 Z" fill="#2e8b6f"/>
+    <circle cx="26" cy="5" r="1.7" fill="#f5f0e7"/>
+  </g>
+  <!-- fish (fish) -->
+  <g transform="translate(128 138) rotate(6)">
+    <path d="M-44 0 C-26 -18 26 -18 44 0 C26 18 -26 18 -44 0 Z" fill="#1f6f8b"/>
+    <path d="M-44 0 L-62 -13 L-55 0 L-62 13 Z" fill="#3b6ea5"/>
+    <path d="M2 -15 C11 -22 24 -20 30 -11 C21 -13 12 -10 8 -4 C8 -10 6 -13 2 -15 Z" fill="#f47d65"/>
+    <circle cx="30" cy="-2" r="4" fill="#f5f0e7"/><circle cx="31" cy="-2" r="2" fill="#1b2a3a"/>
+  </g>
+  <text x="130" y="232" text-anchor="middle" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="29" fill="#1b2a3a">huntfishapp</text>
+  <text x="130" y="248" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="500" font-size="9" fill="#1f6f8b" letter-spacing="1.0">HARVEST DATA · EDA</text>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="none" stroke="#1b2a3a" stroke-width="10" stroke-linejoin="round"/>
+</svg>

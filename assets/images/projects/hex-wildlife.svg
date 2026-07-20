@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" role="img" aria-label="Wildlife Grad Dashboard hex logo">
+  <defs><clipPath id="c"><path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z"/></clipPath></defs>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="#f5f0e7"/>
+  <g clip-path="url(#c)">
+    <rect x="0" y="150" width="260" height="150" fill="#e7eef1"/>
+    <path d="M0 168 q32 -14 64 0 t64 0 t64 0 t64 0 v140 H0 Z" fill="#dbe7ec"/>
+  </g>
+  <!-- antler accent -->
+  <g transform="translate(130 60)" stroke="#2e8b6f" stroke-width="4.5" stroke-linecap="round" fill="none">
+    <path d="M-4 18 C-10 4 -14 0 -26 -4 M-14 8 C-20 6 -24 2 -26 -6 M-14 8 C-16 2 -14 -4 -18 -10"/>
+    <path d="M4 18 C10 4 14 0 26 -4 M14 8 C20 6 24 2 26 -6 M14 8 C16 2 14 -4 18 -10"/>
+  </g>
+  <!-- bar chart -->
+  <g transform="translate(130 168)">
+    <line x1="-56" y1="2" x2="56" y2="2" stroke="#1b2a3a" stroke-width="4" stroke-linecap="round"/>
+    <rect x="-52" y="-26" width="20" height="28" rx="3" fill="#1f6f8b"/>
+    <rect x="-27" y="-44" width="20" height="46" rx="3" fill="#2e8b6f"/>
+    <rect x="-2"  y="-34" width="20" height="36" rx="3" fill="#3b6ea5"/>
+    <rect x="23"  y="-58" width="20" height="60" rx="3" fill="#f47d65"/>
+    <!-- trend line -->
+    <path d="M-42 -30 L-17 -48 L8 -38 L33 -62" fill="none" stroke="#1b2a3a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="33" cy="-62" r="4" fill="#1b2a3a"/>
+  </g>
+  <text x="130" y="232" text-anchor="middle" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="30" fill="#1b2a3a">wildlife grad</text>
+  <text x="130" y="248" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="500" font-size="9" fill="#1f6f8b" letter-spacing="1.0">ASSISTANTSHIP TRENDS</text>
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="none" stroke="#1b2a3a" stroke-width="10" stroke-linejoin="round"/>
+</svg>

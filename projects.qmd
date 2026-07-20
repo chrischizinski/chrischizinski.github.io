@@ -11,6 +11,8 @@ Open-source tools and dashboards from my lab and research.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-tidycreel.svg){.project-hex fig-alt="tidycreel hex logo"}
+
 [R Package]{.project-tag}
 
 [tidycreel]{.card-title}
@@ -29,6 +31,8 @@ management-ready reporting.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-book.svg){.project-hex fig-alt="Modern Creel Survey Analysis book hex logo"}
+
 [Quarto Book]{.project-tag}
 
 [Modern Creel Survey Analysis in R]{.card-title}
@@ -47,6 +51,8 @@ Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-wildlife.svg){.project-hex fig-alt="Wildlife Grad Dashboard hex logo"}
+
 [R Dashboard]{.project-tag}
 
 [Wildlife Grad Dashboard]{.card-title}
@@ -65,6 +71,8 @@ assistantship postings — salaries, timing, and geography.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-huntfish.svg){.project-hex fig-alt="huntfishapp hex logo"}
+
 [Shiny App]{.project-tag}
 
 [huntfishapp]{.card-title}
@@ -83,6 +91,8 @@ outdoor recreation sales data.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-pradel.svg){.project-hex fig-alt="pradel-jax hex logo"}
+
 [Python · JAX]{.project-tag}
 
 [pradel-jax]{.card-title}

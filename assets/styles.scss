@@ -250,6 +250,17 @@ pre.sourceCode {
   content: "› ";
   color: $water;
 }
+// Hex logo at the top of each card.
+.card.project-card .project-hex {
+  display: block;
+  width: 118px;
+  height: auto;
+  margin: 0.25rem auto 1rem;
+}
+.card.project-card .project-hex img {
+  width: 100%;
+  height: auto;
+}
 // Category tag — specimen-style pill at the top of each card.
 .card.project-card .project-tag {
   align-self: flex-start;
