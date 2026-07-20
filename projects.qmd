@@ -11,6 +11,8 @@ Open-source tools and dashboards from my lab and research.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[R Package]{.project-tag}
+
 [tidycreel]{.card-title}
 
 Tidy R tools for creel survey design, estimation, validation, and
@@ -27,6 +29,8 @@ management-ready reporting.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[Quarto Book]{.project-tag}
+
 [Modern Creel Survey Analysis in R]{.card-title}
 
 Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
@@ -43,6 +47,8 @@ Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[R Dashboard]{.project-tag}
+
 [Wildlife Grad Dashboard]{.card-title}
 
 Public trends dashboard tracking U.S. wildlife and natural resources graduate
@@ -59,6 +65,8 @@ assistantship postings — salaries, timing, and geography.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[Shiny App]{.project-tag}
+
 [huntfishapp]{.card-title}
 
 Web-based exploratory data analysis application for hunting, fishing, and
@@ -75,6 +83,8 @@ outdoor recreation sales data.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[Python · JAX]{.project-tag}
+
 [pradel-jax]{.card-title}
 
 Modern JAX-based optimization framework for Pradel capture–recapture models.

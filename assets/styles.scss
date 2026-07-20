@@ -250,6 +250,28 @@ pre.sourceCode {
   content: "› ";
   color: $water;
 }
+// Category tag — specimen-style pill at the top of each card.
+.card.project-card .project-tag {
+  align-self: flex-start;
+  display: inline-block;
+  font-family: $font-family-monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $water;
+  background: rgba($water, 0.08);
+  border: 1px solid rgba($water, 0.28);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  margin-bottom: 0.75rem;
+}
+// Thin accent along the top edge, brightening on hover.
+.card.project-card {
+  border-top: 2px solid rgba($water, 0.35);
+}
+.card.project-card:hover {
+  border-top-color: $water;
+}
 // Let the card body fill height so links can pin to the bottom.
 .card.project-card .card-body {
   display: flex;
@@ -261,6 +283,7 @@ pre.sourceCode {
 .project-links {
   margin-top: auto;
   padding-top: 0.9rem;
+  border-top: 1px solid $sand;
 }
 .project-links p {
   display: flex;
