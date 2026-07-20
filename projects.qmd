@@ -24,6 +24,19 @@ management-ready reporting.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+[Modern Creel Survey Analysis in R]{.card-title}
+
+Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
+— design, estimation, diagnostics, and reporting. Companion to the package.
+
+[Read online →](https://modern-creel-surveys.netlify.app/)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
 [Wildlife Grad Dashboard]{.card-title}
 
 Public trends dashboard tracking U.S. wildlife and natural resources graduate
