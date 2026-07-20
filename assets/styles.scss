@@ -93,6 +93,10 @@ h3 { font-size: 1.28rem; }
 }
 
 // ── About / hero (trestles) ──────────────────────────────────────────────
+// Vertically center the left column (image + links) against the bio text.
+.quarto-about-trestles .about-entity {
+  align-self: center;
+}
 .about-entity .about-image {
   border-radius: $border-radius-lg;
   border: 1px solid $sand;
