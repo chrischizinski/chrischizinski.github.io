@@ -250,10 +250,17 @@ pre.sourceCode {
   content: "› ";
   color: $water;
 }
-// Stacked, centered website / GitHub links with leading icon.
-// Pandoc wraps the links in a <p>, so make that the flex column.
+// Let the card body fill height so links can pin to the bottom.
+.card.project-card .card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+// Centered website / GitHub links pinned to the bottom of the card.
+// Pandoc wraps the links in a <p>, so make that the flex row.
 .project-links {
-  margin-top: 0.9rem;
+  margin-top: auto;
+  padding-top: 0.9rem;
 }
 .project-links p {
   display: flex;
