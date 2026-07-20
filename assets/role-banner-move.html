@@ -1,0 +1,11 @@
+<script>
+// The role banner is injected inside the right about column; lift it out to
+// span the full width above both columns.
+document.addEventListener("DOMContentLoaded", function () {
+  var banner = document.querySelector(".role-banner");
+  var trestles = document.querySelector(".quarto-about-trestles");
+  if (banner && trestles && trestles.parentNode) {
+    trestles.parentNode.insertBefore(banner, trestles);
+  }
+});
+</script>

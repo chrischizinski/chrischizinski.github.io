@@ -93,6 +93,16 @@ h3 { font-size: 1.28rem; }
 }
 
 // ── About / hero (trestles) ──────────────────────────────────────────────
+// Full-width role banner above both about columns (via include-before-body).
+.role-banner {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $sand;
+}
+.role-banner .specimen-label {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+}
 // Vertically center the left column (image + links) against the bio text.
 .quarto-about-trestles .about-entity {
   align-self: center;

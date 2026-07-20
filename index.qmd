@@ -19,9 +19,9 @@ about:
     - icon: envelope
       text: Email
       href: mailto:cchizinski2@unl.edu
+include-before-body: assets/role-banner.html
+include-after-body: assets/role-banner-move.html
 ---
-
-[Professor · Assoc. Director of Research & Graduate Education · School of Natural Resources · UNL]{.specimen-label}
 
 I study how people interact with fish, wildlife, and other natural
 resources—and how those interactions shape conservation policy and management.
