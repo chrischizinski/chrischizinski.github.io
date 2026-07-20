@@ -3,7 +3,8 @@ title: "Christopher Chizinski"
 subtitle: "Human Dimensions of Wildlife & Fisheries"
 about:
   template: trestles
-  image: assets/images/Chizinski.jpeg
+  image: assets/images/chizinski-namib.jpg
+  image-alt: "Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"
   image-shape: rounded
   links:
     - icon: github
