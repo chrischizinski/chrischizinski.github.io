@@ -98,10 +98,12 @@ h3 { font-size: 1.28rem; }
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid $sand;
+  text-align: center;
 }
 .role-banner .specimen-label {
   margin-bottom: 0;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 .about-entity .about-image {
   border-radius: $border-radius-lg;
