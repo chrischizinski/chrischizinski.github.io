@@ -95,7 +95,7 @@ h3 { font-size: 1.28rem; }
 // ── About / hero (trestles) ──────────────────────────────────────────────
 // Full-width role banner above both about columns (via include-before-body).
 .role-banner {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid $sand;
   text-align: center;
@@ -104,6 +104,11 @@ h3 { font-size: 1.28rem; }
   margin-bottom: 0;
   font-size: 0.95rem;
   line-height: 1.7;
+}
+// Trim the default top padding above the about columns (~50% less whitespace).
+// Quarto core sets `padding-top:3em !important`; beat it with higher specificity.
+#quarto-content .quarto-about-trestles {
+  padding-top: 1.6rem !important;
 }
 .about-entity .about-image {
   border-radius: $border-radius-lg;
