@@ -36,7 +36,7 @@ retention, and reactivation (R3), and the development of open-source tools in R
 for conservation research and management.
 
 I am a Professor in the School of Natural Resources at the University of
-Nebraska–Lincoln, where I also help lead the school's research enterprise and
+Nebraska–Lincoln, where I also help lead the school's research and
 graduate programs. I teach undergraduate courses in human dimensions and
 natural resource policy, as well as graduate courses in R programming, data
 visualization, and reproducible science.
