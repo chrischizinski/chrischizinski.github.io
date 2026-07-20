@@ -11,7 +11,7 @@ Open-source tools and dashboards from my lab and research.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
-![](assets/images/projects/hex-tidycreel.svg){.project-hex fig-alt="tidycreel hex logo"}
+![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
 
 [R Package]{.project-tag}
 
