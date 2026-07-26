@@ -1,0 +1,68 @@
+---
+title: "rmd2qmd: migrating legacy R Markdown to Quarto"
+date: 2026-07-26
+categories: [rstats, quarto]
+tags: [rstats, quarto, rmarkdown, package]
+---
+
+I have been spending more time moving older analysis projects, notes, and
+reports from R Markdown to Quarto. That work is usually straightforward until
+you hit the edge cases: YAML options that matter, chunk behavior that needs to
+stay intact, or formatting that falls apart when the conversion is handled with
+simple find-and-replace scripts.
+
+To make that migration less brittle, I put together
+[`rmd2qmd`](https://github.com/chrischizinski/rmd2qmd), an R package for
+converting legacy `.Rmd` documents to `.qmd` while preserving rendering
+behavior, executable code, and document structure.
+
+![](/assets/images/projects/hex-rmd2qmd.png){fig-alt="rmd2qmd hex logo" width="220"}
+
+The package is built around a few simple principles:
+
+- preserve behavior before appearance
+- parse structure instead of guessing with regex
+- warn when a conversion is uncertain
+- never overwrite the original `.Rmd` file unless explicitly requested
+- keep the generated Quarto readable
+
+Under the hood, `rmd2qmd` works with YAML front matter, the Markdown abstract
+syntax tree, and knitr chunks so the output is closer to idiomatic Quarto than
+what you usually get from a quick text substitution.
+
+Right now the package supports a few common workflows:
+
+- converting a single `.Rmd` file
+- converting a directory recursively
+- optionally validating converted outputs by rendering them with Quarto
+- generating a Markdown conversion report after a run
+
+If you want to try it, install the development version from GitHub:
+
+```r
+# install.packages("pak")
+pak::pak("chrischizinski/rmd2qmd")
+```
+
+Then convert a file or an entire project:
+
+```r
+library(rmd2qmd)
+
+# Convert one file
+convert_file("chapter1.Rmd")
+
+# Convert a directory and validate the outputs
+results <- convert_directory("book/", validate = TRUE)
+
+# Write a conversion summary
+generate_report(results, output = "conversion-report.md")
+```
+
+The package is still early, but the main goal is already in place: make it
+easier to modernize older R Markdown material without introducing silent
+changes.
+
+The source code is on GitHub at
+[`chrischizinski/rmd2qmd`](https://github.com/chrischizinski/rmd2qmd), and the
+reference site is available at [chrischizinski.com/rmd2qmd](https://chrischizinski.com/rmd2qmd/).

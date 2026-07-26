@@ -11,6 +11,26 @@ Open-source tools and dashboards from my lab and research.
 ::: {.g-col-12 .g-col-md-6}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/hex-rmd2qmd.png){.project-hex fig-alt="rmd2qmd hex logo"}
+
+[R Package]{.project-tag}
+
+[rmd2qmd]{.card-title}
+
+R package for converting legacy `.Rmd` documents to clean, idiomatic Quarto
+while preserving rendering behavior, code chunks, and document structure.
+
+<div class="project-links">
+<a href="https://chrischizinski.com/rmd2qmd/"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/rmd2qmd"><i class="bi bi-github"></i> GitHub</a>
+</div>
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.card .project-card}
+::: {.card-body}
 ![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
 
 [R Package]{.project-tag}
