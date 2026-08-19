@@ -39,6 +39,10 @@ format:
     theme:
       - cosmo
       - assets/styles.scss
+    include-in-header:
+      text: |
+        <!-- Cloudflare Web Analytics -->
+        <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "df5dfaf0e39b4658b43226cb083be41f"}'></script>
     toc: true
     code-copy: true
     code-overflow: wrap
