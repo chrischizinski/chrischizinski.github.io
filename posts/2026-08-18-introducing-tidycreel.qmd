@@ -66,8 +66,7 @@ close to the names used in a survey.
 
 For example, the start of a simple workflow reads like this:
 
-```{r}
-#| eval: false
+```r
 library(tidycreel)
 
 design <- creel_design(
