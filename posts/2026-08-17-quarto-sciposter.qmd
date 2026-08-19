@@ -79,6 +79,60 @@ From there, the body is ordinary Quarto Markdown. A figure generated in an R
 chunk is part of the poster source, and a change to the analysis can flow into a
 new poster PDF without another round of copying and pasting.
 
+## Making it your poster
+
+The point of the format is not to force every poster into the same visual style.
+Most customization happens in the document YAML, so a project can have its own
+colors, typography, size, logos, and footer without editing the extension.
+
+Start with one of the supplied themes, `generic` or `unl`, then override only
+the parts that belong to the project. This example changes the primary and
+accent colors, uses a distinct heading font, sets the type scale explicitly,
+and adds institutional logos:
+
+```yaml
+format:
+  sciposter-typst:
+    poster:
+      size: "48x36"
+      columns: 3
+      theme: generic
+      colors:
+        primary: "#0D3B66"
+        accent: "#E07A5F"
+      fonts: ["Source Sans Pro", "Helvetica"]
+      heading-fonts: ["Source Serif Pro"]
+      base-font-size: 28pt
+      title-font-size: 72pt
+      footer:
+        left: "American Fisheries Society 2026"
+        right: "your-project.org"
+logos:
+  left: [logos/university.svg]
+  right: [logos/funder.png]
+```
+
+The body has its own layout controls. A takeaway makes one result readable from
+across the aisle, a `poster-box` groups supporting material, and a `poster-grid`
+places related items on a shared row. They are ordinary fenced divs in the
+source:
+
+```markdown
+::: {.takeaway label="Key finding"}
+Catch rates fell after the regulation change.
+:::
+
+::: {.poster-box title="Methods"}
+Brief text, a figure, or a table that readers should consider together.
+:::
+```
+
+For a more specific change, the extension also exposes `theme-overrides`. That
+is useful when, for example, the title bar and section bars need different
+colors, or a project needs a custom heading treatment. The full set of options
+and layout blocks is in the
+[quarto-sciposter README](https://github.com/chrischizinski/quarto-sciposter#readme).
+
 ## An example from AFS 2026
 
 I used `quarto-sciposter` to make a poster for the 2026 American Fisheries
