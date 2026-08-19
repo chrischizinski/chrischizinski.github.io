@@ -1,0 +1,98 @@
+---
+title: "quarto-sciposter: scientific posters from Quarto markdown"
+date: 2026-08-17
+categories: [rstats, quarto]
+tags: [quarto, typst, scientific poster, rstats, reproducibility]
+description: "Introducing quarto-sciposter, a Quarto extension for producing flexible scientific conference posters with Typst."
+---
+
+I have made more than a few conference posters by copying text and figures into
+a slide deck, then spending the last few hours before printing moving boxes by a
+few pixels. It works, but it is hard to repeat, difficult to review, and easy to
+break when a figure changes.
+
+[`quarto-sciposter`](https://github.com/chrischizinski/quarto-sciposter) is a
+Quarto extension I built to make that workflow more reproducible. It takes a
+plain Quarto Markdown document and renders a scientific poster with
+[Typst](https://typst.app/), which is bundled with recent versions of Quarto.
+There is no separate LaTeX installation and no need to build the entire layout
+by hand.
+
+![](/assets/images/projects/quarto-sciposter-hex.jpeg){.sciposter-hex fig-alt="quarto-sciposter hex sticker showing a scientific poster with charts and a peach pushpin"}
+
+The package is intended for the parts of poster production that should be
+repeatable: poster size, column layout, typography, logos, figure placement,
+references, and a footer. The writing and the choices about what belongs on the
+poster are still mine. That is the useful division of labor.
+
+## A poster is a document, not a slide with a large page size
+
+I wanted a poster format that treats the document as a document. The source is
+Markdown, headings organize the content, code chunks can create figures, and
+the same source can be rendered again when a result changes. That is especially
+helpful for an R-based project, where the analysis, figures, and poster should
+not be separate final versions of the same work.
+
+The format supports poster sizes from a custom 48 by 36 inch layout to A-series
+sizes, with one to five columns. It includes controls for title bars, logos,
+references, figures, QR codes, callout boxes, evidence strips, and a prominent
+takeaway. It also includes a draft mode for checking the amount of content
+before the poster reaches the printer.
+
+Here is the smallest starting point:
+
+```bash
+quarto use template chrischizinski/quarto-sciposter
+```
+
+That command copies the extension and a `template.qmd` file into a new project.
+For an existing Quarto project, add the format instead:
+
+```bash
+quarto add chrischizinski/quarto-sciposter
+```
+
+Then render a poster with:
+
+```bash
+quarto render my-poster.qmd --to sciposter-typst
+```
+
+The beginning of the document declares the poster rather than relying on
+manual page setup:
+
+```yaml
+---
+title: "Poster title"
+author: "Your name"
+format:
+  sciposter-typst:
+    poster:
+      size: "48x36"
+      columns: 3
+      theme: generic
+      footer: "Conference 2026"
+---
+```
+
+From there, the body is ordinary Quarto Markdown. A figure generated in an R
+chunk is part of the poster source, and a change to the analysis can flow into a
+new poster PDF without another round of copying and pasting.
+
+## An example from AFS 2026
+
+I used `quarto-sciposter` to make a poster for the 2026 American Fisheries
+Society meeting: [*tidycreel: A Unified R Framework for Modern Creel
+Surveys*](/assets/documents/tidycreel-afs-2026.pdf). It is a useful example of
+the type of project I had in mind: a poster that needs to explain a technical
+workflow, show figures and a code-adjacent conceptual structure, include several
+authors and affiliations, and remain readable from a few feet away.
+
+The poster is a PDF, but its source is still a Quarto document. That means I can
+adjust a figure, revise a sentence, add a collaborator, or change the conference
+footer without rebuilding the layout from scratch.
+
+The source and installation instructions are available at
+[github.com/chrischizinski/quarto-sciposter](https://github.com/chrischizinski/quarto-sciposter).
+I will keep adding examples as I use the format for different poster sizes and
+types of analysis.

@@ -227,6 +227,18 @@ pre.sourceCode {
   color: $water;
 }
 
+// ── Project stickers ───────────────────────────────────────────────────
+// The source image remains rectangular; crop it to the visible hex at display.
+.sciposter-hex {
+  clip-path: polygon(50% 1%, 96.5% 26%, 96.5% 74%, 50% 99%, 3.5% 74%, 3.5% 26%);
+  display: block;
+  margin: 1.5rem auto;
+  max-width: min(19rem, 80%);
+}
+.thumbnail-image[src*="quarto-sciposter-hex"] {
+  clip-path: polygon(50% 1%, 96.5% 26%, 96.5% 74%, 50% 99%, 3.5% 74%, 3.5% 26%);
+}
+
 // ── Project cards (grid on projects.qmd) ─────────────────────────────────
 .card.project-card {
   border: 1px solid $sand;

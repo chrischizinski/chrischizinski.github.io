@@ -1,0 +1,150 @@
+---
+title: "Introducing tidycreel and Modern Creel Survey Analysis in R"
+date: 2026-08-18
+categories: [tidycreel, rstats, fisheries]
+tags: [tidycreel, creel survey, survey design, rstats, fisheries science]
+description: "An introduction to tidycreel, its companion book, and a new series on practical creel-survey analysis in R."
+---
+
+Creel surveys are  a way to estimate angler effort, catch, or
+harvest from interviews at a lake. That is true, but it leaves out most of the work. A useful estimate
+depends on decisions made well before anyone opens R: which days are available
+for sampling, how they are stratified, how counts and interviews are collected,
+what happens when an angler has not finished a trip, and what population the
+final number is meant to describe.
+
+Those details can make creel analysis feel more difficult than it needs to be.
+They also make it interesting. A creel survey joins field work, data management,
+sampling theory, statistical estimation, and communication with people who need
+to make decisions. I built [`tidycreel`](https://chrischizinski.com/tidycreel/)
+to give that work a more consistent home in R.
+
+`tidycreel` is an R package for creel-survey design, data management,
+estimation, visualization, and reporting. It supports common survey settings,
+including instantaneous count, bus-route, ice-fishing, camera, and aerial
+workflows. It is not intended to make the judgment calls disappear. It is meant
+to make the decisions, data, and assumptions that support an estimate easier to
+see and reproduce.
+
+This blog series will be a place to work through those ideas in small pieces. I
+will use real `tidycreel` workflows and R code, but I do not want to repeat the
+package reference page function by function. The reference site is where I will
+keep the arguments, return values, and examples closest to the code. Here, I
+want to spend more time on why a workflow is structured as it is and how it
+relates to the work of fisheries scientists, managers, students, and analysts.
+
+## Why creel analysis gets complicated
+
+The arithmetic behind an estimate can be simple. The surrounding survey is not.
+A count at an access point is not automatically a measure of effort across a
+lake. An interview from an angler who is still fishing does not mean the same
+thing as an interview at the end of a trip. A catch table may have a different
+unit of observation than an interview table. Weekday and weekend samples may
+need different treatment because the fishery behaves differently and because
+the sampling design says they do.
+
+Those are not annoying details to clean up after the fact. They determine what
+an estimate means and how much confidence we should place in it. A good workflow
+keeps the sampling design attached to the data instead of reducing everything to
+a spreadsheet of numbers before analysis starts.
+
+That is also why I think reproducibility matters here. It is not only about
+being able to rerun a script. A reproducible creel analysis should let a
+colleague see how the schedule, raw data, cleaning decisions, and estimation
+choices became a reported result. That is useful in a graduate methods course,
+but it is equally useful when a manager asks what a change in estimated harvest
+means for a fishery.
+
+## Why build on the tidyverse and survey packages
+
+I did not want to rebuild the parts of R that already work well. `tidycreel`
+uses tidyverse conventions because they make data work readable. Tables stay as
+data frames or tibbles. Common tasks use verbs that many R users already know,
+such as `filter()`, `mutate()`, `group_by()`, `summarise()`, and `left_join()`.
+The package also uses tidy-select style column arguments, so the code can stay
+close to the names used in a survey.
+
+For example, the start of a simple workflow reads like this:
+
+```{r}
+#| eval: false
+library(tidycreel)
+
+design <- creel_design(
+  calendar = survey_calendar,
+  date = date,
+  strata = day_type
+) |>
+  add_counts(
+    counts = angler_counts,
+    count_col = angler_count,
+    count_time_col = count_time
+  )
+```
+
+The tidyverse style helps us build and inspect the data. It is not the
+statistical engine. For that, `tidycreel` builds on the
+[`survey`](https://cran.r-project.org/package=survey) package. The `survey`
+package has a long record of implementing design-based analysis: stratification,
+sampling units, probabilities, totals, ratios, and variance estimation. Those
+are the pieces we need when a count or interview has to represent more than
+itself.
+
+That combination is deliberate. The tidyverse makes the workflow legible. The
+`survey` package supplies the design-based machinery. `tidycreel` adds creel
+survey vocabulary and guardrails around both, so an analysis can say
+`creel_design()`, `add_interviews()`, or `estimate_effort()` instead of forcing
+every user to reconstruct the same survey objects and variance calculations.
+
+## The book and the package have different jobs
+
+The companion book, [*Modern Creel Survey Analysis in
+R*](https://modern-creel-surveys.netlify.app/), takes the slower route through
+these topics. It is for readers who want to understand the design-based logic,
+data structures, diagnostics, and interpretation behind a workflow. The book is
+broader than package documentation because an analysis is broader than a list
+of functions.
+
+The package provides the working tools. The book explains the reasoning and
+gives the larger arc. This series sits between them. Posts will be shorter and
+more conversational than book chapters, while still providing code that readers
+can run, adapt, and question.
+
+## Who I am writing for
+
+I have graduate students in mind, especially those who have field data and a
+question but have not yet had to translate a sampling design into an analysis.
+I am also writing for fisheries scientists and managers who need estimates that
+are transparent enough to explain, review, and use. Some posts will assume more
+R experience than others; I will try to be clear about that and to keep examples
+small enough that readers can see what changes from one step to the next.
+
+If you work with creel data in a different setting, I hope the series is still
+useful. The particular species, water body, agency database, and reporting
+requirements will vary. The need to connect field observations to a defined
+population and sampling design does not.
+
+## What is coming in this series
+
+Here are the first topics I plan to cover:
+
+- Building a creel design object and keeping survey structure attached to the data
+- Sampling calendars, strata, and the difference between an available day and a sampled day
+- Access-point and roving surveys, including what changes when interviews occur during trips
+- Data as linked tables: schedules, counts, interviews, catch, and biological data
+- Using `tidycreel.connect` to turn agency CSV files, databases, or APIs into consistent analysis inputs
+- Validating data before an estimator turns a small problem into a large one
+- Estimating angler effort from count data and describing the uncertainty around it
+- Catch, harvest, release, and rate estimates, including the distinction between complete and incomplete trips
+- Building reproducible Quarto reports that are useful to managers as well as analysts
+- Reading results carefully: domains, precision, bias, and what a creel estimate does not say
+- And more, as the package, book, and questions from readers develop
+
+The next post starts with the design object. It is the point where a survey plan
+and its observation tables become an analysis that can support the later
+estimates.
+
+You can find the source code for
+[`tidycreel` on GitHub](https://github.com/chrischizinski/tidycreel), the
+[package reference site](https://chrischizinski.com/tidycreel/), and the full
+[book](https://modern-creel-surveys.netlify.app/).
