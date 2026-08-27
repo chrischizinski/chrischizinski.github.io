@@ -80,6 +80,57 @@ design object can be extended with `add_interviews()`, `add_catch()`, and
 They make the links between the tables explicit and allow the later functions to
 check that the pieces make sense together.
 
+## The design object also makes error checking more useful
+
+The design object is not only how `tidycreel` knows which estimator to use. It
+also gives the package the context it needs to distinguish a harmless untidy
+value from something that could change an estimate.
+
+There are two layers of checking. First, `validation_report()` looks at the
+tables themselves. It reports column types, flags missingness above a chosen
+threshold, looks for dates outside a plausible range, negative numeric values,
+and empty character values. When a species field is supplied, it can also
+report how many values match the package's species vocabulary. This is the
+ordinary data-quality pass that is useful before an object is built.
+
+The second layer uses the survey design. When `creel_design()` is created, it
+checks that the selected date column is a real `Date` with no missing values and
+that strata are usable categorical variables. The checks expand with the design:
+for example, a bus-route design verifies inclusion probabilities, while
+`add_counts()` can flag duplicate sampling units or a count table whose structure
+does not identify repeated observations. Those are not merely formatting
+problems. They determine weights, expansions, and variance calculations.
+
+Once data are attached, `check_completeness()` uses the calendar held by the
+object as the reference frame. It can identify scheduled days with no count
+data and strata with too few interviews for a dependable rate estimate. In
+other words, the package can ask not only, “Is this cell blank?” but also,
+“What was supposed to have been sampled here, and what does its absence mean?”
+
+Here is a useful sequence before estimation:
+
+```r
+# General checks on the incoming tables
+validation_report(
+  counts = counts,
+  interviews = interviews,
+  species_col = "species"
+)
+
+# Design-aware checks after the tables are attached
+design <- creel_design(calendar = schedule, date = date, strata = day_type) |>
+  add_counts(counts = counts) |>
+  add_interviews(interviews = interviews)
+
+check_completeness(design)
+```
+
+Neither layer substitutes for a field biologist's judgment. A warning about a
+long trip may be a data-entry error, or it may be the most informative trip in
+the dataset. The point is to make the question visible before it becomes part
+of an estimate—and to use the same sampling frame for diagnosis that will later
+be used for inference.
+
 ## Where tidycreel.connect fits
 
 Most agencies do not export a dataset with the exact variable names used in an R
