@@ -31,8 +31,7 @@ stratified, and what each observation represents.
 For a straightforward instantaneous-count survey, the smallest useful example
 looks like this:
 
-```{r}
-#| eval: false
+```r
 library(tidycreel)
 
 # The calendar says which days belong to each stratum.
@@ -96,8 +95,7 @@ tables with the canonical names expected by `tidycreel`.
 Here is the basic CSV pattern. In a real project, the schema would document the
 names used by that agency's export.
 
-```{r}
-#| eval: false
+```r
 library(tidycreel)
 library(tidycreel.connect)
 
@@ -129,8 +127,7 @@ database or spreadsheet happened to call a field. The sampling schedule remains
 an explicit input, and the fetched tables become the observation inputs. From
 there, the workflow becomes much easier to read:
 
-```{r}
-#| eval: false
+```r
 design <- creel_design(
   calendar = schedule,
   date = date,
