@@ -82,42 +82,46 @@ check that the pieces make sense together.
 
 ## The design object also makes error checking more useful
 
-The design object is not only how `tidycreel` knows which estimator to use. It
-also gives the package the context it needs to distinguish a harmless untidy
-value from something that could change an estimate.
+The design object supports two different kinds of error checking. They use the
+same survey context, but they have different jobs.
 
-There are two layers of checking. First, `validation_report()` looks at the
-tables themselves. It reports column types, flags missingness above a chosen
-threshold, looks for dates outside a plausible range, negative numeric values,
-and empty character values. When a species field is supplied, it can also
-report how many values match the package's species vocabulary. This is the
-ordinary data-quality pass that is useful before an object is built.
+**Automatic guardrails** run under the hood when you create or extend a design
+object, and again when an estimator needs a particular piece of information.
+They are there to stop an analysis before an assumption is silently violated.
+For example, `creel_design()` requires the selected date to be a real `Date`
+with no missing values and strata to be usable categories. `add_counts()` can
+catch ambiguous repeated sampling units or information that would make a count
+or its variance hard to interpret. Other survey types bring their own checks:
+a bus-route design, for example, verifies its inclusion probabilities. These
+are not optional data-cleaning suggestions; they protect the weights,
+expansions, units, and variance calculations the estimator will use.
 
-The second layer uses the survey design. When `creel_design()` is created, it
-checks that the selected date column is a real `Date` with no missing values and
-that strata are usable categorical variables. The checks expand with the design:
-for example, a bus-route design verifies inclusion probabilities, while
-`add_counts()` can flag duplicate sampling units or a count table whose structure
-does not identify repeated observations. Those are not merely formatting
-problems. They determine weights, expansions, and variance calculations.
+**Diagnostic tools for the analyst** are the checks you run deliberately to
+understand the data and decide what to do next. `validation_report()` is a
+table-level diagnostic that reports column types and flags missingness,
+implausible dates, negative numeric values, empty text values, and—when a
+species field is supplied—unmatched species names. It does not decide whether a
+flagged value should be deleted or changed; it gives the analyst a concise
+record to investigate.
 
-Once data are attached, `check_completeness()` uses the calendar held by the
-object as the reference frame. It can identify scheduled days with no count
-data and strata with too few interviews for a dependable rate estimate. In
-other words, the package can ask not only, “Is this cell blank?” but also,
-“What was supposed to have been sampled here, and what does its absence mean?”
+`check_completeness()` is the design-aware companion diagnostic. After data are
+attached, it compares the observed tables with the calendar held by the design
+object and can identify scheduled days with no count data and strata with too
+few interviews for a dependable rate estimate. In other words, it asks not
+only, “Is this cell blank?” but also, “What was supposed to have been sampled
+here, and what does its absence mean?”
 
-Here is a useful sequence before estimation:
+Here is a useful diagnostic sequence before estimation:
 
 ```r
-# General checks on the incoming tables
+# Inspect the incoming tables; investigate any flags.
 validation_report(
   counts = counts,
   interviews = interviews,
   species_col = "species"
 )
 
-# Design-aware checks after the tables are attached
+# Use the calendar in the completed design to assess coverage.
 design <- creel_design(calendar = schedule, date = date, strata = day_type) |>
   add_counts(counts = counts) |>
   add_interviews(interviews = interviews)
@@ -125,11 +129,11 @@ design <- creel_design(calendar = schedule, date = date, strata = day_type) |>
 check_completeness(design)
 ```
 
-Neither layer substitutes for a field biologist's judgment. A warning about a
-long trip may be a data-entry error, or it may be the most informative trip in
-the dataset. The point is to make the question visible before it becomes part
-of an estimate—and to use the same sampling frame for diagnosis that will later
-be used for inference.
+The distinction matters because neither kind of checking substitutes for a
+field biologist's judgment. A flagged long trip may be a data-entry error, or
+it may be the most informative trip in the dataset. The guardrails prevent
+invalid analysis states; the diagnostic tools surface questions that require an
+informed decision before a result is reported.
 
 ## Where tidycreel.connect fits
 
