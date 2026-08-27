@@ -1,0 +1,188 @@
+---
+title: "Start with the design object"
+subtitle: "How tidycreel connects a creel survey to an analysis"
+date: 2026-08-27
+categories: [tidycreel, rstats, fisheries]
+tags: [tidycreel, creel survey, survey design, rstats, fisheries science]
+description: "A practical introduction to the tidycreel design object and the role of tidycreel.connect in a reproducible creel-survey workflow."
+---
+
+When I start looking at a creel survey, I usually have more than one table in
+front of me. There is a sampling schedule, a table of angler counts, interview
+records, and often a separate table for catch or lengths. Each table tells part
+of the story. None of them, by itself, defines the survey.
+
+That distinction matters. A count of 25 anglers has a different meaning if it
+came from a sampled weekend day than if it came from an opportunistic visit on a
+Tuesday afternoon. Likewise, an interview record is not enough to estimate catch
+or harvest unless we retain the design that produced it.
+
+This is the problem that the `creel_design` object in
+[`tidycreel`](https://chrischizinski.com/tidycreel/) is meant to solve. It keeps
+the survey structure and its observation tables together so that the estimation
+step can use the same design information that guided field sampling.
+
+## The design object is where analysis begins
+
+It is tempting to think that the analysis begins when the first estimator is
+called. I think it begins earlier, when we state what was sampled, how it was
+stratified, and what each observation represents.
+
+For a straightforward instantaneous-count survey, the smallest useful example
+looks like this:
+
+```{r}
+#| eval: false
+library(tidycreel)
+
+# The calendar says which days belong to each stratum.
+design <- creel_design(
+  example_calendar,
+  date = date,
+  strata = day_type
+)
+
+# The count table supplies the observations made on sampled days.
+design <- add_counts(design, example_counts)
+
+# `design` now carries both the sampling structure and the count data.
+design
+```
+
+`creel_design()` does not estimate anything. It creates an object that records
+the survey's calendar, date field, strata, and survey type. `add_counts()` then
+attaches the count observations and uses the design information to establish the
+sampling structure needed downstream. The result is still an ordinary R object,
+but it has an important job: it keeps the design logic from being recreated, and
+possibly recreated differently, every time we estimate effort, catch, or a rate.
+
+This is particularly helpful for graduate students learning design-based
+inference. You do not need to start by writing the machinery that connects
+strata, sampling units, and weights. You do need to be able to explain those
+parts of your own survey. The package asks for that information in terms that
+look like a creel survey: calendar, date, strata, counts, interviews, catch, and
+lengths.
+
+## Why the schedule belongs in the analysis
+
+In many projects the schedule is treated as paperwork that can be set aside once
+the field season is over. I prefer to treat it as data. It tells us the available
+days, the strata, and which opportunities to sample were actually selected.
+
+That is why the calendar is the starting point for a design object. The count
+table tells us what was observed. The calendar tells us what those observations
+need to represent. If a weekday and a weekend are separate strata in the field,
+they should remain separate in the object used for estimation unless there is a
+defensible reason to combine them.
+
+The same idea carries into interviews and catch. As the analysis grows, the
+design object can be extended with `add_interviews()`, `add_catch()`, and
+`add_lengths()`. Those additions do not turn a pile of tables into a black box.
+They make the links between the tables explicit and allow the later functions to
+check that the pieces make sense together.
+
+## Where tidycreel.connect fits
+
+Most agencies do not export a dataset with the exact variable names used in an R
+package. The interview identifier might be `InterviewID`; the date might be
+`SurveyDate`; effort might be `HoursFished`. That is normal. The problem comes
+when those translations happen informally in several scripts or, worse, by hand.
+
+[`tidycreel.connect`](https://github.com/chrischizinski/tidycreel/tree/main/tidycreel.connect)
+is the layer I use before building the design object. It connects to CSV files,
+a SQL Server database, or a REST API; applies an explicit column map; and returns
+tables with the canonical names expected by `tidycreel`.
+
+Here is the basic CSV pattern. In a real project, the schema would document the
+names used by that agency's export.
+
+```{r}
+#| eval: false
+library(tidycreel)
+library(tidycreel.connect)
+
+schema <- creel_schema(
+  survey_type = "instantaneous",
+  interview_uid_col = "InterviewID",
+  date_col = "SurveyDate",
+  effort_col = "HoursFished",
+  trip_status_col = "TripStatus",
+  bank_anglers_col = "BankAnglers",
+  angler_boats_col = "AnglerBoats"
+)
+
+conn <- creel_connect(
+  con = list(
+    interviews = "data/interviews.csv",
+    counts = "data/counts.csv"
+  ),
+  schema = schema
+)
+
+interviews <- fetch_interviews(conn)
+counts <- fetch_counts(conn)
+```
+
+The connection does not decide how the survey was designed. It performs the
+translation so that the analysis does not depend on whatever a particular
+database or spreadsheet happened to call a field. The sampling schedule remains
+an explicit input, and the fetched tables become the observation inputs. From
+there, the workflow becomes much easier to read:
+
+```{r}
+#| eval: false
+design <- creel_design(
+  calendar = schedule,
+  date = date,
+  strata = day_type
+)
+
+design <- add_counts(
+  design,
+  counts = counts,
+  count_col = bank_anglers,
+  count_time_col = count_time
+)
+```
+
+The important point is not that every project must use a database connection.
+Many projects will begin with a folder of CSV files. The point is that the
+translation from agency data to analysis data should be declared once, inspected,
+and reused. That makes a handoff to a colleague, a new field season, or a future
+version of yourself much less fragile.
+
+## A runnable walkthrough
+
+If you would rather learn by running a complete example, I have also prepared a
+<a href="/assets/code/tidycreel_walkthrough.R" download>one-hour tidycreel walkthrough</a>
+that you can download and open in RStudio. It moves from planning a survey and
+building a schedule through validation, effort, catch, biological data, plots,
+and export. The script is deliberately more expansive than this post: use it as
+a guided tour, and return here when you want the reasoning behind the design
+object.
+
+## A useful habit before estimating anything
+
+Before running an estimator, I would ask four questions:
+
+- What are my sampling units?
+- What are my strata, and why do they belong in the design?
+- Which table contains the observation, and which table describes what it
+  represents?
+- Can another analyst see how my agency fields became the variables in the
+  analysis?
+
+If those answers are clear, the design object becomes more than a programming
+convenience. It is a compact, inspectable record of the survey logic. If they
+are not clear, changing estimators rarely fixes the underlying problem.
+
+The [tidycreel reference site](https://chrischizinski.com/tidycreel/) has the
+function-level details. The chapter [Building a Creel Design
+Object](https://modern-creel-surveys.netlify.app/building-a-creel-design-object.html)
+in *Modern Creel Survey Analysis in R* walks through a fuller example, including
+interviews and species-level catch. The companion chapter on
+[tidycreel.connect](https://modern-creel-surveys.netlify.app/creel-connect.html)
+shows the connection workflow in more detail.
+
+In the next post, I will look more closely at the sampling calendar and why it
+needs to survive all the way to the final estimate.
