@@ -1,0 +1,191 @@
+---
+title: "What we're working on in tidycreel right now"
+date: 2026-09-02
+author: "Christopher Chizinski"
+categories: [tidycreel, rstats, fisheries]
+tags: [tidycreel, creel survey, survey design, fisheries science, rstats]
+description: >-
+  A look at the current tidycreel work: keeping estimators aligned with the
+  survey design, making results explain how they were made, and catching data
+  problems before they become reported numbers.
+draft: true
+---
+
+`tidycreel` can now take a creel survey from a sampling calendar and raw field
+tables through counts, interviews, catch, and lengths to rates, totals, section
+and species results, and uncertainty estimates. The question driving the work
+right now is no longer simply what the package can do. It is whether an analyst
+can trust a result, understand how it was made, and give a colleague enough
+information to check it.
+
+Over the past few days, I have been working less on new functions and more on
+the contracts around existing estimates: which interviews they use, which
+estimator produced them, and when the package should stop instead of returning a
+plausible but mismatched number. That can look quiet from outside the project.
+Often the visible change is a number that does not move, a label that finally
+matches the calculation, or an error that arrives before the result is reported.
+
+That sounds obvious. It is also where creel analysis gets difficult.
+
+A survey can have a reasonable sampling schedule, careful field staff, and a
+well-organized set of tables, then still get into trouble when the analysis
+quietly treats two kinds of interviews as though they were the same. Or when a
+total and the rate used to build it are based on different trips. Or when a
+result is split by a species or section in a way that looks useful but no longer
+matches what was actually sampled.
+
+Those are the kinds of problems we have been working through.
+
+## Keeping the estimator with the survey
+
+One of the bigger pieces of work has involved roving interviews. An access
+interview happens when an angler has completed a trip. A roving interview
+happens while the person is still fishing. The catch and effort in a roving
+interview are both partial, and that changes the estimator that makes sense.
+
+It is worth being precise about what that changes. A roving clerk does not only
+meet anglers in the middle of a trip. Moving through the fishery, the clerk
+intercepts whoever is present, and some of those people happen to be finishing.
+What follows from a roving design is that all of those interviews get used
+together, complete and incomplete alike, rather than discarding the incomplete
+ones. The estimator follows from how the clerk sampled, not from the status of
+any one interview. That is also why this had to reach harvest and release.
+Harvest and released fish are recorded in the same interception as the catch,
+and they are biased the same way.
+
+For a while, different parts of an analysis could make different choices from
+the same survey. A catch-rate estimate could follow the roving-survey logic,
+while a harvest rate, release rate, or total could quietly follow a different
+path. The output looked like a coherent set of results, but the underlying
+choices did not always agree.
+
+That work is now in place. When a survey calls for the roving approach, the
+catch rate, harvest rate, release rate, and the totals built from them all
+follow it. When an analyst wants the older ratio-of-means approach, naming it is
+enough to get it. Bus-route and ice designs, which cannot support a
+mean-of-ratios total, refuse the argument now instead of accepting it and doing
+something else.
+
+That last part is not finished. A sectioned design handed the regression
+estimator is still accepted and quietly given ratio-of-means numbers. It is
+written down, and it is the next thing of that kind to fix.
+
+That is not a new feature in the usual sense. It is a clearer contract between
+the field design and the reported estimate.
+
+## Making sections and species useful
+
+The other major thread is about results that are specific enough to be useful.
+Lake-wide estimates matter, but managers often need to know what is happening in
+a particular section of a lake or river, or with a particular species.
+
+We have been improving the ways `tidycreel` handles those questions. Species
+totals can now be estimated within sections, and the three rate estimators for
+catch, harvest, and release are kept in step when a result is grouped by
+species. That matters because these functions are closely related. Fixing one
+and leaving the other two behind creates estimands that are hard to trust.
+
+There is also a small change that says a lot about how I want the package to
+behave. A sectioned result is already one row per section. Asking to group it by
+section a second time is not a new analytical question. It is the same split
+twice. Previously, that request ended in a message about a duplicated column
+name. The message was technically true, but it did not explain the problem in
+creel-survey terms.
+
+The revised behavior is simple: stop, explain that the result is already split
+by section, and leave the other useful groupings alone. It is a small thing, but
+clear errors are part of an analysis workflow. They make it easier to catch a
+mistaken request before it becomes a workaround in someone else's script.
+
+## Asking a result how it was made
+
+A creel estimate is a claim about the angler and fish population. That claim is
+only checkable if a reader can ask the result how it was made, because the same
+survey produces quite different numbers depending on which estimator ran.
+
+On several paths, the result could not answer. A total is effort multiplied by a
+rate, so the label it carries names the shape of the calculation rather than the
+estimator underneath it. Ratio-of-means, mean-of-ratios, and the truncated
+version all came back as the same string. The estimator was chosen, it was used,
+and then it had nowhere to land on the way out.
+
+One path was worse than silent. A rate estimated section by section passed the
+requested estimator down, computed mean-of-ratios with it, and then labeled the
+answer ratio-of-means. On one test design that is 0.87 fish per hour reported
+under the name of a method that returns 0.59. Both numbers are defensible. Only
+one of them was run. And because a roving survey routes to mean-of-ratios on its
+own, nobody had to pass an argument to land there.
+
+Results now record the estimator as the analyst asked for it, on rates,
+sectioned rates, and totals. None of the numbers changed. That was the point.
+The tests check both sides of the contract: two settings that resolve to the
+same calculation must return identical estimates while reporting different
+names, while a sectioned result must still differ between methods. A test that
+only compared labels could pass even if the code had stopped honoring the
+argument.
+
+There is a smaller lesson in how this one was found. The issue we had written
+for it described the bug incorrectly. It said a total reported the
+mean-of-ratios name. It reports the product-form name, and the label the issue
+quoted lives on an intermediate object that gets discarded before an analyst
+sees anything, so the repair the issue proposed would not have worked.
+Re-deriving the problem from the code before writing any fix is what caught
+that, and it turned up two more issues on the way.
+
+## Letting the output describe its inputs
+
+A mean-of-ratios estimate now says which trips it actually used: all trips,
+complete trips, or incomplete trips. That matters because the roving-survey
+default uses all interviews, while an explicit diagnostic path may use only
+incomplete ones. The older banner described every mean-of-ratios result as
+though it used incomplete trips, even when it did not.
+
+The update also makes the same diagnostic information available for catch,
+harvest, and release rates. Truncation details still appear because they are
+part of the estimator. The length-of-stay caution and the pointer to validate
+incomplete trips appear only when incomplete trips are actually in the result.
+That is a modest change in printed output, but it makes a result more honest
+about the data behind it.
+
+## Paying attention to the awkward cases
+
+Some of the most important work is in cases that nobody plans for. A trip
+duration is missing. A truncation threshold removes every usable interview. A
+warning reports a percentage that is not actually the percentage a reader needs
+to judge the problem.
+
+Those are not exciting additions to a package website.
+
+We have been adding checks so that these cases produce an explanation tied to
+the survey and the data, rather than an error from somewhere deep in R. A trip
+with no recorded duration should be identified as a data issue. A threshold that
+leaves no usable trips should say that directly. The point is not to make the
+hard decisions disappear. It is to make sure the analyst sees the decision that
+needs to be made.
+
+## The larger goal
+
+`tidycreel` is growing around a pretty straightforward idea: a fisheries
+estimate should stay connected to the survey that produced it.
+
+That means keeping the calendar, counts, interviews, catch, and biological data
+in a workflow that is possible to inspect. It means making the estimator match
+the interview design. It means carrying the same decisions through to totals,
+species, sections, uncertainty, and reporting. And it means being willing to
+stop when a request no longer has a clear statistical meaning.
+
+There will always be more to add. Camera surveys, aerial counts, bus routes, ice
+fisheries, connected agency data, and reporting all have their own corners to
+work through. For now, the focus is getting the foundation right. The earlier
+[introduction to tidycreel](/posts/2026-08-18-introducing-tidycreel.html) and
+the post on the [creel design object](/posts/2026-08-27-design-object.html)
+provide the broader workflow behind this work.
+
+That is slower than adding features. It is also the part that makes the rest of
+the package worth using.
+
+You can follow the package work on
+[GitHub](https://github.com/chrischizinski/tidycreel), browse the [reference
+site](https://chrischizinski.com/tidycreel/), or read more of the reasoning in
+[*Modern Creel Survey Analysis in
+R*](https://modern-creel-surveys.netlify.app/).
