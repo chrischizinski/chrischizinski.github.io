@@ -11,7 +11,7 @@ description: >-
 draft: false
 ---
 
-![](/assets/images/projects/tidycreel-survey-to-estimate.png){fig-alt="Illustration of a creel-survey calendar, a clerk interviewing an angler at a lake, and a chart showing an estimate with uncertainty." fig-cap="From sampling calendar to a checkable estimate. Illustration generated with OpenAI."}
+![](/assets/images/projects/tidycreel-survey-to-estimate.png){fig-alt="Illustration of a creel-survey calendar, a clerk interviewing an angler at a lake, and a chart showing an estimate with uncertainty." fig-cap="From sampling calendar to a checkable estimate. Illustration generated with ChatGPT."}
 
 The [last post on the design object](/posts/2026-08-27-design-object.html)
 argued that a creel survey's calendar, strata, and observation tables should

@@ -19,7 +19,7 @@ description: >-
 draft: false
 ---
 
-![](/assets/images/projects/tidycreel-sampling-calendar.png){fig-alt="Illustration of a creel-survey calendar with selected sampling days, a boat and field gear at a lake, and a chart representing the resulting estimate." fig-cap="A sampling calendar defines what the observations represent. Illustration generated with OpenAI."}
+![](/assets/images/projects/tidycreel-sampling-calendar.png){fig-alt="Illustration of a creel-survey calendar with selected sampling days, a boat and field gear at a lake, and a chart representing the resulting estimate." fig-cap="A sampling calendar defines what the observations represent. Illustration generated with ChatGPT."}
 
 The [design-object post](/posts/2026-08-27-design-object.html) introduced the
 idea that a creel analysis starts before an estimator is called. This post

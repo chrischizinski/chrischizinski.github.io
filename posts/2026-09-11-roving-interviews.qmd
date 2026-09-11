@@ -1,0 +1,289 @@
+---
+title: "How an Angler Is Interviewed Matters"
+subtitle: "Why access-point and roving interviews need different treatment"
+date: 2026-09-11
+author: "Christopher Chizinski"
+categories: [tidycreel, rstats, fisheries]
+tags: [
+  tidycreel,
+  creel survey,
+  roving survey,
+  access-point survey,
+  catch rates,
+  fisheries science,
+  rstats,
+]
+description: >-
+  An access-point interview and a roving interview may ask the same questions,
+  but they do not represent the same part of an angler trip. Here is how that
+  distinction carries into a tidycreel analysis.
+draft: false
+---
+
+![](/assets/images/projects/tidycreel-roving-interviews.png){fig-alt="Illustration of a fisheries clerk standing at the shoreline and interviewing two anglers in a boat pulled close to shore, with a simple chart showing two interview paths." fig-cap="Where an interview occurs changes what it represents. Illustration generated with ChatGPT."}
+
+The [sampling-calendar post](/posts/2026-09-03-sampling-calendar.html) was about
+the days a survey can represent. The next question is smaller, but just as
+important: **how was an angler interviewed?**
+
+An access-point interview usually happens at the end of a trip. A roving
+interview happens while the angler is still fishing. Both can record hours,
+catch, harvest, and the species an angler sought, but they are not
+interchangeable observations. How the interview was collected changes both what
+has been observed and an angler's chance of being encountered.
+
+> **In brief**
+>
+> - Access-point interviews generally describe completed trips and support a
+>   ratio-of-means rate estimator.
+> - Roving interviews intercept anglers while they are fishing, and longer trips
+>   have more opportunity to be encountered. When the design is declared as
+>   roving, `tidycreel` uses all eligible interviews with a mean-of-ratios
+>   estimator by default.
+> - Declaring the interview type is part of specifying the survey design, not a
+>   label to add after an estimate has been calculated.
+
+## The same questionnaire can produce different observations
+
+Imagine that a clerk interviews two anglers at a boat ramp. They have put their
+boat on the trailer and are heading home. Their reported hours fished and catch
+describe completed trips. An access-point interview is therefore a natural
+setting for estimating a rate from total catch divided by total effort across
+those trips.
+
+Now imagine a clerk moving through the fishery by boat. The clerk speaks with an
+angler who launched at dawn and plans to fish until noon. At 9:30, the angler's
+reported catch and effort describe only the trip up to the time of the
+interview. The angler may accumulate more effort, catch more fish, or harvest
+additional fish before going home.
+
+There is another important difference. An angler fishing for six hours is
+available to a roving clerk for longer than an angler fishing for one hour.
+Longer trips therefore have more opportunity to be intercepted.
+
+That is not a flaw in roving surveys. It is part of their sampling process. The
+estimator needs to reflect how anglers entered the interview sample rather than
+treating a roving interview as though it were simply an unfinished access-point
+interview.
+
+## What the survey literature adds
+
+This distinction comes from the creel-survey literature, not from a software
+convention. [Pollock, Jones, and Brown
+(1994)](https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf)
+set out access-point and roving interviews as different ways of contacting
+anglers within a broader survey design. The practical point is the one that
+matters here: an access interview normally observes a completed trip, whereas a
+roving interview observes the part of a trip visible at the time of contact.
+
+[Pollock et al.
+(1997)](https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2)
+make the sampling consequence explicit. In their formulation, anglers are
+intercepted with equal probability at access points, but an angler's chance of
+being encountered in a roving survey is proportional to the completed-trip
+length. They therefore recommend ratio-of-means for access interviews and a mean
+of individual catch-to-effort ratios for roving interviews.
+
+[Hoenig et al. (1997)](https://doi.org/10.2307/2533116) develop the roving
+catch-rate and total-catch estimators in more detail. Under their modelling
+assumptions, very short observed trips can make an untruncated mean-of-ratios
+estimate unstable. Their simulation results support dropping interviews observed
+within the first 30 minutes of a trip before calculating that estimator.
+
+These sources do not prescribe one estimator for every creel survey. They show
+why the estimator must follow the interview and sampling design. That is the
+connection `tidycreel` is trying to preserve when the analysis records
+`interview_type`, trip status, and observed duration.
+
+## Start by recording how the interview was collected
+
+In `tidycreel`, `add_interviews()` records the interview type along with catch,
+effort, trip status, and, when available, trip-duration information. This is one
+place where a small declaration prevents a much larger ambiguity later in the
+workflow.
+
+```r
+library(tidycreel)
+
+data(example_calendar)
+data(example_interviews)
+
+roving_design <- creel_design(
+  example_calendar,
+  date = date,
+  strata = day_type
+) |>
+  add_interviews(
+    example_interviews,
+    catch = catch_total,
+    effort = hours_fished,
+    trip_status = trip_status,
+    trip_duration = trip_duration,
+    interview_type = "roving"
+  )
+```
+
+The calendar establishes the days and strata that organize the analysis. The
+interview type answers a different question: **how did an angler become
+available for an interview?**
+
+Both pieces of information belong in the design object before we estimate a
+catch or harvest rate.
+
+An access-point design is declared in the same place with
+`interview_type = "access"`. That is currently the default, but I prefer to
+state it explicitly in a project script. Doing so leaves the field protocol
+visible to the next person who reads the analysis.
+
+## What the roving declaration changes
+
+For an access-point design, `estimate_catch_rate()` defaults to completed-trip
+interviews and a ratio-of-means estimator. The ratio-of-means pools the
+interviews first: total catch across the sampled trips is divided by total
+effort across those trips.
+
+That aligns the rate estimator with the completed-trip observations collected at
+the access point.
+
+For a roving design, `tidycreel` recognizes a different sampling process. When
+neither `use_trips` nor `estimator` is specified, it uses all eligible complete
+and incomplete interviews with a mean-of-ratios estimator. Rather than pooling
+catch and effort first, the mean-of-ratios calculates a catch-per-unit-effort
+rate for each eligible interview and then averages those individual rates.
+
+The same design-aware choice carries through the catch, harvest, and
+release-rate workflows and the totals constructed from those rates.
+
+```r
+# Roving design: all eligible interviews + mean-of-ratios
+roving_cpue <- estimate_catch_rate(roving_design)
+
+# Override the defaults when completed trips are specifically wanted
+complete_trip_cpue <- estimate_catch_rate(
+  roving_design,
+  use_trips = "complete",
+  estimator = "ratio-of-means"
+)
+```
+
+These calls do not simply calculate the same quantity in two different ways.
+They use different subsets of the interview sample and different estimators.
+
+The second can be useful as a diagnostic comparison, or when the scientific
+question specifically calls for completed trips. It should not quietly replace
+the roving estimator simply because completed trips are more familiar.
+
+## Why this matters for creel-survey estimates
+
+Interview type affects more than the label on a CPUE result. In a conventional
+creel survey, estimated total catch or harvest is often calculated as estimated
+total effort multiplied by an estimated rate. The rate must therefore be on the
+right footing before it is expanded to a day, season, fishery, or management
+unit ([Pollock et al.
+1997](https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2)).
+
+That has several practical implications:
+
+- A mismatch between the interview protocol and estimator can carry into total
+  catch, harvest, and release estimates, rather than remaining a technical
+  difference in a table of CPUE results.
+- Rates from years, locations, or survey programs are only directly comparable
+  when the way anglers entered the sample and the estimator used to analyze them
+  are comparable too.
+- The field record needs to retain interview type, trip status, and observed
+  duration. Without them, an analyst cannot show which interviews contributed to
+  an estimate or reproduce the decision later.
+
+Choosing the roving estimator addresses the unequal opportunity for longer trips
+to be encountered. It does not remove every challenge of a roving design. For
+example, when an effective bag limit changes angler behavior or catch rates over
+the course of a trip, an interview during the trip may no longer represent the
+completed trip in the same way. Pollock et al. (1997) show that this can produce
+biased roving estimates, so those fisheries warrant a design review rather than
+an automatic estimator choice.
+
+## Very short trips need special attention
+
+The default roving path also applies a 30-minute minimum trip duration for
+mean-of-ratios estimation, following the short-trip treatment discussed by
+[Hoenig et al. (1997)](https://doi.org/10.2307/2533116).
+
+The reason follows from how the estimator works. Each interview contributes its
+own catch-per-unit-effort rate. When very little effort has been observed, even
+a single early catch can produce an extremely large individual rate. An angler
+who catches a fish shortly after beginning a trip, for example, can have a very
+high observed catch-per-hour rate even though little of the trip has actually
+been observed.
+
+Those extreme individual rates can make the estimate unstable.
+
+By default, `tidycreel` therefore excludes interviews with observed trip
+durations shorter than 0.5 hours before calculating the mean-of-ratios estimate.
+The threshold is part of the estimator and should be reported as such. It is not
+a general data-cleaning rule saying that short fishing trips are invalid
+observations.
+
+## Complete and incomplete are not a data-quality ranking
+
+It is tempting to read an unfinished trip as *incomplete data*. In the
+ordinary-language sense, the trip is incomplete. In a roving survey, however,
+that does not mean the interview is a mistake, a deficient record, or an
+access-point interview that happened too early.
+
+The angler was encountered during the trip **by design**.
+
+The useful question is therefore not whether the trip was complete. It is
+whether the observation contains the information required by the estimator
+appropriate to the survey design.
+
+This distinction is also why `trip_status` and trip-duration information should
+be retained during data preparation. They document what the clerk actually
+observed, support the appropriate estimation path, and make it possible to
+review later exactly how the rate was calculated.
+
+## A short checklist before estimating rates
+
+Before estimating CPUE, HPUE, or release rate, I would stop and ask:
+
+- Did interviews occur after anglers completed their trips, or while anglers
+  were still fishing?
+- Does the interview table retain valid complete/incomplete trip status?
+- For roving interviews, is the information needed to determine observed trip
+  duration available?
+- Does the estimator reported in the output match the interview design?
+- If a minimum observed duration was applied, is that threshold documented?
+- Can someone reading the script tell why this estimator was used?
+
+These are field-method questions as much as R questions. A well-organized table
+cannot reconstruct a sampling process that was never recorded. It can, however,
+keep that process visible throughout the analysis.
+
+The [tidycreel reference site](https://chrischizinski.com/tidycreel/) documents
+the function-level arguments for `add_interviews()` and the rate estimators. The
+earlier posts on the [design object](/posts/2026-08-27-design-object.html) and
+[sampling calendar](/posts/2026-09-03-sampling-calendar.html) provide the larger
+context.
+
+The calendar tells us **when the fishery could be sampled**. The interview
+protocol tells us **how anglers entered the sample**. The estimator determines
+**how those observations become an estimate**.
+
+Those are parts of the same survey design, not separate decisions to reconcile
+at the end.
+
+## References
+
+- Hoenig, J. M., C. M. Jones, K. H. Pollock, D. S. Robson, and D. L. Wade.
+  1997. [Calculation of catch rate and total catch in roving surveys of
+  anglers](https://doi.org/10.2307/2533116). *Biometrics* 53:306-317.
+- Pollock, K. H., J. M. Hoenig, C. M. Jones, D. S. Robson, and C. J. Greene.
+  1997. [Catch rate estimation for roving and access point
+  surveys](https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2).
+  *North American Journal of Fisheries Management* 17:11-19.
+- Pollock, K. H., C. M. Jones, and T. L. Brown. 1994. [*Angler survey methods
+  and their applications in fisheries
+  management*](https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf).
+  American Fisheries Society Special Publication 25, Bethesda, Maryland.
+
+The next post will turn to the linked tables that carry counts, interviews,
+catch, and biological data through the rest of a creel analysis.
