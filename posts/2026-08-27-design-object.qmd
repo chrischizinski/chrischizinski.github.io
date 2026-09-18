@@ -18,7 +18,7 @@ Tuesday afternoon. Likewise, an interview record is not enough to estimate catch
 or harvest unless we retain the design that produced it.
 
 This is the problem that the `creel_design` object in
-[`tidycreel`](https://chrischizinski.com/tidycreel/) is meant to solve. It keeps
+ [`tidycreel`](https://chrischizinski.com/tidycreel/) is meant to solve. It keeps
 the survey structure and its observation tables together so that the estimation
 step can use the same design information that guided field sampling.
 
@@ -236,5 +236,8 @@ interviews and species-level catch. The companion chapter on
 [tidycreel.connect](https://modern-creel-surveys.netlify.app/creel-connect.html)
 shows the connection workflow in more detail.
 
-In the next post, I will look more closely at the sampling calendar and why it
-needs to survive all the way to the final estimate.
+The [next post looks more closely at the sampling calendar](/posts/2026-09-03-sampling-calendar.html)
+and why it needs to survive all the way to the final estimate. The later
+[linked-tables tutorial](/posts/2026-09-18-linked-tables.html) returns to the
+same design object once counts, interviews, catch, and biological observations
+are attached.

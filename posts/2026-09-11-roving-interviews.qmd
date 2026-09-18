@@ -285,5 +285,6 @@ at the end.
   management*](https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf).
   American Fisheries Society Special Publication 25, Bethesda, Maryland.
 
-The next post will turn to the linked tables that carry counts, interviews,
-catch, and biological data through the rest of a creel analysis.
+The [next post turns to the linked tables](/posts/2026-09-18-linked-tables.html)
+that carry counts, interviews, catch, and biological data through the rest of a
+creel analysis.

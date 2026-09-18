@@ -194,8 +194,11 @@ fisheries, connected agency data, and reporting all have additional problems to
 work through. For now, the focus is getting the underlying estimation and
 validation pieces right. The [introduction to
 tidycreel](/posts/2026-08-18-introducing-tidycreel.html) explains the wider
-purpose of the series. The next tutorial returns to the sampling calendar and
-how it defines the population an estimate represents.
+purpose of the series. The [sampling-calendar tutorial](/posts/2026-09-03-sampling-calendar.html)
+returns to how the calendar defines the population an estimate represents. The
+later [roving-interviews post](/posts/2026-09-11-roving-interviews.html) and
+[linked-tables post](/posts/2026-09-18-linked-tables.html) continue the same
+design-first thread.
 
 That work is less visible than adding new features, but it is necessary before
 building more on top of it.

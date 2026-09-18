@@ -127,10 +127,10 @@ population and sampling design does not.
 
 Here are the first topics I plan to cover:
 
-- Building a creel design object and keeping survey structure attached to the data
-- Sampling calendars, strata, and the difference between an available day and a sampled day
-- Access-point and roving surveys, including what changes when interviews occur during trips
-- Data as linked tables: schedules, counts, interviews, catch, and biological data
+- [Building a creel design object](/posts/2026-08-27-design-object.html) and keeping survey structure attached to the data
+- [Sampling calendars](/posts/2026-09-03-sampling-calendar.html), strata, and the difference between an available day and a sampled day
+- [Access-point and roving surveys](/posts/2026-09-11-roving-interviews.html), including what changes when interviews occur during trips
+- [Data as linked tables](/posts/2026-09-18-linked-tables.html): schedules, counts, interviews, catch, and biological data
 - Using `tidycreel.connect` to turn agency CSV files, databases, or APIs into consistent analysis inputs
 - Validating data before an estimator turns a small problem into a large one
 - Estimating angler effort from count data and describing the uncertainty around it
@@ -139,9 +139,9 @@ Here are the first topics I plan to cover:
 - Reading results carefully: domains, precision, bias, and what a creel estimate does not say
 - And more, as the package, book, and questions from readers develop
 
-The next post starts with the design object. It is the point where a survey plan
-and its observation tables become an analysis that can support the later
-estimates.
+The [next post starts with the design object](/posts/2026-08-27-design-object.html).
+It is the point where a survey plan and its observation tables become an
+analysis that can support the later estimates.
 
 You can find the source code for
 [`tidycreel` on GitHub](https://github.com/chrischizinski/tidycreel), the

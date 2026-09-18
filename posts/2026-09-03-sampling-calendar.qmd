@@ -175,5 +175,8 @@ update](/posts/2026-09-01-what-were-working-on-in-tidycreel.html), where the
 focus was keeping downstream estimators and reporting consistent with the
 survey design.
 
-The next step is to attach counts and interviews to the design and use that
-information to estimate angler effort across the defined survey period.
+The [next step is to attach counts and interviews](/posts/2026-09-18-linked-tables.html)
+to the design and use that information to estimate angler effort across the
+defined survey period. Before that, the [roving-interviews post](/posts/2026-09-11-roving-interviews.html)
+shows why the way an interview enters the design determines which estimator is
+appropriate.
