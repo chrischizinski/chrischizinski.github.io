@@ -262,10 +262,6 @@ pre.sourceCode {
   content: "› ";
   color: $water;
 }
-// The sciposter sticker is a rectangular JPEG; crop it to the visible hex.
-.card.project-card .project-hex img[src*="quarto-sciposter-hex"] {
-  clip-path: polygon(50% 1%, 96.5% 26%, 96.5% 74%, 50% 99%, 3.5% 74%, 3.5% 26%);
-}
 // Hex logo at the top of each card.
 .card.project-card .project-hex {
   display: block;

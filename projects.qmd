@@ -73,7 +73,7 @@ while preserving rendering behavior, code chunks, and document structure.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
-![](assets/images/projects/quarto-sciposter-hex.jpeg){.project-hex fig-alt="quarto-sciposter hex logo"}
+![](assets/images/projects/hex-quarto-sciposter.png){.project-hex fig-alt="quarto-sciposter hex logo"}
 
 [Quarto Extension]{.project-tag}
 
@@ -98,7 +98,7 @@ Quarto Markdown.
 
 [R Dashboard]{.project-tag}
 
-[Wildlife Grad Dashboard]{.card-title}
+[Wildlife Dashboard]{.card-title}
 
 Public trends dashboard tracking U.S. wildlife and natural resources graduate
 assistantship postings — salaries, timing, and geography.
