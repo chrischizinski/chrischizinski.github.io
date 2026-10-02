@@ -33,6 +33,27 @@ while preserving rendering behavior, code chunks, and document structure.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/quarto-sciposter-hex.jpeg){.project-hex fig-alt="quarto-sciposter hex logo"}
+
+[Quarto Extension]{.project-tag}
+
+[quarto-sciposter]{.card-title}
+
+Quarto extension for reproducible scientific conference posters, rendered with
+Typst. Poster size, columns, logos, figures, and references live in plain
+Quarto Markdown.
+
+<div class="project-links">
+<a href="posts/2026-08-17-quarto-sciposter.html"><i class="bi bi-journal-text"></i> Post</a>
+<a href="https://github.com/chrischizinski/quarto-sciposter"><i class="bi bi-github"></i> GitHub</a>
+</div>
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
+::: {.card .project-card}
+::: {.card-body}
 ![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
 
 [R Package]{.project-tag}
