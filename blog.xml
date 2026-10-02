@@ -1709,6 +1709,7 @@ font-style: inherit;">strata =</span> day_type</span>
 
 
 
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-design-object.png" class="img-fluid" data-fig-cap="The design object keeps the survey structure and its observations together. Illustration generated with ChatGPT." alt="Watercolor illustration of an analyst organizing a survey calendar and observation sheets in an open binder at a lakeside table, surrounded by field records, binoculars, and a shoreline map with sampling locations marked."></p>
 <p>When I start looking at a creel survey, I usually have more than one table in front of me. There is a sampling schedule, a table of angler counts, interview records, and often a separate table for catch or lengths. Each table tells part of the story. None of them, by itself, defines the survey.</p>
 <p>That distinction matters. A count of 25 anglers has a different meaning if it came from a sampled weekend day than if it came from an opportunistic visit on a Tuesday afternoon. Likewise, an interview record is not enough to estimate catch or harvest unless we retain the design that produced it.</p>
 <p>This is the problem that the <code>creel_design</code> object in <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> is meant to solve. It keeps the survey structure and its observation tables together so that the estimation step can use the same design information that guided field sampling.</p>
@@ -1970,6 +1971,7 @@ font-style: inherit;">count_time_col =</span> count_time</span>
   <category>fisheries</category>
   <guid>https://chrischizinski.com/posts/2026-08-27-design-object.html</guid>
   <pubDate>Thu, 27 Aug 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-design-object.png" medium="image" type="image/png" height="76" width="144"/>
 </item>
 <item>
   <title>Introducing tidycreel and Modern Creel Survey Analysis in R</title>
@@ -1979,6 +1981,7 @@ font-style: inherit;">count_time_col =</span> count_time</span>
 
 
 
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-introduction.png" class="img-fluid" data-fig-cap="A creel-survey workflow connects field decisions, observations, and reproducible estimates. Illustration generated with ChatGPT." alt="Watercolor illustration of a fisheries clerk recording observations at a lakeside table with a calendar, field notebook, binoculars, and laptop, beside a panel connecting survey records to a data table and an estimate with uncertainty."></p>
 <p>Creel surveys are a way to estimate angler effort, catch, or harvest from interviews at a lake. That is true, but it leaves out most of the work. A useful estimate depends on decisions made well before anyone opens R: which days are available for sampling, how they are stratified, how counts and interviews are collected, what happens when an angler has not finished a trip, and what population the final number is meant to describe.</p>
 <p>Those details can make creel analysis feel more difficult than it needs to be. They also make it interesting. A creel survey joins field work, data management, sampling theory, statistical estimation, and communication with people who need to make decisions. I built <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> to give that work a more consistent home in R.</p>
 <p><code>tidycreel</code> is an R package for creel-survey design, data management, estimation, visualization, and reporting. It supports common survey settings, including instantaneous count, bus-route, ice-fishing, camera, and aerial workflows. It is not intended to make the judgment calls disappear. It is meant to make the decisions, data, and assumptions that support an estimate easier to see and reproduce.</p>
@@ -2068,6 +2071,7 @@ font-style: inherit;">count_time_col =</span> count_time</span>
   <category>fisheries</category>
   <guid>https://chrischizinski.com/posts/2026-08-18-introducing-tidycreel.html</guid>
   <pubDate>Tue, 18 Aug 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-introduction.png" medium="image" type="image/png" height="76" width="144"/>
 </item>
 <item>
   <title>quarto-sciposter: scientific posters from Quarto markdown</title>

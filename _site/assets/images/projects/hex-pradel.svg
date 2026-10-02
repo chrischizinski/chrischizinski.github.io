@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" role="img" aria-label="pradel-jax hex logo: a tagged trout leaping from the water along a rising arc of capture dots">
+  <defs>
+    <clipPath id="hex"><path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z"/></clipPath>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b5d73"/>
+      <stop offset="0.55" stop-color="#1d4259"/>
+      <stop offset="1" stop-color="#16283a"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f8f93"/>
+      <stop offset="1" stop-color="#14323f"/>
+    </linearGradient>
+    <linearGradient id="trout" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9efe9"/>
+      <stop offset="0.5" stop-color="#f5f0e7"/>
+      <stop offset="1" stop-color="#f4b9a6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sky -->
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="url(#sky)"/>
+
+  <g clip-path="url(#hex)">
+    <!-- sun disc -->
+    <circle cx="188" cy="82" r="46" fill="#f4b9a6" opacity="0.16"/>
+
+    <!-- lambda watermark: Pradel's population growth rate -->
+    <text x="62" y="124" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="96" fill="#f5f0e7" fill-opacity="0.16">&#955;</text>
+
+    <!-- rising arc of capture occasions -->
+    <path d="M38 180 Q58 172 74 154 T98 128" fill="none" stroke="#7fc4c0" stroke-opacity="0.55" stroke-width="1.6" stroke-dasharray="1.5 5" stroke-linecap="round"/>
+    <g stroke="#f47d65" stroke-width="2.4">
+      <circle cx="38"  cy="180" r="4"   fill="#f47d65"/>
+      <circle cx="56"  cy="170" r="4.6" fill="#1d4259"/>
+      <circle cx="75"  cy="152" r="5.2" fill="#f47d65"/>
+      <circle cx="97"  cy="129" r="5.8" fill="#f47d65"/>
+    </g>
+
+    <!-- the trout: flat shapes, mid-leap, nose to the upper right -->
+    <g transform="translate(152 106) rotate(-34) scale(1.2)">
+      <!-- tail -->
+      <path d="M-40 -3 L-60 -19 C-55 -7 -55 7 -60 19 L-40 3 Z" fill="#f47d65"/>
+      <!-- dorsal + pelvic fins -->
+      <path d="M2 -16 L-6 -31 L-20 -12 Z" fill="#f47d65"/>
+      <path d="M-4 13 L-12 25 L-22 11 Z" fill="#f47d65"/>
+      <!-- body -->
+      <path d="M52 2 C40 -14 12 -22 -14 -13 C-26 -9 -34 -5 -41 -3 L-41 3 C-32 6 -23 10 -10 13 C14 19 40 14 52 2 Z" fill="url(#trout)"/>
+      <!-- lateral stripe -->
+      <path d="M44 1 C26 -3 4 -3 -22 -1" fill="none" stroke="#f47d65" stroke-opacity="0.7" stroke-width="2.4" stroke-linecap="round"/>
+      <!-- spots -->
+      <g fill="#16283a" fill-opacity="0.55">
+        <circle cx="18" cy="-9" r="1.6"/><circle cx="6" cy="-12" r="1.6"/><circle cx="-8" cy="-9" r="1.5"/>
+        <circle cx="-20" cy="-6" r="1.4"/><circle cx="26" cy="-6" r="1.4"/>
+      </g>
+      <!-- gill + eye -->
+      <path d="M30 -9 C33 -4 33 3 30 8" fill="none" stroke="#16283a" stroke-opacity="0.35" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="41" cy="-3" r="2.6" fill="#16283a"/>
+      <circle cx="41.8" cy="-3.8" r="0.8" fill="#fff"/>
+      <!-- tag: the mark that makes a recapture possible -->
+      <circle cx="-3" cy="-17" r="4.2" fill="#16283a" stroke="#f5f0e7" stroke-width="1.6"/>
+      <circle cx="-3" cy="-17" r="1.5" fill="#f47d65"/>
+    </g>
+
+    <!-- water -->
+    <path d="M0 196 C20 188 38 188 58 196 S96 204 118 196 S160 188 182 196 S226 204 260 192 V300 H0 Z" fill="url(#water)"/>
+    <path d="M0 214 C24 207 44 207 66 214 S110 221 132 214 S178 207 202 214 S240 220 260 212 V300 H0 Z" fill="#1d6f7a" opacity="0.55"/>
+    <!-- splash ripples where the trout left the water -->
+    <g fill="none" stroke="#e9efe9" stroke-opacity="0.8" stroke-width="1.8" stroke-linecap="round">
+      <path d="M56 198 q14 -7 28 0"/>
+      <path d="M46 203 q24 -11 48 0" stroke-opacity="0.45"/>
+    </g>
+    <g fill="#e9efe9" fill-opacity="0.85">
+      <circle cx="62" cy="186" r="1.6"/><circle cx="72" cy="182" r="1.2"/><circle cx="81" cy="187" r="1.4"/>
+    </g>
+  </g>
+
+  <!-- inner keyline -->
+  <path d="M130 22 L232 81 L232 219 L130 278 L28 219 L28 81 Z" fill="none" stroke="#7fc4c0" stroke-opacity="0.4" stroke-width="1.4" stroke-linejoin="round"/>
+
+  <!-- name -->
+  <text x="130" y="244" text-anchor="middle" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="27" fill="#f5f0e7">pradel-jax</text>
+  <text x="130" y="258" text-anchor="middle" font-family="'JetBrains Mono',ui-monospace,monospace" font-weight="500" font-size="7" fill="#9fd6d1" letter-spacing="1">MARK–RECAPTURE · JAX</text>
+
+  <!-- outer border -->
+  <path d="M130 6 L246 73 L246 227 L130 294 L14 227 L14 73 Z" fill="none" stroke="#0e1b27" stroke-width="10" stroke-linejoin="round"/>
+</svg>

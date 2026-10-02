@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1120" viewBox="0 0 1400 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Fish totals carry uncertainty from both inputs: interviews and counts</title>
+  <desc id="desc">Within each stratum, multiply the rate variance by squared effort and the effort variance by the squared rate. Add these contributions, then subtract the Goodman correction, the product of the two input variances. The example gives weekday catch variance of about 52,711 fish squared and weekend variance of 82,944 fish squared. Assuming independent strata, add these variances to get 135,655 fish squared, then take the square root for a standard error of about 368 fish. The catch estimate is 3,072 fish, with a 95 percent confidence interval from 2,326 to 3,818 fish. The product formula assumes independently estimated effort and rates; numbers are rounded.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10" fill="#315d58"/></marker>
+  </defs>
+  <rect width="1400" height="1120" rx="26" fill="#f7f4eb"/>
+  <g font-family="Arial, sans-serif" fill="#203e3a" text-anchor="middle">
+    <text x="700" y="52" font-size="40" font-weight="bold">Fish totals carry uncertainty from both inputs</text>
+    <text x="700" y="94" font-size="31">(interviews and counts)</text>
+    <text x="700" y="130" font-size="29">1. Calculate the product variance within each stratum</text>
+
+    <rect x="70" y="150" width="390" height="180" rx="16" fill="#e6eeea" stroke="#315d58" stroke-width="2"/>
+    <text x="265" y="198" font-size="32" font-weight="bold">Rate uncertainty</text>
+    <text x="265" y="247" font-size="29">Effort² × rate variance</text>
+    <text x="265" y="291" font-size="25">From the interview sample</text>
+
+    <text x="482" y="250" font-size="40">+</text>
+    <rect x="505" y="150" width="390" height="180" rx="16" fill="#e6eeea" stroke="#315d58" stroke-width="2"/>
+    <text x="700" y="198" font-size="32" font-weight="bold">Effort uncertainty</text>
+    <text x="700" y="247" font-size="29">Rate² × effort variance</text>
+    <text x="700" y="291" font-size="25">From the count sample</text>
+
+    <text x="917" y="250" font-size="40">−</text>
+    <rect x="940" y="150" width="390" height="180" rx="16" fill="#efe5d3" stroke="#796648" stroke-width="2"/>
+    <text x="1135" y="198" font-size="32" font-weight="bold">Goodman correction</text>
+    <text x="1135" y="247" font-size="29">Effort variance ×</text>
+    <text x="1135" y="285" font-size="29">rate variance</text>
+
+    <text x="700" y="382" font-size="29">Apply this calculation separately to weekday and weekend</text>
+    <path d="M390 395 L390 422" stroke="#315d58" stroke-width="3" marker-end="url(#arrow)"/>
+    <path d="M1010 395 L1010 422" stroke="#315d58" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="150" y="440" width="480" height="140" rx="16" fill="#e6eeea" stroke="#315d58" stroke-width="2"/>
+    <text x="390" y="483" font-size="31" font-weight="bold">Weekday catch</text>
+    <text x="390" y="525" font-size="33">Variance ≈ 52,711 fish²</text>
+    <text x="390" y="561" font-size="25">Standard error ≈ 230 fish</text>
+
+    <rect x="770" y="440" width="480" height="140" rx="16" fill="#e6eeea" stroke="#315d58" stroke-width="2"/>
+    <text x="1010" y="483" font-size="31" font-weight="bold">Weekend catch</text>
+    <text x="1010" y="525" font-size="33">Variance = 82,944 fish²</text>
+    <text x="1010" y="561" font-size="25">Standard error = 288 fish</text>
+
+    <path d="M390 584 L390 618 L700 618 M1010 584 L1010 618 L700 618 L700 644" fill="none" stroke="#315d58" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="700" y="687" font-size="29">2. Add stratum variances, then take the square root</text>
+    <text x="700" y="730" font-size="34">52,711 + 82,944 ≈ 135,655 fish²</text>
+
+    <rect x="390" y="762" width="620" height="82" rx="18" fill="#315d58"/>
+    <text x="700" y="815" font-size="34" font-weight="bold" fill="#ffffff">Total standard error ≈ 368 fish</text>
+    <text x="700" y="894" font-size="29">3. Report the total with its 95% confidence interval</text>
+    <path d="M380 946 H1020 M380 929 V963 M1020 929 V963" fill="none" stroke="#315d58" stroke-width="5"/>
+    <circle cx="700" cy="946" r="12" fill="#315d58"/>
+    <text x="380" y="1000" font-size="29">2,326</text>
+    <text x="700" y="1000" font-size="31" font-weight="bold">3,072 fish</text>
+    <text x="1020" y="1000" font-size="29">3,818</text>
+
+    <text x="700" y="1059" font-size="24">Assumes independent effort and rate estimates, and independent strata here.</text>
+    <text x="700" y="1093" font-size="24">Numbers rounded. Add variances; do not add standard errors or confidence limits.</text>
+  </g>
+</svg>

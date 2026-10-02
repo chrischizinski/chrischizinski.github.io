@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780" role="img" aria-labelledby="title desc">
+  <title id="title">From instantaneous counts to a monthly effort estimate</title>
+  <desc id="desc">A four-step flowchart. Count rounds are averaged to estimate anglers present, multiplied by the period length to estimate daily angler-hours, expanded within calendar strata, and added to produce a monthly total with a confidence interval.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#2f6f73"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#173f4f" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="780" rx="28" fill="#f8f4e8"/>
+  <text x="800" y="66" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#173f4f">From a count to monthly angler-hours</text>
+  <text x="800" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#48636c">Each step adds information supplied by the field protocol or sampling calendar</text>
+
+  <!-- Step 1 -->
+  <g filter="url(#shadow)">
+    <rect x="48" y="158" width="330" height="390" rx="24" fill="#ffffff" stroke="#96b8bc" stroke-width="3"/>
+  </g>
+  <circle cx="94" cy="204" r="25" fill="#173f4f"/>
+  <text x="94" y="213" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">1</text>
+  <text x="128" y="213" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#173f4f">Count rounds</text>
+  <text x="213" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#48636c">Snapshots within one period</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" text-anchor="middle">
+    <circle cx="128" cy="360" r="46" fill="#e9f4f6" stroke="#2f6f73" stroke-width="4"/>
+    <text x="128" y="369" fill="#173f4f">18</text>
+    <circle cx="213" cy="360" r="46" fill="#e9f4f6" stroke="#2f6f73" stroke-width="4"/>
+    <text x="213" y="369" fill="#173f4f">22</text>
+    <circle cx="298" cy="360" r="46" fill="#e9f4f6" stroke="#2f6f73" stroke-width="4"/>
+    <text x="298" y="369" fill="#173f4f">20</text>
+  </g>
+  <text x="213" y="453" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#48636c">Anglers counted each round</text>
+  <text x="213" y="496" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#48636c">Mean count = 20</text>
+
+  <!-- Arrow 1 -->
+  <path d="M 386 353 L 430 353" fill="none" stroke="#2f6f73" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 2 -->
+  <g filter="url(#shadow)">
+    <rect x="442" y="158" width="330" height="390" rx="24" fill="#ffffff" stroke="#96b8bc" stroke-width="3"/>
+  </g>
+  <circle cx="488" cy="204" r="25" fill="#173f4f"/>
+  <text x="488" y="213" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">2</text>
+  <text x="522" y="213" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#173f4f">Daily effort</text>
+  <text x="607" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#48636c">Add the period length</text>
+  <circle cx="607" cy="351" r="76" fill="#e9f4f6" stroke="#2f6f73" stroke-width="5"/>
+  <line x1="607" y1="351" x2="607" y2="302" stroke="#173f4f" stroke-width="7" stroke-linecap="round"/>
+  <line x1="607" y1="351" x2="647" y2="374" stroke="#173f4f" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="607" cy="351" r="8" fill="#d8a23b"/>
+  <text x="607" y="457" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#173f4f">20 × 8 hours</text>
+  <text x="607" y="497" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#2f6f73">160 angler-hours</text>
+
+  <!-- Arrow 2 -->
+  <path d="M 780 353 L 824 353" fill="none" stroke="#2f6f73" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 3 -->
+  <g filter="url(#shadow)">
+    <rect x="836" y="158" width="330" height="390" rx="24" fill="#ffffff" stroke="#96b8bc" stroke-width="3"/>
+  </g>
+  <circle cx="882" cy="204" r="25" fill="#173f4f"/>
+  <text x="882" y="213" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">3</text>
+  <text x="916" y="213" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#173f4f">Expand by stratum</text>
+  <text x="1001" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#48636c">Use all days in the calendar</text>
+  <rect x="887" y="302" width="228" height="58" rx="14" fill="#e9f4f6"/>
+  <text x="1001" y="339" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#173f4f">Weekday mean × N</text>
+  <rect x="887" y="378" width="228" height="58" rx="14" fill="#f4e6bd"/>
+  <text x="1001" y="415" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#173f4f">Weekend mean × N</text>
+  <text x="1001" y="479" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#48636c">Each sampled day represents</text>
+  <text x="1001" y="510" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#48636c">days from its own stratum</text>
+
+  <!-- Arrow 3 -->
+  <path d="M 1174 353 L 1218 353" fill="none" stroke="#2f6f73" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 4 -->
+  <g filter="url(#shadow)">
+    <rect x="1230" y="158" width="322" height="390" rx="24" fill="#173f4f" stroke="#173f4f" stroke-width="3"/>
+  </g>
+  <circle cx="1276" cy="204" r="25" fill="#d8a23b"/>
+  <text x="1276" y="213" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#173f4f">4</text>
+  <text x="1310" y="213" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Monthly total</text>
+  <text x="1391" y="265" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#dcebed">Add the expanded strata</text>
+  <text x="1391" y="346" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#ffffff">Estimated</text>
+  <text x="1391" y="388" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#ffffff">angler-hours</text>
+  <line x1="1295" y1="458" x2="1487" y2="458" stroke="#dcebed" stroke-width="5" stroke-linecap="round"/>
+  <line x1="1295" y1="443" x2="1295" y2="473" stroke="#dcebed" stroke-width="5"/>
+  <line x1="1487" y1="443" x2="1487" y2="473" stroke="#dcebed" stroke-width="5"/>
+  <circle cx="1391" cy="458" r="14" fill="#d8a23b"/>
+  <text x="1391" y="508" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#dcebed">Point estimate + 95% interval</text>
+
+  <!-- Uncertainty band -->
+  <rect x="112" y="604" width="1376" height="116" rx="22" fill="#e9f4f6" stroke="#96b8bc" stroke-width="2"/>
+  <text x="800" y="645" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#173f4f">Uncertainty travels through the workflow</text>
+  <text x="800" y="686" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#48636c">Variation among count rounds contributes within-day uncertainty; variation among sampled days contributes between-day uncertainty.</text>
+</svg>
