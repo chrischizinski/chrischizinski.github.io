@@ -1,48 +1,75 @@
 ---
-title: "Christopher Chizinski"
-subtitle: "Human Dimensions of Wildlife & Fisheries"
-about:
-  template: trestles
-  image: assets/images/chizinski-namib.jpg
-  image-alt: "Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"
-  image-shape: rounded
-  links:
-    - icon: github
-      text: GitHub
-      href: https://github.com/chrischizinski
-    - icon: cloud
-      text: Bluesky
-      href: https://bsky.app/profile/chrischizinski.bsky.social
-    - icon: mortarboard
-      text: Lab (UNL)
-      href: https://humandimensions.unl.edu
-    - icon: envelope
-      text: Email
-      href: mailto:cchizinski2@unl.edu
-include-before-body: assets/role-banner.html
-include-after-body: assets/role-banner-move.html
+pagetitle: "Christopher Chizinski"
+toc: false
+page-layout: full
+title-block-banner: false
 ---
 
-I study how people interact with fish, wildlife, and other natural
-resources—and how those interactions shape conservation policy and management.
-My research focuses on the decisions behind who hunts, fishes, and forages, how
-participation changes over time, and what those patterns mean for the agencies
-responsible for managing public resources.
+::: {.home-hero}
+
+::: {.hero-text}
+[Professor · School of Natural Resources · UNL]{.specimen-label}
+
+# Christopher Chizinski
+
+[Human dimensions of wildlife & fisheries.]{.hero-tagline} I study who hunts and
+fishes, how participation changes over time, and what that means for the agencies
+that manage public resources.
+
+<div class="hero-links">
+<a href="https://github.com/chrischizinski" aria-label="GitHub"><i class="bi bi-github"></i> GitHub</a>
+<a href="https://bsky.app/profile/chrischizinski.bsky.social" aria-label="Bluesky"><i class="bi bi-cloud"></i> Bluesky</a>
+<a href="mailto:cchizinski2@unl.edu" aria-label="Email"><i class="bi bi-envelope"></i> Email</a>
+<a href="blog.xml" aria-label="RSS"><i class="bi bi-rss"></i> RSS</a>
+</div>
+:::
+
+::: {.hero-photo}
+![](assets/images/chizinski-namib.jpg){fig-alt="Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"}
+:::
+
+:::
+
+::: {.home-tiles}
+
+<a class="home-tile" href="blog.html">
+<span class="specimen-label">01 · Notes</span>
+<span class="tile-title">Blog</span>
+<span class="tile-desc">R, data analysis, and creel survey methods.</span>
+</a>
+
+<a class="home-tile" href="projects.html">
+<span class="specimen-label">02 · Software</span>
+<span class="tile-title">Projects</span>
+<span class="tile-desc">tidycreel, dashboards, and open-source tools.</span>
+</a>
+
+<a class="home-tile" href="cv.html">
+<span class="specimen-label">03 · Record</span>
+<span class="tile-title">CV</span>
+<span class="tile-desc">Publications, teaching, and funding.</span>
+</a>
+
+<a class="home-tile" href="https://humandimensions.unl.edu">
+<span class="specimen-label">04 · Group</span>
+<span class="tile-title">Lab&nbsp;↗</span>
+<span class="tile-desc">Members, current projects, and joining the group.</span>
+</a>
+
+:::
+
+::: {.home-section .home-about}
+
+[About]{.specimen-label}
 
 I combine survey science, quantitative methods, and reproducible data analysis
 to study participation, behavior, harvest, and decision-making. Much of this
 work involves creel and angler surveys, capture–recapture methods, recruitment,
-retention, and reactivation (R3), and the development of open-source tools in R
-for conservation research and management.
+retention, and reactivation (R3), and open-source R tools for conservation
+research and management.
 
-I am a Professor in the School of Natural Resources at the University of
-Nebraska–Lincoln, where I also help lead the school's research and
-graduate programs. I teach undergraduate courses in human dimensions and
-natural resource policy, as well as graduate courses in R programming, data
-visualization, and reproducible science.
+I teach undergraduate courses in human dimensions and natural resource policy,
+and graduate courses in R programming, data visualization, and reproducible
+science, and help lead the School's research and graduate programs.
 
-This site brings together my [blog](blog.qmd)—mostly notes on R, data analysis,
-and quantitative methods—the [software and dashboards](projects.qmd) developed
-by my lab, and my [curriculum vitae](cv.qmd). For information about lab members,
-current projects, and opportunities to join the group, visit
-[humandimensions.unl.edu](https://humandimensions.unl.edu).
+:::
