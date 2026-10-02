@@ -269,8 +269,9 @@ unit, the calendar gives it a population of days, and stratification controls
 how sampled days represent that population. `estimate_effort()` keeps those
 pieces together and returns the uncertainty needed to interpret the total.
 
-The next step is to combine effort with interview-based rates to estimate total
-catch, harvest, and release. That multiplication is meaningful only when the
+The [next post combines effort with interview-based rates to estimate total
+catch, harvest, and release](/posts/2026-10-02-catch-harvest-release.html).
+That multiplication is meaningful only when the
 rate and effort describe compatible anglers, places, periods, and units.
 
 ## Reference

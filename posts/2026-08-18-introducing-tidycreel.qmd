@@ -133,8 +133,8 @@ Here are the first topics I plan to cover:
 - [Data as linked tables](/posts/2026-09-18-linked-tables.html): schedules, counts, interviews, catch, and biological data
 - Using `tidycreel.connect` to turn agency CSV files, databases, or APIs into consistent analysis inputs
 - Validating data before an estimator turns a small problem into a large one
-- Estimating angler effort from count data and describing the uncertainty around it
-- Catch, harvest, release, and rate estimates, including the distinction between complete and incomplete trips
+- [Estimating angler effort from count data](/posts/2026-09-25-effort-estimation.html) and describing the uncertainty around it
+- [Catch, harvest, release, and rate estimates](/posts/2026-10-02-catch-harvest-release.html), including the distinction between complete and incomplete trips
 - Building reproducible Quarto reports that are useful to managers as well as analysts
 - Reading results carefully: domains, precision, bias, and what a creel estimate does not say
 - And more, as the package, book, and questions from readers develop
