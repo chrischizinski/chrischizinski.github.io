@@ -94,7 +94,7 @@ Quarto Markdown.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
-![](assets/images/projects/hex-wildlife.svg){.project-hex fig-alt="Wildlife Grad Dashboard hex logo"}
+![](assets/images/projects/hex-wildlife-dashboard.png){.project-hex fig-alt="Wildlife Dashboard hex logo showing a bald eagle, largemouth bass, and bighorn ram over a map of the United States"}
 
 [R Dashboard]{.project-tag}
 
