@@ -12,7 +12,7 @@ Quarto project.
 
 ::: {.cv-links}
 [Full CV (web)](https://chrischizinski.com/chizinski_cv/){.btn .btn-primary}
-[Download PDF](https://raw.githubusercontent.com/chrischizinski/chizinski_cv/main/chizinski_cv.pdf){.btn .btn-outline-secondary}
+[Download PDF](https://chrischizinski.com/chizinski_cv/chizinski_cv.pdf){.btn .btn-outline-secondary}
 [Source](https://github.com/chrischizinski/chizinski_cv){.btn .btn-outline-secondary}
 :::
 
