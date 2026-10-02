@@ -1,5 +1,7 @@
 ---
 title: "Projects"
+page-layout: full
+toc: false
 ---
 
 [Open source · lab & research tools]{.specimen-label}
@@ -8,7 +10,7 @@ Open-source tools and dashboards from my lab and research.
 
 ::: {.grid}
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/hex-rmd2qmd.png){.project-hex fig-alt="rmd2qmd hex logo"}
@@ -28,7 +30,7 @@ while preserving rendering behavior, code chunks, and document structure.
 :::
 :::
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
@@ -48,7 +50,7 @@ management-ready reporting.
 :::
 :::
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/hex-book.svg){.project-hex fig-alt="Modern Creel Survey Analysis book hex logo"}
@@ -68,7 +70,7 @@ Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
 :::
 :::
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/hex-wildlife.svg){.project-hex fig-alt="Wildlife Grad Dashboard hex logo"}
@@ -88,7 +90,7 @@ assistantship postings — salaries, timing, and geography.
 :::
 :::
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/hex-huntfish.svg){.project-hex fig-alt="huntfishapp hex logo"}
@@ -108,7 +110,7 @@ outdoor recreation sales data.
 :::
 :::
 
-::: {.g-col-12 .g-col-md-6}
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
 ![](assets/images/projects/hex-pradel.svg){.project-hex fig-alt="pradel-jax hex logo"}

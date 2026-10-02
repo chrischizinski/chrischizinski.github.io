@@ -13,6 +13,7 @@ listing:
   sort-ui: false
   filter-ui: false
   feed: true
+  page-size: 30
 page-layout: full
 title-block-banner: false
 ---
