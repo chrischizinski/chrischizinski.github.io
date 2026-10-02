@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -40,10 +43,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ba8195c2afaa1f580b03b35da926f1fe.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-297fd10debce6dcd94c7220416da9298.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-31ae1f7e71b6081ec8fe3db0b7188caa.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-78397bbd35ecb3863a252ede12cf2b20.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,6 +74,8 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
 
 
 </head>
@@ -127,14 +132,12 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -143,7 +146,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -155,9 +158,65 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>A PDF of my full curriculum vitae is generated from structured data in a separate Quarto project.</p>
-<p><a href="https://raw.githubusercontent.com/chrischizinski/chizinski_cv/main/chizinski_cv.pdf" class="btn btn-primary">Download CV (PDF)</a> <a href="https://github.com/chrischizinski/chizinski_cv" class="btn btn-outline-secondary">View source</a></p>
-<p>The CV project maintains the data, bibliography, and reproducible PDF build independently from this website.</p>
+<p><span class="specimen-label">Curriculum vitae · at a glance</span></p>
+<p>The short version. The full CV (publications, grants, teaching, advising, service) is built from structured data and rebuilt monthly in a separate Quarto project.</p>
+<div class="cv-links">
+<p><a href="https://chrischizinski.com/chizinski_cv/" class="btn btn-primary">Full CV (web)</a> <a href="https://chrischizinski.com/chizinski_cv/chizinski_cv.pdf" class="btn btn-outline-secondary">Download PDF</a> <a href="https://github.com/chrischizinski/chizinski_cv" class="btn btn-outline-secondary">Source</a></p>
+</div>
+<div class="cv-glance">
+<div class="cv-card">
+<p><span class="specimen-label">Positions</span></p>
+<dl class="cv-list">
+<dt>
+2025 – present
+</dt>
+<dd>
+<strong>Professor of Human Dimensions</strong><br>School of Natural Resources, University of Nebraska–Lincoln
+</dd>
+<dt>
+2024 – present
+</dt>
+<dd>
+<strong>Associate Director of Research and Graduate Education</strong><br>School of Natural Resources, University of Nebraska–Lincoln
+</dd>
+<dt>
+2019 – 2025
+</dt>
+<dd>
+<strong>Associate Professor</strong> of Human Dimensions of Wildlife Management
+</dd>
+<dt>
+2015 – 2019
+</dt>
+<dd>
+<strong>Assistant Professor</strong> of Human Dimensions of Wildlife Management
+</dd>
+</dl>
+</div>
+<div class="cv-card">
+<p><span class="specimen-label">Education</span></p>
+<dl class="cv-list">
+<dt>
+2007
+</dt>
+<dd>
+<strong>Ph.D., Fisheries Science</strong><br>Texas Tech University
+</dd>
+<dt>
+2002
+</dt>
+<dd>
+<strong>M.S., Fisheries Science</strong><br>Texas Tech University
+</dd>
+<dt>
+1999
+</dt>
+<dd>
+<strong>B.S., Ecology and Evolutionary Biology and Environmental Biology</strong><br>University of Connecticut
+</dd>
+</dl>
+</div>
+</div>
 
 
 
@@ -566,14 +625,14 @@ ul.task-list li input[type="checkbox"] {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Christopher Chizinski</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p><span class="footer-links"> <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu"><i class="bi bi-envelope"></i> Email</a> <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a> <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a> </span> <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span></p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>Built with <a href="https://quarto.org">Quarto</a></p>
-</div>
   </div>
 </footer>
 

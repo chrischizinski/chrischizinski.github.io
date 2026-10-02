@@ -6,9 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2014-08-24">
+<meta name="dcterms.date" content="2026-08-17">
+<meta name="description" content="Introducing quarto-sciposter, a Quarto extension for producing flexible scientific conference posters with Typst.">
 
-<title>Using geom_blank for better axis ranges in ggplot – Christopher Chizinski</title>
+<title>quarto-sciposter: scientific posters from Quarto markdown – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -176,12 +177,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#plot-as-is" id="toc-plot-as-is" class="nav-link active" data-scroll-target="#plot-as-is">Plot as is</a>
-  <ul class="collapse">
-  <li><a href="#coord_cartesian" id="toc-coord_cartesian" class="nav-link" data-scroll-target="#coord_cartesian">coord_cartesian</a></li>
-  <li><a href="#expand_limits-and-scale_y_continuous" id="toc-expand_limits-and-scale_y_continuous" class="nav-link" data-scroll-target="#expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</a></li>
-  <li><a href="#geom_blank" id="toc-geom_blank" class="nav-link" data-scroll-target="#geom_blank">geom_blank</a></li>
-  </ul></li>
+  <li><a href="#a-poster-is-a-document-not-a-slide-with-a-large-page-size" id="toc-a-poster-is-a-document-not-a-slide-with-a-large-page-size" class="nav-link active" data-scroll-target="#a-poster-is-a-document-not-a-slide-with-a-large-page-size">A poster is a document, not a slide with a large page size</a></li>
+  <li><a href="#making-it-your-poster" id="toc-making-it-your-poster" class="nav-link" data-scroll-target="#making-it-your-poster">Making it your poster</a></li>
+  <li><a href="#an-example-from-afs-2026" id="toc-an-example-from-afs-2026" class="nav-link" data-scroll-target="#an-example-from-afs-2026">An example from AFS 2026</a></li>
   </ul>
 </nav>
     </div>
@@ -190,12 +188,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using geom_blank for better axis ranges in ggplot</h1>
+<h1 class="title">quarto-sciposter: scientific posters from Quarto markdown</h1>
   <div class="quarto-categories">
     <div class="quarto-category">rstats</div>
+    <div class="quarto-category">quarto</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    Introducing quarto-sciposter, a Quarto extension for producing flexible scientific conference posters with Typst.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -204,7 +208,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 24, 2014</p>
+      <p class="date">August 17, 2026</p>
     </div>
   </div>
   
@@ -216,80 +220,74 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The RMarkdown source to this file can be found <a href="\Rmd\2014-08-24-using_geom_blank.Rmd">here</a></p>
-<p>Using facet_wrap() in <strong>ggplot2</strong> is a great way to create multiple panelled plots. Though when I am running these, particularly on datasets with different scales, the axis are not as clean as I like. To provide an illustration of what I am referring to, I will make up some fake data with some different scales in the y values and then plot these in ggplot</p>
-<section id="plot-as-is" class="level2">
-<h2 class="anchored" data-anchor-id="plot-as-is">Plot as is</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140824</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>## Use suppressPackageStartupMessages to eliminate package startup messages.</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First make up some data with different values for y with different scales</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>foo.dat<span class="ot">&lt;-</span><span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"A"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"B"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">3</span>)<span class="sc">+</span><span class="dv">20</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"C"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">5</span>)<span class="sc">+</span><span class="dv">30</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>foo.dat,<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">colour=</span>group),<span class="at">size=</span><span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group,<span class="at">scales=</span><span class="st">"free_y"</span>) <span class="sc">+</span> <span class="do">## using scales="free_y" allows the y-axis to vary while keeping x-axis constant among plots</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<section id="coord_cartesian" class="level3">
-<h3 class="anchored" data-anchor-id="coord_cartesian">coord_cartesian</h3>
-<p>When using a single panel or data that is all on the same scale, I frequently use <code>coord_cartesian</code>. Unfortunately when you have panels with different scales this is no longer as useful because it forces everything on the same scale (which depending on what you are looking at may not be bad).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>)) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-3.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
+<p>I have made more than a few conference posters by copying text and figures into a slide deck, then spending the last few hours before printing moving boxes by a few pixels. It works, but it is hard to repeat, difficult to review, and easy to break when a figure changes.</p>
+<p><a href="https://github.com/chrischizinski/quarto-sciposter"><code>quarto-sciposter</code></a> is a Quarto extension I built to make that workflow more reproducible. It takes a plain Quarto Markdown document and renders a scientific poster with <a href="https://typst.app/">Typst</a>, which is bundled with recent versions of Quarto. There is no separate LaTeX installation and no need to build the entire layout by hand.</p>
+<p><img src="../assets/images/projects/quarto-sciposter-hex.jpeg" class="sciposter-hex img-fluid" alt="quarto-sciposter hex sticker showing a scientific poster with charts and a peach pushpin"></p>
+<p>The package is intended for the parts of poster production that should be repeatable: poster size, column layout, typography, logos, figure placement, references, and a footer. The writing and the choices about what belongs on the poster are still mine. That is the useful division of labor.</p>
+<section id="a-poster-is-a-document-not-a-slide-with-a-large-page-size" class="level2">
+<h2 class="anchored" data-anchor-id="a-poster-is-a-document-not-a-slide-with-a-large-page-size">A poster is a document, not a slide with a large page size</h2>
+<p>I wanted a poster format that treats the document as a document. The source is Markdown, headings organize the content, code chunks can create figures, and the same source can be rendered again when a result changes. That is especially helpful for an R-based project, where the analysis, figures, and poster should not be separate final versions of the same work.</p>
+<p>The format supports poster sizes from a custom 48 by 36 inch layout to A-series sizes, with one to five columns. It includes controls for title bars, logos, references, figures, QR codes, callout boxes, evidence strips, and a prominent takeaway. It also includes a draft mode for checking the amount of content before the poster reaches the printer.</p>
+<p>Here is the smallest starting point:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> use template chrischizinski/quarto-sciposter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>That command copies the extension and a <code>template.qmd</code> file into a new project. For an existing Quarto project, add the format instead:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> add chrischizinski/quarto-sciposter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Then render a poster with:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render my-poster.qmd <span class="at">--to</span> sciposter-typst</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The beginning of the document declares the poster rather than relying on manual page setup:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"Poster title"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">"Your name"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sciposter-typst</span><span class="kw">:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">poster</span><span class="kw">:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">size</span><span class="kw">:</span><span class="at"> </span><span class="st">"48x36"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">theme</span><span class="kw">:</span><span class="at"> generic</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">footer</span><span class="kw">:</span><span class="at"> </span><span class="st">"Conference 2026"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>From there, the body is ordinary Quarto Markdown. A figure generated in an R chunk is part of the poster source, and a change to the analysis can flow into a new poster PDF without another round of copying and pasting.</p>
 </section>
-<section id="expand_limits-and-scale_y_continuous" class="level3">
-<h3 class="anchored" data-anchor-id="expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</h3>
-<p>Another option is to use <code>expand_limits()</code> to force each panel to start at the origin and then use <code>scale_y_continuous(expand=c(0,0))</code> to remove any extra space on around the y-axis limits. The two values in expand are c(multiplier buffer, additive buffer). By including a c(0,0) we are not including any buffer on the axis scale.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-4.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>As you can see in the above plot, using the combo of <code>expand_limits</code> and <code>scale_y_continuous(expand=c(0,0)</code> we can force the minimum to start at 0 but it max values are not as clean as I would like. This is where <code>geom_blank()</code> comes in. The purpose, according to the help files for <a href="http://docs.ggplot2.org/0.9.3.1/geom_blank.html"><code>geom_blank()</code></a> are to essentially draw nothing. When I first saw this, I was really baffled. Why would you not want something that drew nothing? I then realized the benefit of this in axis formatting.</p>
+<section id="making-it-your-poster" class="level2">
+<h2 class="anchored" data-anchor-id="making-it-your-poster">Making it your poster</h2>
+<p>The point of the format is not to force every poster into the same visual style. Most customization happens in the document YAML, so a project can have its own colors, typography, size, logos, and footer without editing the extension.</p>
+<p>Start with one of the supplied themes, <code>generic</code> or <code>unl</code>, then override only the parts that belong to the project. This example changes the primary and accent colors, uses a distinct heading font, sets the type scale explicitly, and adds institutional logos:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sciposter-typst</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">poster</span><span class="kw">:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">size</span><span class="kw">:</span><span class="at"> </span><span class="st">"48x36"</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">theme</span><span class="kw">:</span><span class="at"> generic</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">colors</span><span class="kw">:</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">primary</span><span class="kw">:</span><span class="at"> </span><span class="st">"#0D3B66"</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">accent</span><span class="kw">:</span><span class="at"> </span><span class="st">"#E07A5F"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">fonts</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"Source Sans Pro"</span><span class="kw">,</span><span class="at"> </span><span class="st">"Helvetica"</span><span class="kw">]</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">heading-fonts</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"Source Serif Pro"</span><span class="kw">]</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">base-font-size</span><span class="kw">:</span><span class="at"> 28pt</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">title-font-size</span><span class="kw">:</span><span class="at"> 72pt</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">footer</span><span class="kw">:</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">left</span><span class="kw">:</span><span class="at"> </span><span class="st">"American Fisheries Society 2026"</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">right</span><span class="kw">:</span><span class="at"> </span><span class="st">"your-project.org"</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">logos</span><span class="kw">:</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">left</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">logos/university.svg</span><span class="kw">]</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">right</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">logos/funder.png</span><span class="kw">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The body has its own layout controls. A takeaway makes one result readable from across the aisle, a <code>poster-box</code> groups supporting material, and a <code>poster-grid</code> places related items on a shared row. They are ordinary fenced divs in the source:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>::: {.takeaway label="Key finding"}</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Catch rates fell after the regulation change.</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>::: {.poster-box title="Methods"}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>Brief text, a figure, or a table that readers should consider together.</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For a more specific change, the extension also exposes <code>theme-overrides</code>. That is useful when, for example, the title bar and section bars need different colors, or a project needs a custom heading treatment. The full set of options and layout blocks is in the <a href="https://github.com/chrischizinski/quarto-sciposter#readme">quarto-sciposter README</a>.</p>
 </section>
-<section id="geom_blank" class="level3">
-<h3 class="anchored" data-anchor-id="geom_blank">geom_blank</h3>
-<p>The first thing to do, is to create a dataset with the mins and maxes of the y axis for each group level in our dataset. This is then passed to ggplot using <code>geom_blank</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blank_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">group =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>), <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">50</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_blank</span>(<span class="at">data =</span> blank_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>So we now have a plot with much cleaner y-axis ranges and plots that we can now present in public.</p>
+<section id="an-example-from-afs-2026" class="level2">
+<h2 class="anchored" data-anchor-id="an-example-from-afs-2026">An example from AFS 2026</h2>
+<p>I used <code>quarto-sciposter</code> to make a poster for the 2026 American Fisheries Society meeting: <a href="../assets/documents/tidycreel-afs-2026.pdf"><em>tidycreel: A Unified R Framework for Modern Creel Surveys</em></a>. It is a useful example of the type of project I had in mind: a poster that needs to explain a technical workflow, show figures and a code-adjacent conceptual structure, include several authors and affiliations, and remain readable from a few feet away.</p>
+<p>The poster is a PDF, but its source is still a Quarto document. That means I can adjust a figure, revise a sentence, add a collaborator, or change the conference footer without rebuilding the layout from scratch.</p>
+<p>The source and installation instructions are available at <a href="https://github.com/chrischizinski/quarto-sciposter">github.com/chrischizinski/quarto-sciposter</a>. I will keep adding examples as I use the format for different poster sizes and types of analysis.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

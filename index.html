@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -38,11 +41,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ba8195c2afaa1f580b03b35da926f1fe.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-297fd10debce6dcd94c7220416da9298.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-31ae1f7e71b6081ec8fe3db0b7188caa.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-78397bbd35ecb3863a252ede12cf2b20.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,11 +74,13 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
 
 
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -126,55 +132,52 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     
 <!-- main -->
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-    <img src="assets/images/Chizinski.jpeg" class="about-image
-  rounded " style="width: 20em;">
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Christopher Chizinski</h1>
-<p class="subtitle lead">Human Dimensions of Wildlife &amp; Fisheries</p>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header>
-    <div class="about-links">
-  <a href="https://github.com/chrischizinski" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">GitHub</span>
-  </a>
-  <a href="https://bsky.app/profile/chrischizinski.bsky.social" class="about-link" rel="" target="">
-    <i class="bi bi-cloud"></i>
-     <span class="about-link-text">Bluesky</span>
-  </a>
-  <a href="https://humandimensions.unl.edu" class="about-link" rel="" target="">
-    <i class="bi bi-mortarboard"></i>
-     <span class="about-link-text">Lab (UNL)</span>
-  </a>
-  <a href="mailto:cchizinski2@unl.edu" class="about-link" rel="" target="">
-    <i class="bi bi-envelope"></i>
-     <span class="about-link-text">Email</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content" id="quarto-document-content">
-<p><span class="specimen-label">Professor · Assoc. Director of Research &amp; Graduate Education · School of Natural Resources · UNL</span></p>
-<p>I study how people interact with fish, wildlife, and other natural resources—and how those interactions shape conservation policy and management. My research focuses on the decisions behind who hunts, fishes, and forages, how participation changes over time, and what those patterns mean for the agencies responsible for managing public resources.</p>
-<p>I combine survey science, quantitative methods, and reproducible data analysis to study participation, behavior, harvest, and decision-making. Much of this work involves creel and angler surveys, capture–recapture methods, recruitment, retention, and reactivation (R3), and the development of open-source tools in R for conservation research and management.</p>
-<p>I am a Professor in the School of Natural Resources at the University of Nebraska–Lincoln, where I also help lead the school’s research enterprise and graduate programs. I teach undergraduate courses in human dimensions and natural resource policy, as well as graduate courses in R programming, data visualization, and reproducible science.</p>
-<p>This site brings together my <a href="./blog.html">blog</a>—mostly notes on R, data analysis, and quantitative methods—the <a href="./projects.html">software and dashboards</a> developed by my lab, and my <a href="./cv.html">curriculum vitae</a>. For information about lab members, current projects, and opportunities to join the group, visit <a href="https://humandimensions.unl.edu">humandimensions.unl.edu</a>.</p>
+<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
-</main></div>
+
+
+<div class="home-hero">
+<div class="hero-text">
+<p><span class="specimen-label">Professor · School of Natural Resources · UNL</span></p>
+<section id="christopher-chizinski" class="level1">
+<h1>Christopher Chizinski</h1>
+<p><span class="hero-tagline">Human dimensions of wildlife &amp; fisheries.</span> I study who hunts and fishes, how participation changes over time, and what that means for the agencies that manage public resources.</p>
+<p>I combine survey science, quantitative methods, and reproducible data analysis to study participation, behavior, harvest, and decision-making. Much of this work involves creel and angler surveys, capture–recapture methods, recruitment, retention, and reactivation (R3), and open-source R tools for conservation research and management.</p>
+<p>I teach undergraduate courses in human dimensions and natural resource policy, and graduate courses in R programming, data visualization, and reproducible science, and help lead the School’s research and graduate programs.</p>
+</section>
 </div>
- <!-- /main -->
+<div class="hero-photo">
+<p><img src="assets/images/chizinski-namib.jpg" class="img-fluid" alt="Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"></p>
+<div class="hero-links">
+<p><a href="https://github.com/chrischizinski" aria-label="GitHub"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social" aria-label="Bluesky"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu" aria-label="Email"><i class="bi bi-envelope"></i> Email</a> <a href="blog.xml" aria-label="RSS"><i class="bi bi-rss"></i> RSS</a></p>
+</div>
+</div>
+</div>
+<div class="home-tiles">
+<p><a class="home-tile" href="blog.html"> <span class="specimen-label">01 · Notes</span> <span class="tile-title">Blog</span> <span class="tile-desc">R, data analysis, and creel survey methods.</span> </a></p>
+<p><a class="home-tile" href="projects.html"> <span class="specimen-label">02 · Software</span> <span class="tile-title">Projects</span> <span class="tile-desc">tidycreel, dashboards, and open-source tools.</span> </a></p>
+<p><a class="home-tile" href="cv.html"> <span class="specimen-label">03 · Record</span> <span class="tile-title">CV</span> <span class="tile-desc">Publications, teaching, and funding.</span> </a></p>
+<p><a class="home-tile" href="https://humandimensions.unl.edu"> <span class="specimen-label">04 · Group</span> <span class="tile-title">Lab&nbsp;↗</span> <span class="tile-desc">Members, current projects, and joining the group.</span> </a></p>
+</div>
+
+
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     
@@ -570,14 +573,14 @@ ul.task-list li input[type="checkbox"] {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Christopher Chizinski</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p><span class="footer-links"> <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu"><i class="bi bi-envelope"></i> Email</a> <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a> <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a> </span> <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span></p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>Built with <a href="https://quarto.org">Quarto</a></p>
-</div>
   </div>
 </footer>
 

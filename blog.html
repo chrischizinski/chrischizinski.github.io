@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -42,10 +45,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ba8195c2afaa1f580b03b35da926f1fe.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-297fd10debce6dcd94c7220416da9298.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-31ae1f7e71b6081ec8fe3db0b7188caa.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-78397bbd35ecb3863a252ede12cf2b20.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -83,9 +86,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-image','listing-date','listing-title','listing-categories','listing-reading-time',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -102,9 +105,11 @@ ul.task-list li input[type="checkbox"] {
     }
   })
   </script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -192,13 +197,14 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(10)</span></div><div class="category" data-category="cnN0YXRz">rstats <span class="quarto-category-count">(10)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(20)</span></div><div class="category" data-category="ZmlzaGVyaWVz">fisheries <span class="quarto-category-count">(8)</span></div><div class="category" data-category="cXVhcnRv">quarto <span class="quarto-category-count">(2)</span></div><div class="category" data-category="cnN0YXRz">rstats <span class="quarto-category-count">(20)</span></div><div class="category" data-category="dGlkeWNyZWVs">tidycreel <span class="quarto-category-count">(8)</span></div></div></div>
 <!-- main -->
 <main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Blog</h1>
+<p class="subtitle lead">Notes on R, data analysis, and creel survey methods</p>
 </div>
 
 
@@ -219,278 +225,489 @@ window.Quarto = {
 
 
 
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="cnN0YXRz" data-listing-date-sort="1431061200000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="879">
-<div class="thumbnail"><a href="./posts/2015-05-08-shinyschedule.html" class="no-external">
+<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
+<div class="list grid quarto-listing-cols-3">
+<div class="g-col-1" data-index="0" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1790917200000" data-listing-file-modified-sort="1790950819321" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1967">
+<a href="./posts/2026-10-02-catch-harvest-release.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img loading="lazy" src="./assets/images/projects/tidycreel-fish-totals-v2.png" class="thumbnail-image card-img" style="height: 190px;">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+From Angler-Hours to Fish: Estimating Catch, Harvest, and Release
+</h5>
+<div class="listing-reading-time card-text text-muted">10 min</div>
+<div class="listing-categories">
 
-<p class="card-img-top"><img loading='lazy' src="figs/2015-05-08-shinyschedule/ScreenShot.png"  class="thumbnail-image card-img"/></p>
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
 
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2015-05-08-shinyschedule.html" class="no-external">A Shiny Creel Scheduler</a>
-</h3>
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Oct 2, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="1" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1790312400000" data-listing-file-modified-sort="1790950874674" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1537">
+<a href="./posts/2026-09-25-effort-estimation.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img loading="lazy" src="./assets/images/projects/tidycreel-effort-estimation.png" class="thumbnail-image card-img" style="height: 190px;">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+How an Instantaneous Count Becomes Angler-Hours
+</h5>
+<div class="listing-reading-time card-text text-muted">8 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Sep 25, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="2" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1789707600000" data-listing-file-modified-sort="1789741120489" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1852">
+<a href="./posts/2026-09-18-linked-tables.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img loading="lazy" src="./assets/images/projects/tidycreel-linked-tables.png" class="thumbnail-image card-img" style="height: 190px;">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Why a Creel Survey Needs Linked Tables
+</h5>
+<div class="listing-reading-time card-text text-muted">10 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Sep 18, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="3" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1789102800000" data-listing-file-modified-sort="1789742360033" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1713">
+<a href="./posts/2026-09-11-roving-interviews.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/projects/tidycreel-roving-interviews.png" alt="Illustration of a fisheries clerk standing at the shoreline and interviewing two anglers in a boat pulled close to shore, with a simple chart showing two interview paths." style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+How an Angler Is Interviewed Matters
+</h5>
+<div class="listing-reading-time card-text text-muted">9 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Sep 11, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="4" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1788411600000" data-listing-file-modified-sort="1789742359934" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1065">
+<a href="./posts/2026-09-03-sampling-calendar.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/projects/tidycreel-sampling-calendar.png" alt="Illustration of a creel-survey calendar with selected sampling days, a boat and field gear at a lake, and a chart representing the resulting estimate." style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Why the sampling calendar belongs in the estimate
+</h5>
+<div class="listing-reading-time card-text text-muted">6 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Sep 3, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="5" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1788325200000" data-listing-file-modified-sort="1789742359858" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1505">
+<a href="./posts/2026-09-01-what-were-working-on-in-tidycreel.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/projects/tidycreel-survey-to-estimate.png" alt="Illustration of a creel-survey calendar, a clerk interviewing an angler at a lake, and a chart showing an estimate with uncertainty." style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+What we’re working on in tidycreel right now
+</h5>
+<div class="listing-reading-time card-text text-muted">8 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Sep 2, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="6" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1787806800000" data-listing-file-modified-sort="1789742359758" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1406">
+<a href="./posts/2026-08-27-design-object.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/blog-placeholder.svg" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Start with the design object
+</h5>
+<div class="listing-reading-time card-text text-muted">8 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Aug 27, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="7" data-categories="dGlkeWNyZWVsJTJDcnN0YXRzJTJDZmlzaGVyaWVz" data-listing-date-sort="1787029200000" data-listing-file-modified-sort="1790950874652" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1068">
+<a href="./posts/2026-08-18-introducing-tidycreel.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/blog-placeholder.svg" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Introducing tidycreel and Modern Creel Survey Analysis in R
+</h5>
+<div class="listing-reading-time card-text text-muted">6 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('dGlkeWNyZWVs'); return false;">tidycreel</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('ZmlzaGVyaWVz'); return false;">fisheries</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Aug 18, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="8" data-categories="cnN0YXRzJTJDcXVhcnRv" data-listing-date-sort="1786942800000" data-listing-file-modified-sort="1787157677577" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="803">
+<a href="./posts/2026-08-17-quarto-sciposter.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/projects/quarto-sciposter-hex.jpeg" alt="quarto-sciposter hex sticker showing a scientific poster with charts and a peach pushpin" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+quarto-sciposter: scientific posters from Quarto markdown
+</h5>
+<div class="listing-reading-time card-text text-muted">5 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cXVhcnRv'); return false;">quarto</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Aug 17, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="9" data-categories="cnN0YXRzJTJDcXVhcnRv" data-listing-date-sort="1785042000000" data-listing-file-modified-sort="1785074638703" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="260">
+<a href="./posts/2026-07-26-rmd2qmd.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/projects/hex-rmd2qmd.png" alt="rmd2qmd hex logo" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+rmd2qmd: migrating legacy R Markdown to Quarto
+</h5>
+<div class="listing-reading-time card-text text-muted">2 min</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cXVhcnRv'); return false;">quarto</div>
+
+</div>
+<div class="card-attribution card-text-small end">
+<div class="listing-date">
+Jul 26, 2026
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="10" data-categories="cnN0YXRz" data-listing-date-sort="1431061200000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="879">
+<a href="./posts/2015-05-08-shinyschedule.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2015-05-08-shinyschedule/ScreenShot.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+A Shiny Creel Scheduler
+</h5>
+<div class="listing-reading-time card-text text-muted">5 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2015-05-08-shinyschedule.html" class="no-external">
-Well once again life has quickly passed me by and its been quite a while since I last posted here. I have been working at finishing up the 2014 creel year with generating…
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2015-05-08-shinyschedule.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 May 8, 2015
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="cnN0YXRz" data-listing-date-sort="1416808800000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2112">
-<div class="thumbnail"><a href="./posts/2014-11-24-adonis.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-11-24-adonis/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-11-24-adonis.html" class="no-external">Permutational multivariate analysis of variance using distance matrices (adonis)</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="11" data-categories="cnN0YXRz" data-listing-date-sort="1416808800000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2112">
+<a href="./posts/2014-11-24-adonis.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-11-24-adonis/unnamed-chunk-3-1.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Permutational multivariate analysis of variance using distance matrices (adonis)
+</h5>
+<div class="listing-reading-time card-text text-muted">11 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-11-24-adonis.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-11-24-adonis.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Nov 24, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="cnN0YXRz" data-listing-date-sort="1408856400000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="595">
-<div class="thumbnail"><a href="./posts/2014-08-24-using-geom-blank.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-08-24-using-geom-blank.html" class="no-external">Using geom_blank for better axis ranges in ggplot</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="12" data-categories="cnN0YXRz" data-listing-date-sort="1408856400000" data-listing-file-modified-sort="1784486223241" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="595">
+<a href="./posts/2014-08-24-using-geom-blank.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Using geom_blank for better axis ranges in ggplot
+</h5>
+<div class="listing-reading-time card-text text-muted">3 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-08-24-using-geom-blank.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-08-24-using-geom-blank.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Aug 24, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="cnN0YXRz" data-listing-date-sort="1406696400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4620">
-<div class="thumbnail"><a href="./posts/2014-07-30-simulating-anglers.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-07-30-Simulating-Anglers/unnamed-chunk-5.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-07-30-simulating-anglers.html" class="no-external">Simulating angler survey data</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="13" data-categories="cnN0YXRz" data-listing-date-sort="1406696400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4620">
+<a href="./posts/2014-07-30-simulating-anglers.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-07-30-Simulating-Anglers/unnamed-chunk-5.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Simulating angler survey data
+</h5>
+<div class="listing-reading-time card-text text-muted">24 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-07-30-simulating-anglers.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-07-30-simulating-anglers.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Jul 30, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="cnN0YXRz" data-listing-date-sort="1404104400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2791">
-<div class="thumbnail"><a href="./posts/2014-06-30-ordisurf.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-06-30-ordisurf/unnamed-chunk-3.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-06-30-ordisurf.html" class="no-external">Plotting smooth surfaces on NMDS plots with ggplot</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="14" data-categories="cnN0YXRz" data-listing-date-sort="1404104400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2791">
+<a href="./posts/2014-06-30-ordisurf.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-06-30-ordisurf/unnamed-chunk-3.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Plotting smooth surfaces on NMDS plots with ggplot
+</h5>
+<div class="listing-reading-time card-text text-muted">14 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-06-30-ordisurf.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-06-30-ordisurf.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Jun 30, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="cnN0YXRz" data-listing-date-sort="1402376400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1243">
-<div class="thumbnail"><a href="./posts/2014-06-10-favorite-themes.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-06-10-favorite-themes/unnamed-chunk-2.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-06-10-favorite-themes.html" class="no-external">A few of my favorite themes</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="15" data-categories="cnN0YXRz" data-listing-date-sort="1402376400000" data-listing-file-modified-sort="1784486223240" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1243">
+<a href="./posts/2014-06-10-favorite-themes.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-06-10-favorite-themes/unnamed-chunk-2.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+A few of my favorite themes
+</h5>
+<div class="listing-reading-time card-text text-muted">7 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-06-10-favorite-themes.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-06-10-favorite-themes.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Jun 10, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="cnN0YXRz" data-listing-date-sort="1399438800000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2055">
-<div class="thumbnail"><a href="./posts/2014-05-07-multiple-plots.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-05-07-multiple-plots_rmd/unnamed-chunk-2.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-05-07-multiple-plots.html" class="no-external">Multiple plots in ggplot2</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="16" data-categories="cnN0YXRz" data-listing-date-sort="1399438800000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2055">
+<a href="./posts/2014-05-07-multiple-plots.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-05-07-multiple-plots_rmd/unnamed-chunk-2.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Multiple plots in ggplot2
+</h5>
+<div class="listing-reading-time card-text text-muted">11 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-05-07-multiple-plots.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-05-07-multiple-plots.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 May 7, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="cnN0YXRz" data-listing-date-sort="1397365200000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2806">
-<div class="thumbnail"><a href="./posts/2014-04-13-vegan-ggplot2.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-04-13-vegan-ggplot2/unnamed-chunk-5.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-04-13-vegan-ggplot2.html" class="no-external">Plotting NMDS plots with ggplot2</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="17" data-categories="cnN0YXRz" data-listing-date-sort="1397365200000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2806">
+<a href="./posts/2014-04-13-vegan-ggplot2.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-04-13-vegan-ggplot2/unnamed-chunk-5.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Plotting NMDS plots with ggplot2
+</h5>
+<div class="listing-reading-time card-text text-muted">15 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-04-13-vegan-ggplot2.html" class="no-external">
-The RMarkdown source to this file can be found here
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-04-13-vegan-ggplot2.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Apr 13, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="cnN0YXRz" data-listing-date-sort="1396933200000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4594">
-<div class="thumbnail"><a href="./posts/2014-04-08-models-by-variable.html" class="no-external">
-
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-04-08-models-by-variable.html" class="no-external">Models by a factor</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="18" data-categories="cnN0YXRz" data-listing-date-sort="1396933200000" data-listing-file-modified-sort="1784486223239" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4594">
+<a href="./posts/2014-04-08-models-by-variable.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="assets/images/blog-placeholder.svg" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Models by a factor
+</h5>
+<div class="listing-reading-time card-text text-muted">23 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-04-08-models-by-variable.html" class="no-external">
-Recently, a friend asked a question on ways to run a single model by a grouping variable in a dataset (similar to the BY statement in SAS for those familiar with SAS). This…
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-04-08-models-by-variable.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Apr 8, 2014
 </div>
-</a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="cnN0YXRz" data-listing-date-sort="1396587600000" data-listing-file-modified-sort="1784486223238" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3942">
-<div class="thumbnail"><a href="./posts/2014-04-04-igraph-ggplotll.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="figs/2014-04-04-igraph-ggplotll/chunck2.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2014-04-04-igraph-ggplotll.html" class="no-external">Plotting igraph objects with ggplot2</a>
-</h3>
+</div></a>
+</div>
+<div class="g-col-1" data-index="19" data-categories="cnN0YXRz" data-listing-date-sort="1396587600000" data-listing-file-modified-sort="1784486223238" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3942">
+<a href="./posts/2014-04-04-igraph-ggplotll.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' src="figs/2014-04-04-igraph-ggplotll/chunck2.png" style="height: 190px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Plotting igraph objects with ggplot2
+</h5>
+<div class="listing-reading-time card-text text-muted">20 min</div>
 <div class="listing-categories">
 
 <div class="listing-category" onclick="window.quartoListingCategory('cnN0YXRz'); return false;">rstats</div>
 
 </div>
-<div class="delink listing-description"><a href="./posts/2014-04-04-igraph-ggplotll.html" class="no-external">
-I have been working collaborating on a project with Dustin Martin using network theory.<br>
-We have are utilizing the <em>igraph</em> package in R, which ultimately produces graphs of…<br><em></em><em></em><em></em><em></em><em></em>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2014-04-04-igraph-ggplotll.html" class="no-external">
+<div class="card-attribution card-text-small end">
 <div class="listing-date">
 Apr 4, 2014
 </div>
-</a>
 </div>
+</div>
+</div></a>
 </div>
 </div>
 <div class="listing-no-matching d-none">No matching items</div>
@@ -899,14 +1116,14 @@ Apr 4, 2014
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Christopher Chizinski</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p><span class="footer-links"> <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu"><i class="bi bi-envelope"></i> Email</a> <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a> <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a> </span> <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span></p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>Built with <a href="https://quarto.org">Quarto</a></p>
-</div>
   </div>
 </footer>
 

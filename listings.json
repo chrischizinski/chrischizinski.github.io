@@ -2,6 +2,16 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2026-10-02-catch-harvest-release.html",
+      "/posts/2026-09-25-effort-estimation.html",
+      "/posts/2026-09-18-linked-tables.html",
+      "/posts/2026-09-11-roving-interviews.html",
+      "/posts/2026-09-03-sampling-calendar.html",
+      "/posts/2026-09-01-what-were-working-on-in-tidycreel.html",
+      "/posts/2026-08-27-design-object.html",
+      "/posts/2026-08-18-introducing-tidycreel.html",
+      "/posts/2026-08-17-quarto-sciposter.html",
+      "/posts/2026-07-26-rmd2qmd.html",
       "/posts/2015-05-08-shinyschedule.html",
       "/posts/2014-11-24-adonis.html",
       "/posts/2014-08-24-using-geom-blank.html",

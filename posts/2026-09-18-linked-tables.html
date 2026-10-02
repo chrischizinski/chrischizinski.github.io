@@ -6,9 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2014-08-24">
+<meta name="author" content="Christopher Chizinski">
+<meta name="dcterms.date" content="2026-09-18">
+<meta name="description" content="Counts, interviews, catch, and fish measurements describe different units. A tidycreel 7.0.0 example shows how linked tables preserve those distinctions without losing the connections needed for analysis.">
 
-<title>Using geom_blank for better axis ranges in ggplot – Christopher Chizinski</title>
+<title>Why a Creel Survey Needs Linked Tables – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -176,12 +178,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#plot-as-is" id="toc-plot-as-is" class="nav-link active" data-scroll-target="#plot-as-is">Plot as is</a>
-  <ul class="collapse">
-  <li><a href="#coord_cartesian" id="toc-coord_cartesian" class="nav-link" data-scroll-target="#coord_cartesian">coord_cartesian</a></li>
-  <li><a href="#expand_limits-and-scale_y_continuous" id="toc-expand_limits-and-scale_y_continuous" class="nav-link" data-scroll-target="#expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</a></li>
-  <li><a href="#geom_blank" id="toc-geom_blank" class="nav-link" data-scroll-target="#geom_blank">geom_blank</a></li>
-  </ul></li>
+  <li><a href="#start-with-what-one-row-means" id="toc-start-with-what-one-row-means" class="nav-link active" data-scroll-target="#start-with-what-one-row-means">Start with what one row means</a></li>
+  <li><a href="#one-large-spreadsheet-can-quietly-repeat-effort" id="toc-one-large-spreadsheet-can-quietly-repeat-effort" class="nav-link" data-scroll-target="#one-large-spreadsheet-can-quietly-repeat-effort">One large spreadsheet can quietly repeat effort</a></li>
+  <li><a href="#attach-counts-and-interviews-first" id="toc-attach-counts-and-interviews-first" class="nav-link" data-scroll-target="#attach-counts-and-interviews-first">Attach counts and interviews first</a></li>
+  <li><a href="#link-species-level-catch-to-its-interview" id="toc-link-species-level-catch-to-its-interview" class="nav-link" data-scroll-target="#link-species-level-catch-to-its-interview">Link species-level catch to its interview</a></li>
+  <li><a href="#keep-biological-observations-connected-too" id="toc-keep-biological-observations-connected-too" class="nav-link" data-scroll-target="#keep-biological-observations-connected-too">Keep biological observations connected too</a></li>
+  <li><a href="#check-the-links-before-estimating-anything" id="toc-check-the-links-before-estimating-anything" class="nav-link" data-scroll-target="#check-the-links-before-estimating-anything">Check the links before estimating anything</a></li>
   </ul>
 </nav>
     </div>
@@ -190,21 +192,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using geom_blank for better axis ranges in ggplot</h1>
+<h1 class="title">Why a Creel Survey Needs Linked Tables</h1>
+<p class="subtitle lead">Keeping counts, interviews, catch, and fish measurements connected</p>
   <div class="quarto-categories">
+    <div class="quarto-category">tidycreel</div>
     <div class="quarto-category">rstats</div>
+    <div class="quarto-category">fisheries</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    Counts, interviews, catch, and fish measurements describe different units. A tidycreel 7.0.0 example shows how linked tables preserve those distinctions without losing the connections needed for analysis.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Christopher Chizinski </p>
+          </div>
+  </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 24, 2014</p>
+      <p class="date">September 18, 2026</p>
     </div>
   </div>
   
@@ -216,80 +232,175 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The RMarkdown source to this file can be found <a href="\Rmd\2014-08-24-using_geom_blank.Rmd">here</a></p>
-<p>Using facet_wrap() in <strong>ggplot2</strong> is a great way to create multiple panelled plots. Though when I am running these, particularly on datasets with different scales, the axis are not as clean as I like. To provide an illustration of what I am referring to, I will make up some fake data with some different scales in the y values and then plot these in ggplot</p>
-<section id="plot-as-is" class="level2">
-<h2 class="anchored" data-anchor-id="plot-as-is">Plot as is</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140824</span>)</span>
+<p><img src="../assets/images/projects/tidycreel-linked-tables.png" class="img-fluid" data-fig-cap="Different observations belong in different tables, with their connections preserved. Illustration generated with ChatGPT." alt="Watercolor illustration of a fisheries clerk measuring a fish at a lakeside field station, beside a panel of linked table icons representing counts, interviews, catch, and length measurements."></p>
+<p>The <a href="../posts/2026-09-11-roving-interviews.html">previous post</a> asked how an angler entered the interview sample. This post follows those observations back to the data: <strong>what does one row represent, and how does it connect to the rest of the survey?</strong></p>
+<p>A count records fishing activity at a particular place and time. An interview records information about a trip or party. Catch records describe species and what happened to the fish. Length and age records describe the fish sampled for biological information. These observations belong together in an analysis, but they do not all belong on the same row.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Keep each table at its own unit of observation.</li>
+<li>Link catch and biological records to interviews with stable identifiers.</li>
+<li>Preserve interviews with zero catch and distinguish them from missing data.</li>
+<li>Attach the tables to the design before asking what they estimate.</li>
+</ul>
+</blockquote>
+<p>The example below uses <strong>tidycreel 7.0.0, “Goldeye”</strong>, and the simulated data shipped with that release. Its <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/NEWS.md">release notes</a> also document a change directly relevant here: interview identifiers are normalized to character when catch, length, and age tables are attached.</p>
+<section id="start-with-what-one-row-means" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-what-one-row-means">Start with what one row means</h2>
+<p>Before joining anything, I want to be able to finish this sentence for every table: <em>one row represents…</em> That answer tells us which values can be repeated and which must remain unique.</p>
+<p>For the instantaneous-count workflow used here, the main tables have these roles:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 48%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Table</th>
+<th>What one row represents</th>
+<th>How it connects</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Calendar</td>
+<td>A date or sampling unit in the declared design</td>
+<td>Dates, strata, and other design keys</td>
+</tr>
+<tr class="even">
+<td>Counts</td>
+<td>A count event at a recorded time</td>
+<td>Calendar dates and applicable sampling-unit keys</td>
+</tr>
+<tr class="odd">
+<td>Interviews</td>
+<td>An interviewed trip or party under the field protocol</td>
+<td>Calendar/design keys and an interview identifier</td>
+</tr>
+<tr class="even">
+<td>Catch</td>
+<td>A species and catch type within an interview</td>
+<td>Interview identifier</td>
+</tr>
+<tr class="odd">
+<td>Lengths</td>
+<td>An individual fish measurement or a release-length bin</td>
+<td>Interview identifier and species</td>
+</tr>
+<tr class="even">
+<td>Ages</td>
+<td>An individual aged fish</td>
+<td>Interview identifier and species</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a> explained why dates and strata matter. Here, the additional connection is the interview identifier. It allows several species records and several fish measurements to belong to the same interview without turning that interview into several independent trips.</p>
+<p>Counts do not need to belong to individual interviews. A clerk might count anglers across a section and interview only some of them. Connecting every count to every interview on that date would create combinations that the field crew never observed.</p>
+</section>
+<section id="one-large-spreadsheet-can-quietly-repeat-effort" class="level2">
+<h2 class="anchored" data-anchor-id="one-large-spreadsheet-can-quietly-repeat-effort">One large spreadsheet can quietly repeat effort</h2>
+<p>Suppose an interview records four hours of fishing and catch of two species. A species-level table needs at least two rows to describe that catch. If we join those rows to the interview, the four hours appear twice. Summing the joined effort column now gives eight hours, although only four were reported.</p>
+<p>Adding individual fish measurements can multiply rows again. Three length records for one species are three measurements, not three more interviews.</p>
+<p>A join can be useful for a particular question. The problem is forgetting that it changes what a row represents. Keeping the original tables separate gives us a way to check a derived table against the observations that produced it.</p>
+<p>This is the practical role of the <a href="../posts/2026-08-27-design-object.html">design object</a>. It holds the related tables and the information needed to interpret them, without requiring us to flatten everything into one spreadsheet.</p>
+</section>
+<section id="attach-counts-and-interviews-first" class="level2">
+<h2 class="anchored" data-anchor-id="attach-counts-and-interviews-first">Attach counts and interviews first</h2>
+<p>The first part of the example should look familiar. Define the calendar, attach counts, and then attach interviews with their catch and effort fields. The interview type remains explicit for the same reason discussed in the last post: it documents how the observations were collected.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>## Use suppressPackageStartupMessages to eliminate package startup messages.</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First make up some data with different values for y with different scales</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>foo.dat<span class="ot">&lt;-</span><span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"A"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"B"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">3</span>)<span class="sc">+</span><span class="dv">20</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"C"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">5</span>)<span class="sc">+</span><span class="dv">30</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>foo.dat,<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">colour=</span>group),<span class="at">size=</span><span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group,<span class="at">scales=</span><span class="st">"free_y"</span>) <span class="sc">+</span> <span class="do">## using scales="free_y" allows the y-axis to vary while keeping x-axis constant among plots</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<section id="coord_cartesian" class="level3">
-<h3 class="anchored" data-anchor-id="coord_cartesian">coord_cartesian</h3>
-<p>When using a single panel or data that is all on the same scale, I frequently use <code>coord_cartesian</code>. Unfortunately when you have panels with different scales this is no longer as useful because it forces everything on the same scale (which depending on what you are looking at may not be bad).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>)) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-3.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># This walkthrough was checked against version 7.0.0.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">"tidycreel"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_calendar)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_counts)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_interviews)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_catch)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_lengths)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(example_ages)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  example_calendar,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> date,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> day_type</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_counts</span>(example_counts) <span class="sc">|&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_interviews</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    example_interviews,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">catch =</span> catch_total,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">effort =</span> hours_fished,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">harvest =</span> catch_kept,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">trip_status =</span> trip_status,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">trip_duration =</span> trip_duration,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_anglers =</span> n_anglers,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">interview_type =</span> <span class="st">"access"</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This example declares access-point interviews. A roving survey should retain its own interview type and appropriate trip information; organizing the tables does not change the sampling protocol. The example also produces an equal-probability warning because it supplies no explicit sampling weights. It demonstrates table attachment; a survey with unequal selection probabilities needs those probabilities represented in its design before estimation.</p>
+<p>The interview table still contains one row per interview, including interviews with no catch. Those zero-catch observations matter when estimating rates. A catch table alone cannot tell us how much fishing occurred without a fish being caught.</p>
 </section>
-<section id="expand_limits-and-scale_y_continuous" class="level3">
-<h3 class="anchored" data-anchor-id="expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</h3>
-<p>Another option is to use <code>expand_limits()</code> to force each panel to start at the origin and then use <code>scale_y_continuous(expand=c(0,0))</code> to remove any extra space on around the y-axis limits. The two values in expand are c(multiplier buffer, additive buffer). By including a c(0,0) we are not including any buffer on the axis scale.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-4.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>As you can see in the above plot, using the combo of <code>expand_limits</code> and <code>scale_y_continuous(expand=c(0,0)</code> we can force the minimum to start at 0 but it max values are not as clean as I would like. This is where <code>geom_blank()</code> comes in. The purpose, according to the help files for <a href="http://docs.ggplot2.org/0.9.3.1/geom_blank.html"><code>geom_blank()</code></a> are to essentially draw nothing. When I first saw this, I was really baffled. Why would you not want something that drew nothing? I then realized the benefit of this in axis formatting.</p>
+<section id="link-species-level-catch-to-its-interview" class="level2">
+<h2 class="anchored" data-anchor-id="link-species-level-catch-to-its-interview">Link species-level catch to its interview</h2>
+<p><code>add_catch()</code> attaches the species detail through the interview identifier. The two identifier arguments describe opposite sides of that link: <code>catch_uid</code> is the interview ID column in the catch table, and <code>interview_uid</code> is its counterpart in the interview table. Despite its name, <code>catch_uid</code> is not a unique identifier for each fish or catch row.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> design <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_catch</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    example_catch,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">catch_uid =</span> interview_id,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">interview_uid =</span> interview_id,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">species =</span> species,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">count =</span> count,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">catch_type =</span> catch_type</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The catch table uses <code>"caught"</code>, <code>"harvested"</code>, and <code>"released"</code> to describe catch type. <strong>Caught is the total; harvested and released are components.</strong> Adding all three together would count fish twice. If a caught row is absent, the package derives that total from harvested plus released. If it is present, it must be at least their sum. These rules are documented in <a href="https://chrischizinski.com/tidycreel/reference/add_catch.html"><code>add_catch()</code></a>.</p>
+<p>An interview can legitimately have no catch rows when nothing was caught. That is different from losing its catch records during an export. The software cannot reconstruct that distinction from an absent row, so the data-preparation workflow must establish what absence means. Version 7.0.0 rejects <code>NA</code> catch counts rather than silently treating an unknown count as zero. Dropping a row with an unknown count is therefore a substantive decision, not a harmless fix.</p>
+<p>Version 7.0.0 also makes the linked identifiers character values. A numeric ID from one source and a character ID from another can otherwise fail to join. Identifiers are labels: keep leading zeros when they are meaningful, and do not expect character conversion to recover zeros already lost during import.</p>
 </section>
-<section id="geom_blank" class="level3">
-<h3 class="anchored" data-anchor-id="geom_blank">geom_blank</h3>
-<p>The first thing to do, is to create a dataset with the mins and maxes of the y axis for each group level in our dataset. This is then passed to ggplot using <code>geom_blank</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blank_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">group =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>), <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">50</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_blank</span>(<span class="at">data =</span> blank_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>So we now have a plot with much cleaner y-axis ranges and plots that we can now present in public.</p>
+<section id="keep-biological-observations-connected-too" class="level2">
+<h2 class="anchored" data-anchor-id="keep-biological-observations-connected-too">Keep biological observations connected too</h2>
+<p>Length and age records attach to interviews in the same way. They do not need a matching row number in the catch table. Several measured or aged fish can belong to one interview, and many interviews may have no biological records.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> design <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_lengths</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    example_lengths,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">length_uid =</span> interview_id,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">interview_uid =</span> interview_id,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">species =</span> species,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">length =</span> length,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">length_type =</span> length_type,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">count =</span> count,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">release_format =</span> <span class="st">"binned"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_ages</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    example_ages,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_uid =</span> interview_id,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">interview_uid =</span> interview_id,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">species =</span> species,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> age,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_type =</span> age_type</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(design)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The shipped length example mixes individual harvested-fish measurements with binned release records. That is why this call specifies <code>release_format = "binned"</code> and supplies a count column. The count is the number of released fish in a bin, not an interview count. Length and age fate labels are <code>"harvest"</code> and <code>"release"</code>, whereas the catch table uses <code>"harvested"</code> and <code>"released"</code>. The <a href="https://chrischizinski.com/tidycreel/reference/add_lengths.html"><code>add_lengths()</code></a> and <a href="https://chrischizinski.com/tidycreel/reference/add_ages.html"><code>add_ages()</code></a> references describe those formats.</p>
+<p>An interview ID identifies the interview, not an individual fish. If a project needs to match a fish’s length to its age, retain a separate fish or specimen identifier in the source records. Interview and species alone cannot establish which measurement belongs to which aged fish.</p>
+<p>These links preserve biological observations; they do not automatically make the measured fish representative of the entire catch. That still depends on which fish were available, which were selected for measurement, and the estimation method used.</p>
+</section>
+<section id="check-the-links-before-estimating-anything" class="level2">
+<h2 class="anchored" data-anchor-id="check-the-links-before-estimating-anything">Check the links before estimating anything</h2>
+<p>The attachment functions check that catch and biological records refer to interviews in the design. A record with an unknown interview ID should send us back to the source tables: was the ID mistyped, was an interview omitted, or were records drawn from different survey exports?</p>
+<p>I would also check that the interview identifier uniquely identifies an interview across the data being combined. If numbering restarts each year or at each water body, an ID such as <code>"104"</code> is not enough on its own. Construct a consistent identifier from the necessary source fields and use it in every related table before attachment.</p>
+<p>A separate check asks whether the design has the expected field coverage:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_completeness</span>(design)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For this workflow, that report identifies calendar days without count data and strata with few interviews. Its default low-interview threshold is 10; that is a diagnostic threshold, not proof that a sample is adequate for every survey. On the shipped example, the report finds no missing sampling days but flags one stratum below that threshold. That is a result to inspect, not an error in attaching the tables. The report also does not establish that every fish was measured or every species record was entered. Those checks require the field protocol and source records.</p>
+<p>Before moving on, I would ask:</p>
+<ul>
+<li>Can I explain what a row represents in every table?</li>
+<li>Does each catch, length, and age record point to the intended interview?</li>
+<li>Are zero-catch interviews retained, and are missing records investigated?</li>
+<li>Have any joins repeated effort or turned measurements into extra interviews?</li>
+<li>Can another analyst distinguish observed sample summaries from expanded estimates?</li>
+</ul>
+<p>The calendar defines the survey’s time structure. Interviews retain the trip information and sampling protocol. Linked catch and biological tables add detail without changing how many interviews occurred. Keeping those distinctions visible is what lets the next step—estimating effort, catch, and harvest—start from the observations the field crew actually collected.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

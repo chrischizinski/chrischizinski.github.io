@@ -2,20 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Projects &amp; Software – Christopher Chizinski</title>
+<title>Projects – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -40,10 +43,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ba8195c2afaa1f580b03b35da926f1fe.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-297fd10debce6dcd94c7220416da9298.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-31ae1f7e71b6081ec8fe3db0b7188caa.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-78397bbd35ecb3863a252ede12cf2b20.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,6 +74,8 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
 
 
 </head>
@@ -127,23 +132,21 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Projects &amp; Software</h1>
+<h1 class="title">Projects</h1>
 </div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -158,39 +161,94 @@ ul.task-list li input[type="checkbox"] {
 <p><span class="specimen-label">Open source · lab &amp; research tools</span></p>
 <p>Open-source tools and dashboards from my lab and research.</p>
 <div class="grid">
-<div class="g-col-12 g-col-md-6">
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
 <div class="card project-card">
 <div class="card-body">
+<p><img src="assets/images/projects/tidycreel.png" class="project-hex img-fluid" alt="tidycreel hex logo"></p>
+<p><span class="project-tag">R Package</span></p>
 <p><span class="card-title">tidycreel</span></p>
 <p>Tidy R tools for creel survey design, estimation, validation, and management-ready reporting.</p>
-<p><a href="https://github.com/chrischizinski/tidycreel">GitHub →</a></p>
+<div class="project-links">
+<p><a href="https://chrischizinski.github.io/tidycreel/"><i class="bi bi-globe"></i> Website</a> <a href="https://github.com/chrischizinski/tidycreel"><i class="bi bi-github"></i> GitHub</a></p>
 </div>
 </div>
 </div>
-<div class="g-col-12 g-col-md-6">
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
 <div class="card project-card">
 <div class="card-body">
-<p><span class="card-title">Wildlife Grad Dashboard</span></p>
+<p><img src="assets/images/projects/hex-book.svg" class="project-hex img-fluid" alt="Modern Creel Survey Analysis book hex logo"></p>
+<p><span class="project-tag">Quarto Book</span></p>
+<p><span class="card-title">Modern Creel Survey Analysis in R</span></p>
+<p>Methods-first Quarto book on design-based creel survey analysis with <code>tidycreel</code> — design, estimation, diagnostics, and reporting. Companion to the package.</p>
+<div class="project-links">
+<p><a href="https://modern-creel-surveys.netlify.app"><i class="bi bi-globe"></i> Website</a> <a href="https://github.com/chrischizinski/modern-creel-surveys"><i class="bi bi-github"></i> GitHub</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="card project-card">
+<div class="card-body">
+<p><img src="assets/images/projects/hex-rmd2qmd.png" class="project-hex img-fluid" alt="rmd2qmd hex logo"></p>
+<p><span class="project-tag">R Package</span></p>
+<p><span class="card-title">rmd2qmd</span></p>
+<p>R package for converting legacy <code>.Rmd</code> documents to clean, idiomatic Quarto while preserving rendering behavior, code chunks, and document structure.</p>
+<div class="project-links">
+<p><a href="https://chrischizinski.com/rmd2qmd/"><i class="bi bi-globe"></i> Website</a> <a href="https://github.com/chrischizinski/rmd2qmd"><i class="bi bi-github"></i> GitHub</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="card project-card">
+<div class="card-body">
+<p><img src="assets/images/projects/hex-quarto-sciposter.png" class="project-hex img-fluid" alt="quarto-sciposter hex logo"></p>
+<p><span class="project-tag">Quarto Extension</span></p>
+<p><span class="card-title">quarto-sciposter</span></p>
+<p>Quarto extension for reproducible scientific conference posters, rendered with Typst. Poster size, columns, logos, figures, and references live in plain Quarto Markdown.</p>
+<div class="project-links">
+<p><a href="posts/2026-08-17-quarto-sciposter.html"><i class="bi bi-journal-text"></i> Post</a> <a href="https://github.com/chrischizinski/quarto-sciposter"><i class="bi bi-github"></i> GitHub</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="card project-card">
+<div class="card-body">
+<p><img src="assets/images/projects/hex-wildlife-dashboard.png" class="project-hex img-fluid" alt="Wildlife Dashboard hex logo showing a bald eagle, largemouth bass, and bighorn ram over a map of the United States"></p>
+<p><span class="project-tag">R Dashboard</span></p>
+<p><span class="card-title">Wildlife Dashboard</span></p>
 <p>Public trends dashboard tracking U.S. wildlife and natural resources graduate assistantship postings — salaries, timing, and geography.</p>
-<p><a href="https://github.com/chrischizinski/wildlife-grad-dashboard">GitHub →</a></p>
+<div class="project-links">
+<p><a href="https://chrischizinski.github.io/wildlife-grad-dashboard/"><i class="bi bi-globe"></i> Website</a> <a href="https://github.com/chrischizinski/wildlife-grad-dashboard"><i class="bi bi-github"></i> GitHub</a></p>
 </div>
 </div>
 </div>
-<div class="g-col-12 g-col-md-6">
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
 <div class="card project-card">
 <div class="card-body">
+<p><img src="assets/images/projects/hex-huntfishapp.png" class="project-hex img-fluid" alt="huntfishapp hex logo showing an elk and a leaping rainbow trout over rising charts"></p>
+<p><span class="project-tag">Shiny App</span></p>
 <p><span class="card-title">huntfishapp</span></p>
 <p>Web-based exploratory data analysis application for hunting, fishing, and outdoor recreation sales data.</p>
-<p><a href="https://github.com/chrischizinski/huntfishapp">GitHub →</a></p>
+<div class="project-links">
+<p><a href="https://chrischizinski.github.io/huntfishapp"><i class="bi bi-globe"></i> Website</a> <a href="https://github.com/chrischizinski/huntfishapp"><i class="bi bi-github"></i> GitHub</a></p>
 </div>
 </div>
 </div>
-<div class="g-col-12 g-col-md-6">
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
 <div class="card project-card">
 <div class="card-body">
+<p><img src="assets/images/projects/hex-pradel.svg" class="project-hex img-fluid" alt="pradel-jax hex logo"></p>
+<p><span class="project-tag">Python · JAX</span></p>
 <p><span class="card-title">pradel-jax</span></p>
 <p>Modern JAX-based optimization framework for Pradel capture–recapture models.</p>
-<p><a href="https://github.com/chrischizinski/pradel-jax">GitHub →</a></p>
+<div class="project-links">
+<p><a href="https://github.com/chrischizinski/pradel-jax"><i class="bi bi-github"></i> GitHub</a></p>
+</div>
 </div>
 </div>
 </div>
@@ -603,14 +661,14 @@ ul.task-list li input[type="checkbox"] {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Christopher Chizinski</p>
-</div>   
+      &nbsp;
+    </div>   
     <div class="nav-footer-center">
+<p><span class="footer-links"> <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu"><i class="bi bi-envelope"></i> Email</a> <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a> <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a> </span> <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span></p>
+</div>
+    <div class="nav-footer-right">
       &nbsp;
     </div>
-    <div class="nav-footer-right">
-<p>Built with <a href="https://quarto.org">Quarto</a></p>
-</div>
   </div>
 </footer>
 

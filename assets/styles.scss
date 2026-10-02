@@ -92,45 +92,6 @@ h3 { font-size: 1.28rem; }
   background: $water;
 }
 
-// ── About / hero (trestles) ──────────────────────────────────────────────
-.about-entity .about-image {
-  border-radius: $border-radius-lg;
-  border: 1px solid $sand;
-  box-shadow: 0 10px 30px -18px rgba($ink, 0.5);
-}
-.about-links {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
-  max-width: 22rem;
-}
-.about-links .about-link {
-  border: 1px solid $sand;
-  border-radius: $border-radius;
-  transition: border-color 0.15s ease, color 0.15s ease;
-  margin: 0;
-  justify-content: center;
-}
-@media (max-width: 400px) {
-  .about-links { grid-template-columns: 1fr; }
-}
-.about-links .about-link:hover {
-  border-color: $water;
-  color: $water;
-}
-
-// Bluesky butterfly: mask over the fallback bootstrap icon so it inherits color
-.about-links .about-link[href*="bsky.app"] i::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 568 501'%3E%3Cpath d='M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C9.945 203.66 0 75.293 0 57.947 0-28.906 76.135-1.611 123.121 33.664Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 568 501'%3E%3Cpath d='M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C9.945 203.66 0 75.293 0 57.947 0-28.906 76.135-1.611 123.121 33.664Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  vertical-align: -0.125em;
-}
-
 // ── Links ────────────────────────────────────────────────────────────────
 a {
   text-underline-offset: 0.18em;
@@ -210,6 +171,18 @@ pre.sourceCode {
   color: $water;
 }
 
+// ── Project stickers ───────────────────────────────────────────────────
+// The source image remains rectangular; crop it to the visible hex at display.
+.sciposter-hex {
+  clip-path: polygon(50% 1%, 96.5% 26%, 96.5% 74%, 50% 99%, 3.5% 74%, 3.5% 26%);
+  display: block;
+  margin: 1.5rem auto;
+  max-width: min(19rem, 80%);
+}
+.thumbnail-image[src*="quarto-sciposter-hex"] {
+  clip-path: polygon(50% 1%, 96.5% 26%, 96.5% 74%, 50% 99%, 3.5% 74%, 3.5% 26%);
+}
+
 // ── Project cards (grid on projects.qmd) ─────────────────────────────────
 .card.project-card {
   border: 1px solid $sand;
@@ -233,6 +206,76 @@ pre.sourceCode {
   content: "› ";
   color: $water;
 }
+// Hex logo at the top of each card.
+.card.project-card .project-hex {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin: 0.5rem auto 1.1rem;
+}
+.card.project-card .project-hex img {
+  width: 100%;
+  height: auto;
+}
+// Category tag — specimen-style pill at the top of each card.
+.card.project-card .project-tag {
+  align-self: flex-start;
+  display: inline-block;
+  font-family: $font-family-monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $water;
+  background: rgba($water, 0.08);
+  border: 1px solid rgba($water, 0.28);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  margin-bottom: 0.75rem;
+}
+// Thin accent along the top edge, brightening on hover.
+.card.project-card {
+  border-top: 2px solid rgba($water, 0.35);
+}
+.card.project-card:hover {
+  border-top-color: $water;
+}
+// Let the card body fill height so links can pin to the bottom.
+.card.project-card .card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+// Centered website / GitHub links pinned to the bottom of the card.
+// Pandoc wraps the links in a <p>, so make that the flex row.
+.project-links {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: 1px solid $sand;
+}
+.project-links p {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.75rem;
+  margin: 0;
+}
+.project-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: $font-family-monospace;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: $ink;
+  transition: color 0.15s ease;
+}
+.project-links a i {
+  color: $water;
+}
+.project-links a:hover {
+  color: $water;
+}
 
 // ── Footer ───────────────────────────────────────────────────────────────
 .nav-footer {
@@ -246,4 +289,317 @@ pre.sourceCode {
 #TOC .active, .sidebar nav a.active {
   color: $water !important;
   border-left-color: $water !important;
+}
+
+// ── Homepage ─────────────────────────────────────────────────────────────
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: center;
+  padding: 2.5rem 0 2.75rem;
+  border-bottom: 1px solid $ink;
+  box-shadow: 0 1px 0 0 $sand;   // double-hairline motif
+}
+.home-hero h1 {
+  font-size: clamp(2.4rem, 5.6vw, 4rem);
+  margin: 0.2rem 0 1rem;
+}
+.home-hero .hero-text p {
+  font-size: 1.15rem;
+  max-width: 34rem;
+}
+// Lead paragraph is large; the longer bio paragraphs after it are body size.
+.home-hero .hero-text h1 + p ~ p {
+  font-size: 1rem;
+  color: $ink;
+}
+.hero-tagline {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  color: $water;
+}
+.hero-photo img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  object-position: 50% 6%;   // keep the face in frame when cropping
+  border-radius: $border-radius-lg;
+  border: 1px solid $sand;
+  box-shadow: 0 18px 40px -24px rgba($ink, 0.55);
+}
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+.hero-photo .hero-links {
+  justify-content: center;
+}
+.hero-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid $sand;
+  border-radius: $border-radius;
+  font-family: $font-family-monospace;
+  font-size: 0.82rem;
+  text-decoration: none;
+  color: $ink;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.hero-links a:hover {
+  border-color: $water;
+  color: $water;
+}
+
+.home-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2.25rem 0 0.25rem;
+}
+.home-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.1rem 1.2rem 1.25rem;
+  background: #fff;
+  border: 1px solid $sand;
+  border-top: 2px solid rgba($water, 0.35);
+  border-radius: $border-radius-lg;
+  text-decoration: none;
+  color: $ink;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.home-tile:hover {
+  border-color: $water;
+  border-top-color: $water;
+  box-shadow: 0 14px 34px -22px rgba($ink, 0.55);
+  transform: translateY(-2px);
+  color: $ink;
+}
+.home-tile .specimen-label {
+  margin-bottom: 0.3rem;
+}
+.home-tile .tile-title {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+.home-tile .tile-desc {
+  font-size: 0.9rem;
+  color: $stone;
+}
+
+.home-section {
+  margin: 2.5rem 0;
+}
+.home-about p {
+  max-width: 44rem;
+}
+
+@media (max-width: 991px) {
+  .home-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .home-hero { grid-template-columns: 1fr; gap: 1.5rem; }
+  .hero-photo img { height: 240px; }
+  .hero-links { gap: 0.4rem; }
+  .hero-links a { font-size: 0.72rem; padding: 0.3rem 0.45rem; gap: 0.3rem; }
+}
+@media (max-width: 480px) {
+  .home-tiles { grid-template-columns: 1fr; }
+}
+
+// ── Blog card grid ───────────────────────────────────────────────────────
+.quarto-listing-container-grid .list.grid {
+  gap: 1.4rem;
+}
+.quarto-listing-container-grid a.quarto-grid-link {
+  text-decoration: none;
+  color: $ink;
+}
+.quarto-listing-container-grid .quarto-grid-item {
+  background: #fff;
+  border: 1px solid $sand;
+  border-top: 2px solid rgba($water, 0.35);
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.quarto-listing-container-grid a.quarto-grid-link:hover .quarto-grid-item {
+  border-color: $water;
+  border-top-color: $water;
+  box-shadow: 0 14px 34px -22px rgba($ink, 0.55);
+  transform: translateY(-2px);
+}
+.quarto-listing-container-grid .card-img-top {
+  margin: 0;
+  border-bottom: 1px solid $sand;
+  background: $sand;
+}
+.quarto-listing-container-grid .card-img-top img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.quarto-listing-container-grid .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.15rem 1.1rem;
+}
+.quarto-listing-container-grid .listing-title {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 1.18rem;
+  line-height: 1.25;
+  margin: 0;
+}
+.quarto-listing-container-grid .listing-reading-time,
+.quarto-listing-container-grid .listing-date {
+  font-family: $font-family-monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: $stone;
+}
+.quarto-listing-container-grid .listing-reading-time { order: -1; }   // eyebrow above title
+.quarto-listing-container-grid .card-attribution { margin-top: auto; }
+
+// Newest post spans the full row as a feature card (image left, text right).
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child {
+  grid-column: 1 / -1;
+}
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child .quarto-grid-item {
+  flex-direction: row;
+}
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child .card-img-top {
+  flex: 0 0 55%;
+  border-bottom: 0;
+  border-right: 1px solid $sand;
+}
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child .card-img-top img {
+  height: 100% !important;
+  min-height: 260px;
+}
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child .listing-title {
+  font-size: 1.7rem;
+}
+.quarto-listing-container-grid .list.grid > .g-col-1:first-child .card-body {
+  justify-content: center;
+  padding: 1.6rem 1.8rem;
+}
+@media (max-width: 767px) {
+  .quarto-listing-container-grid .list.grid > .g-col-1:first-child .quarto-grid-item {
+    flex-direction: column;
+  }
+  .quarto-listing-container-grid .list.grid > .g-col-1:first-child .card-img-top {
+    flex-basis: auto;
+    border-right: 0;
+    border-bottom: 1px solid $sand;
+  }
+  .quarto-listing-container-grid .list.grid > .g-col-1:first-child .card-img-top img {
+    height: 190px !important;
+    min-height: 0;
+  }
+}
+
+// ── Footer links ─────────────────────────────────────────────────────────
+.nav-footer .footer-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.25rem;
+}
+.nav-footer .footer-links a {
+  font-family: $font-family-monospace;
+  font-size: 0.78rem;
+  color: $stone;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.nav-footer .footer-links a:hover {
+  color: $water;
+}
+.nav-footer .footer-links i {
+  margin-right: 0.25rem;
+}
+// Two tidy rows: links on top, credit line below. Quarto still emits empty
+// left/right columns (&nbsp;); hide them so they don't stack up on mobile.
+.nav-footer .nav-footer-left,
+.nav-footer .nav-footer-right {
+  display: none;
+}
+.nav-footer .nav-footer-center {
+  text-align: center;
+  margin: 0;       // Quarto adds a ~36px top margin on mobile
+  min-height: 0;
+  padding: 0.4rem 0;
+}
+.nav-footer .nav-footer-center p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+}
+@media (max-width: 480px) {
+  // cap the width so five links wrap 3 + 2 rather than 4 + 1
+  .nav-footer .footer-links { gap: 0.4rem 0.9rem; max-width: 17rem; }
+  .nav-footer .footer-links a { font-size: 0.72rem; }
+}
+.nav-footer .footer-credit {
+  font-size: 0.8rem;
+  color: $stone;
+}
+
+// ── CV page ──────────────────────────────────────────────────────────────
+.cv-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.4rem 0 2rem;
+}
+.cv-links p {
+  display: contents;   // Pandoc wraps the buttons in a <p>; let them flex
+}
+.cv-glance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+.cv-card {
+  background: #fff;
+  border: 1px solid $sand;
+  border-top: 2px solid rgba($water, 0.35);
+  border-radius: $border-radius-lg;
+  padding: 1.2rem 1.4rem 1.3rem;
+}
+.cv-list {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.9rem 1rem;
+  margin: 0.4rem 0 0;
+}
+.cv-list dt {
+  font-family: $font-family-monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  font-weight: 400;
+  color: $stone;
+  padding-top: 0.2rem;
+}
+.cv-list dd {
+  margin: 0;
+  line-height: 1.4;
+}
+@media (max-width: 767px) {
+  .cv-glance { grid-template-columns: 1fr; }
+  .cv-list { grid-template-columns: 1fr; gap: 0.1rem; }
+  .cv-list dd { margin-bottom: 0.8rem; }
 }

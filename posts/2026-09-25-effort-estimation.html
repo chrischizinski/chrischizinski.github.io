@@ -6,9 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2014-08-24">
+<meta name="author" content="Christopher Chizinski">
+<meta name="dcterms.date" content="2026-09-25">
+<meta name="description" content="An instantaneous count measures anglers at one moment. A tidycreel 7.0.0 example shows how period length, survey strata, and sampled days turn those observations into angler-hours with uncertainty.">
 
-<title>Using geom_blank for better axis ranges in ggplot – Christopher Chizinski</title>
+<title>How an Instantaneous Count Becomes Angler-Hours – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -113,6 +115,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- Cloudflare Web Analytics -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -176,12 +207,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#plot-as-is" id="toc-plot-as-is" class="nav-link active" data-scroll-target="#plot-as-is">Plot as is</a>
-  <ul class="collapse">
-  <li><a href="#coord_cartesian" id="toc-coord_cartesian" class="nav-link" data-scroll-target="#coord_cartesian">coord_cartesian</a></li>
-  <li><a href="#expand_limits-and-scale_y_continuous" id="toc-expand_limits-and-scale_y_continuous" class="nav-link" data-scroll-target="#expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</a></li>
-  <li><a href="#geom_blank" id="toc-geom_blank" class="nav-link" data-scroll-target="#geom_blank">geom_blank</a></li>
-  </ul></li>
+  <li><a href="#a-count-and-an-effort-estimate-are-different-quantities" id="toc-a-count-and-an-effort-estimate-are-different-quantities" class="nav-link active" data-scroll-target="#a-count-and-an-effort-estimate-are-different-quantities">A count and an effort estimate are different quantities</a></li>
+  <li><a href="#keep-the-full-calendar-and-the-sampled-counts" id="toc-keep-the-full-calendar-and-the-sampled-counts" class="nav-link" data-scroll-target="#keep-the-full-calendar-and-the-sampled-counts">Keep the full calendar and the sampled counts</a></li>
+  <li><a href="#let-add_counts-establish-the-effort-unit" id="toc-let-add_counts-establish-the-effort-unit" class="nav-link" data-scroll-target="#let-add_counts-establish-the-effort-unit">Let <code>add_counts()</code> establish the effort unit</a></li>
+  <li><a href="#choose-the-population-the-estimate-should-represent" id="toc-choose-the-population-the-estimate-should-represent" class="nav-link" data-scroll-target="#choose-the-population-the-estimate-should-represent">Choose the population the estimate should represent</a></li>
+  <li><a href="#read-the-uncertainty-with-the-point-estimate" id="toc-read-the-uncertainty-with-the-point-estimate" class="nav-link" data-scroll-target="#read-the-uncertainty-with-the-point-estimate">Read the uncertainty with the point estimate</a></li>
+  <li><a href="#check-what-the-estimate-does-and-does-not-cover" id="toc-check-what-the-estimate-does-and-does-not-cover" class="nav-link" data-scroll-target="#check-what-the-estimate-does-and-does-not-cover">Check what the estimate does and does not cover</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -190,21 +222,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using geom_blank for better axis ranges in ggplot</h1>
+<h1 class="title">How an Instantaneous Count Becomes Angler-Hours</h1>
+<p class="subtitle lead">Estimating fishing effort across sampled days and the full survey period</p>
   <div class="quarto-categories">
+    <div class="quarto-category">tidycreel</div>
     <div class="quarto-category">rstats</div>
+    <div class="quarto-category">fisheries</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    An instantaneous count measures anglers at one moment. A tidycreel 7.0.0 example shows how period length, survey strata, and sampled days turn those observations into angler-hours with uncertainty.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Christopher Chizinski </p>
+          </div>
+  </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 24, 2014</p>
+      <p class="date">September 25, 2026</p>
     </div>
   </div>
   
@@ -216,80 +262,181 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The RMarkdown source to this file can be found <a href="\Rmd\2014-08-24-using_geom_blank.Rmd">here</a></p>
-<p>Using facet_wrap() in <strong>ggplot2</strong> is a great way to create multiple panelled plots. Though when I am running these, particularly on datasets with different scales, the axis are not as clean as I like. To provide an illustration of what I am referring to, I will make up some fake data with some different scales in the y values and then plot these in ggplot</p>
-<section id="plot-as-is" class="level2">
-<h2 class="anchored" data-anchor-id="plot-as-is">Plot as is</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140824</span>)</span>
+<p><img src="../assets/images/projects/tidycreel-effort-estimation.png" class="img-fluid" data-fig-cap="A count is a snapshot. The survey design determines the period and population that snapshot can represent. Illustration generated with ChatGPT." alt="Watercolor illustration of a creel clerk counting anglers from a lakeside overlook, beside a field-journal diagram that expands a point-in-time observation across a calendar and shows an estimate with an uncertainty interval."></p>
+<p>The <a href="../posts/2026-09-18-linked-tables.html">previous post</a> kept counts, interviews, catch, and biological observations in linked tables. With those pieces attached to the design, the next question is what they estimate.</p>
+<p>Effort comes first. A common mistake among people who are less familiar with creel surveys is to assume that effort comes from interviews because anglers report how long they have fished. In the instantaneous-count design discussed here, those reported hours help estimate catch or harvest per unit effort. They do not provide the total fishing pressure across the survey period.</p>
+<p>Counts provide the effort side of the calculation. Catch and harvest totals eventually combine a rate from interviews with fishing effort from counts. If the effort estimate has the wrong unit or represents the wrong period, every total built from it carries that problem forward.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>An instantaneous count records anglers present at one moment, not hours of fishing.</li>
+<li>Multiplying the count by the length of the period it represents converts the observation to angler-hours.</li>
+<li>The sampling calendar expands sampled days within their declared strata.</li>
+<li>A point estimate should travel with its standard error, confidence interval, unit, and target period.</li>
+</ul>
+</blockquote>
+<p>The example below uses <strong>tidycreel 7.0.0, “Goldeye”</strong>. It is deliberately small enough that we can follow each part of the expansion.</p>
+<section id="a-count-and-an-effort-estimate-are-different-quantities" class="level2">
+<h2 class="anchored" data-anchor-id="a-count-and-an-effort-estimate-are-different-quantities">A count and an effort estimate are different quantities</h2>
+<p>An instantaneous count answers a narrow question: <em>how many anglers were present when the count was made?</em> If 20 anglers are present at 10:15 a.m., the observation is 20 anglers. It is not 20 angler-hours and it is not the number of people who fished that day.</p>
+<p>The count becomes an estimate of effort only after it is connected to time. If the count was randomized within an eight-hour fishing period, the simple period estimate is:</p>
+<p><span class="math display">\[
+\widehat{E}_{d} = I_d T_d,
+\]</span></p>
+<p>where <span class="math inline">\(I_d\)</span> is the instantaneous angler count and <span class="math inline">\(T_d\)</span> is the length of the period in hours. A count of 20 anglers across an eight-hour period represents 160 angler-hours for that sampled day.</p>
+<p>That multiplication depends on the field design. The eight hours must describe the period over which the count was randomized and for which the snapshot is intended to be representative. It should not be added later merely because the survey crew worked an eight-hour shift.</p>
+<p>Multiple counts within a period add another step. They estimate the same stock of anglers at different moments, so they are averaged before multiplying by the period length. They are not summed as if each count found a new set of anglers. The longer treatment in <a href="https://modern-creel-surveys.netlify.app/chapters/12-effort-estimation.html"><em>Modern Creel Survey Analysis in R</em></a> works through that within-day case.</p>
+<p>The same logic carries those snapshots through to a monthly estimate:</p>
+<p><img src="../assets/images/projects/tidycreel-effort-flow.svg" class="img-fluid" data-fig-cap="Counts become daily effort only after the period length is applied. Daily estimates are then expanded within the calendar strata and added to obtain the monthly total. Uncertainty from repeated counts and sampled days travels through the same workflow." alt="Four-step flowchart showing three instantaneous angler counts averaged to a mean count, multiplied by an eight-hour period to estimate daily angler-hours, expanded separately within weekday and weekend calendar strata, and added into a monthly angler-hour estimate with a 95 percent confidence interval. A note identifies within-day and between-day sources of uncertainty."></p>
+</section>
+<section id="keep-the-full-calendar-and-the-sampled-counts" class="level2">
+<h2 class="anchored" data-anchor-id="keep-the-full-calendar-and-the-sampled-counts">Keep the full calendar and the sampled counts</h2>
+<p>This example covers June 1 through June 16. The full calendar defines ten weekdays and six weekend days. Counts were collected on five weekdays and three weekend days.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>## Use suppressPackageStartupMessages to eliminate package startup messages.</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First make up some data with different values for y with different scales</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>foo.dat<span class="ot">&lt;-</span><span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"A"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"B"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">3</span>)<span class="sc">+</span><span class="dv">20</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"C"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">5</span>)<span class="sc">+</span><span class="dv">30</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>foo.dat,<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">colour=</span>group),<span class="at">size=</span><span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group,<span class="at">scales=</span><span class="st">"free_y"</span>) <span class="sc">+</span> <span class="do">## using scales="free_y" allows the y-axis to vary while keeping x-axis constant among plots</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<section id="coord_cartesian" class="level3">
-<h3 class="anchored" data-anchor-id="coord_cartesian">coord_cartesian</h3>
-<p>When using a single panel or data that is all on the same scale, I frequently use <code>coord_cartesian</code>. Unfortunately when you have panels with different scales this is no longer as useful because it forces everything on the same scale (which depending on what you are looking at may not be bad).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>)) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-3.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dates <span class="ot">&lt;-</span> <span class="fu">seq</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.Date</span>(<span class="st">"2024-06-01"</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.Date</span>(<span class="st">"2024-06-16"</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="st">"day"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>calendar <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> dates,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">day_type =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.integer</span>(<span class="fu">format</span>(dates, <span class="st">"%u"</span>)) <span class="sc">&gt;=</span> <span class="dv">6</span>L,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"weekend"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"weekday"</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>sample_dates <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2024-06-03"</span>, <span class="st">"2024-06-05"</span>, <span class="st">"2024-06-07"</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2024-06-11"</span>, <span class="st">"2024-06-13"</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2024-06-01"</span>, <span class="st">"2024-06-08"</span>, <span class="st">"2024-06-15"</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>counts <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> sample_dates,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">day_type =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"weekday"</span>, <span class="dv">5</span>), <span class="fu">rep</span>(<span class="st">"weekend"</span>, <span class="dv">3</span>)),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_anglers =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">11</span>, <span class="dv">14</span>, <span class="dv">13</span>, <span class="dv">20</span>, <span class="dv">24</span>, <span class="dv">22</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">period_hours =</span> <span class="fu">rep</span>(<span class="dv">8</span>, <span class="dv">8</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The unsampled dates remain in <code>calendar</code>, even though they have no row in <code>counts</code>. That is the distinction introduced in the <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a>: the observations come from sampled days, while the calendar defines the population of days they can represent.</p>
+<p>Weekday and weekend also remain separate. Weekend counts are higher in this example, and weekends were sampled at a different rate. Pooling the days before expansion would let the composition of the sample, rather than the sampling design, determine the result.</p>
 </section>
-<section id="expand_limits-and-scale_y_continuous" class="level3">
-<h3 class="anchored" data-anchor-id="expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</h3>
-<p>Another option is to use <code>expand_limits()</code> to force each panel to start at the origin and then use <code>scale_y_continuous(expand=c(0,0))</code> to remove any extra space on around the y-axis limits. The two values in expand are c(multiplier buffer, additive buffer). By including a c(0,0) we are not including any buffer on the axis scale.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-4.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>As you can see in the above plot, using the combo of <code>expand_limits</code> and <code>scale_y_continuous(expand=c(0,0)</code> we can force the minimum to start at 0 but it max values are not as clean as I would like. This is where <code>geom_blank()</code> comes in. The purpose, according to the help files for <a href="http://docs.ggplot2.org/0.9.3.1/geom_blank.html"><code>geom_blank()</code></a> are to essentially draw nothing. When I first saw this, I was really baffled. Why would you not want something that drew nothing? I then realized the benefit of this in axis formatting.</p>
+<section id="let-add_counts-establish-the-effort-unit" class="level2">
+<h2 class="anchored" data-anchor-id="let-add_counts-establish-the-effort-unit">Let <code>add_counts()</code> establish the effort unit</h2>
+<p>The design connects the calendar to the count observations. The important argument here is <code>period_length_col</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  calendar,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> date,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> day_type</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_counts</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    counts,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">count_col =</span> n_anglers,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">period_length_col =</span> period_hours</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For each sampled date, <code>add_counts()</code> multiplies <code>n_anglers</code> by <code>period_hours</code>. It also records the resulting effort unit as angler-hours. That unit information matters later when an effort estimate is combined with a rate reported as fish per angler-hour.</p>
+<p>If <code>period_length_col</code> is omitted, tidycreel 7.0.0 warns that an instantaneous count has been expanded without a period length. The resulting sum is not an angler-hour estimate. The warning is worth stopping for because no downstream formatting can repair a missing time basis.</p>
+<p>This example uses one count per sampled day, which keeps the arithmetic visible. A survey with repeated counts should also supply <code>count_time_col</code> so tidycreel can average the within-period counts and retain their contribution to uncertainty.</p>
 </section>
-<section id="geom_blank" class="level3">
-<h3 class="anchored" data-anchor-id="geom_blank">geom_blank</h3>
-<p>The first thing to do, is to create a dataset with the mins and maxes of the y axis for each group level in our dataset. This is then passed to ggplot using <code>geom_blank</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blank_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">group =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>), <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">50</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_blank</span>(<span class="at">data =</span> blank_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>So we now have a plot with much cleaner y-axis ranges and plots that we can now present in public.</p>
+<section id="choose-the-population-the-estimate-should-represent" class="level2">
+<h2 class="anchored" data-anchor-id="choose-the-population-the-estimate-should-represent">Choose the population the estimate should represent</h2>
+<p><code>estimate_effort()</code> makes the reporting target explicit. Three calls show the progression from observed sample days to the full calendar period.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sampled_effort <span class="ot">&lt;-</span> <span class="fu">estimate_effort</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  design,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"sampled_days"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>effort_by_stratum <span class="ot">&lt;-</span> <span class="fu">estimate_effort</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  design,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> day_type,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"stratum_total"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>period_effort <span class="ot">&lt;-</span> <span class="fu">estimate_effort</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  design,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"period_total"</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The checked 7.0.0 example produces:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Target</th>
+<th style="text-align: left;">What it represents</th>
+<th style="text-align: right;">Estimate (angler-hours)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>sampled_days</code></td>
+<td style="text-align: left;">The eight days with counts</td>
+<td style="text-align: right;">1,008</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>stratum_total</code>, weekday</td>
+<td style="text-align: left;">All ten weekdays in the calendar</td>
+<td style="text-align: right;">960</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>stratum_total</code>, weekend</td>
+<td style="text-align: left;">All six weekend days in the calendar</td>
+<td style="text-align: right;">1,056</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>period_total</code></td>
+<td style="text-align: left;">All 16 calendar days, summed across strata</td>
+<td style="text-align: right;">2,016</td>
+</tr>
+</tbody>
+</table>
+<p>The sampled-day total is the sum of the eight daily effort estimates. The stratum totals first estimate mean daily effort within weekday and weekend, then multiply those means by the number of calendar days in each stratum. The period total adds the two stratum totals.</p>
+<p>In this small example, exactly half of the days were sampled, so the period total happens to be twice the sampled-day total. That shortcut will not usually work. Sampling fractions can differ among strata, period lengths can vary, and the full estimate must preserve those differences.</p>
+</section>
+<section id="read-the-uncertainty-with-the-point-estimate" class="level2">
+<h2 class="anchored" data-anchor-id="read-the-uncertainty-with-the-point-estimate">Read the uncertainty with the point estimate</h2>
+<p>Printing <code>period_effort</code> returns more than 2,016 angler-hours:</p>
+<pre class="text"><code>Method: Total
+Variance: Taylor linearization
+Confidence level: 95%
+Effort target: period_total
+Unit: angler-hours
+
+estimate    se se_between se_within ci_lower ci_upper     n
+    2016    56         56         0     1879     2153     8</code></pre>
+<p>The estimate is 2,016 angler-hours for the 16-day period. Its standard error is 56 angler-hours, and the 95% confidence interval runs from 1,879 to 2,153 angler-hours.</p>
+<p>Here, <code>se_between</code> equals the total standard error because there is only one count on each sampled day. There is no replication within a day from which to estimate moment-to-moment variation, so <code>se_within</code> is zero. Zero does not mean angler abundance was perfectly stable within each day. It means this design did not measure that component.</p>
+<p>With repeated count rounds, <code>se_within</code> can quantify within-day variation. Comparing it with <code>se_between</code> helps identify whether additional field effort would be better spent sampling more days or making more counts on days already selected.</p>
+</section>
+<section id="check-what-the-estimate-does-and-does-not-cover" class="level2">
+<h2 class="anchored" data-anchor-id="check-what-the-estimate-does-and-does-not-cover">Check what the estimate does and does not cover</h2>
+<p>Before reporting the result, I would ask:</p>
+<ul>
+<li>Does the calendar contain every day in the intended reporting period?</li>
+<li>Were the counts randomized within the periods named by <code>period_length_col</code>?</li>
+<li>Do the strata match the field sampling design rather than a grouping created after data collection?</li>
+<li>Are dates without counts known unsampled days, or are some missed visits or missing records?</li>
+<li>Does the output name the expected target and unit?</li>
+<li>Are the confidence interval and variance components reported with the point estimate?</li>
+</ul>
+<p>The estimate cannot extend beyond its frame. If the count route omitted part of the lake, the result represents the covered area unless an additional, defensible spatial expansion is part of the design. Likewise, a June calendar cannot support a summer-season total that includes July and August.</p>
+<p>This is why <code>check_completeness(design)</code> is a diagnostic rather than an automatic decision maker. It can identify calendar dates without counts. The survey record must tell us whether those dates were intentionally unsampled, missed in the field, or lost during data handling.</p>
+<p>An instantaneous count is only a snapshot. The period length gives it a time unit, the calendar gives it a population of days, and stratification controls how sampled days represent that population. <code>estimate_effort()</code> keeps those pieces together and returns the uncertainty needed to interpret the total.</p>
+<p>The <a href="../posts/2026-10-02-catch-harvest-release.html">next post combines effort with interview-based rates to estimate total catch, harvest, and release</a>. That multiplication is meaningful only when the rate and effort describe compatible anglers, places, periods, and units.</p>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<ul>
+<li>Pollock, K. H., C. M. Jones, and T. L. Brown. 1994. <a href="https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf"><em>Angler survey methods and their applications in fisheries management</em></a>. American Fisheries Society Special Publication 25, Bethesda, Maryland.</li>
+</ul>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

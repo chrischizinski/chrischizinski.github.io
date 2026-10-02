@@ -6,9 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2014-08-24">
+<meta name="dcterms.date" content="2026-08-27">
+<meta name="description" content="A practical introduction to the tidycreel design object and the role of tidycreel.connect in a reproducible creel-survey workflow.">
 
-<title>Using geom_blank for better axis ranges in ggplot – Christopher Chizinski</title>
+<title>Start with the design object – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -176,12 +177,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#plot-as-is" id="toc-plot-as-is" class="nav-link active" data-scroll-target="#plot-as-is">Plot as is</a>
-  <ul class="collapse">
-  <li><a href="#coord_cartesian" id="toc-coord_cartesian" class="nav-link" data-scroll-target="#coord_cartesian">coord_cartesian</a></li>
-  <li><a href="#expand_limits-and-scale_y_continuous" id="toc-expand_limits-and-scale_y_continuous" class="nav-link" data-scroll-target="#expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</a></li>
-  <li><a href="#geom_blank" id="toc-geom_blank" class="nav-link" data-scroll-target="#geom_blank">geom_blank</a></li>
-  </ul></li>
+  <li><a href="#the-design-object-is-where-analysis-begins" id="toc-the-design-object-is-where-analysis-begins" class="nav-link active" data-scroll-target="#the-design-object-is-where-analysis-begins">The design object is where analysis begins</a></li>
+  <li><a href="#why-the-schedule-belongs-in-the-analysis" id="toc-why-the-schedule-belongs-in-the-analysis" class="nav-link" data-scroll-target="#why-the-schedule-belongs-in-the-analysis">Why the schedule belongs in the analysis</a></li>
+  <li><a href="#the-design-object-also-makes-error-checking-more-useful" id="toc-the-design-object-also-makes-error-checking-more-useful" class="nav-link" data-scroll-target="#the-design-object-also-makes-error-checking-more-useful">The design object also makes error checking more useful</a></li>
+  <li><a href="#where-tidycreel.connect-fits" id="toc-where-tidycreel.connect-fits" class="nav-link" data-scroll-target="#where-tidycreel.connect-fits">Where tidycreel.connect fits</a></li>
+  <li><a href="#a-runnable-walkthrough" id="toc-a-runnable-walkthrough" class="nav-link" data-scroll-target="#a-runnable-walkthrough">A runnable walkthrough</a></li>
+  <li><a href="#a-useful-habit-before-estimating-anything" id="toc-a-useful-habit-before-estimating-anything" class="nav-link" data-scroll-target="#a-useful-habit-before-estimating-anything">A useful habit before estimating anything</a></li>
   </ul>
 </nav>
     </div>
@@ -190,12 +191,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using geom_blank for better axis ranges in ggplot</h1>
+<h1 class="title">Start with the design object</h1>
+<p class="subtitle lead">How tidycreel connects a creel survey to an analysis</p>
   <div class="quarto-categories">
+    <div class="quarto-category">tidycreel</div>
     <div class="quarto-category">rstats</div>
+    <div class="quarto-category">fisheries</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    A practical introduction to the tidycreel design object and the role of tidycreel.connect in a reproducible creel-survey workflow.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -204,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 24, 2014</p>
+      <p class="date">August 27, 2026</p>
     </div>
   </div>
   
@@ -216,80 +225,119 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The RMarkdown source to this file can be found <a href="\Rmd\2014-08-24-using_geom_blank.Rmd">here</a></p>
-<p>Using facet_wrap() in <strong>ggplot2</strong> is a great way to create multiple panelled plots. Though when I am running these, particularly on datasets with different scales, the axis are not as clean as I like. To provide an illustration of what I am referring to, I will make up some fake data with some different scales in the y values and then plot these in ggplot</p>
-<section id="plot-as-is" class="level2">
-<h2 class="anchored" data-anchor-id="plot-as-is">Plot as is</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140824</span>)</span>
+<p>When I start looking at a creel survey, I usually have more than one table in front of me. There is a sampling schedule, a table of angler counts, interview records, and often a separate table for catch or lengths. Each table tells part of the story. None of them, by itself, defines the survey.</p>
+<p>That distinction matters. A count of 25 anglers has a different meaning if it came from a sampled weekend day than if it came from an opportunistic visit on a Tuesday afternoon. Likewise, an interview record is not enough to estimate catch or harvest unless we retain the design that produced it.</p>
+<p>This is the problem that the <code>creel_design</code> object in <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> is meant to solve. It keeps the survey structure and its observation tables together so that the estimation step can use the same design information that guided field sampling.</p>
+<section id="the-design-object-is-where-analysis-begins" class="level2">
+<h2 class="anchored" data-anchor-id="the-design-object-is-where-analysis-begins">The design object is where analysis begins</h2>
+<p>It is tempting to think that the analysis begins when the first estimator is called. I think it begins earlier, when we state what was sampled, how it was stratified, and what each observation represents.</p>
+<p>For a straightforward instantaneous-count survey, the smallest useful example looks like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>## Use suppressPackageStartupMessages to eliminate package startup messages.</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First make up some data with different values for y with different scales</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>foo.dat<span class="ot">&lt;-</span><span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"A"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"B"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">3</span>)<span class="sc">+</span><span class="dv">20</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"C"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">5</span>)<span class="sc">+</span><span class="dv">30</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>foo.dat,<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">colour=</span>group),<span class="at">size=</span><span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group,<span class="at">scales=</span><span class="st">"free_y"</span>) <span class="sc">+</span> <span class="do">## using scales="free_y" allows the y-axis to vary while keeping x-axis constant among plots</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<section id="coord_cartesian" class="level3">
-<h3 class="anchored" data-anchor-id="coord_cartesian">coord_cartesian</h3>
-<p>When using a single panel or data that is all on the same scale, I frequently use <code>coord_cartesian</code>. Unfortunately when you have panels with different scales this is no longer as useful because it forces everything on the same scale (which depending on what you are looking at may not be bad).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>)) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-3.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The calendar says which days belong to each stratum.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  example_calendar,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> date,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> day_type</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># The count table supplies the observations made on sampled days.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">add_counts</span>(design, example_counts)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># `design` now carries both the sampling structure and the count data.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>design</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>creel_design()</code> does not estimate anything. It creates an object that records the survey’s calendar, date field, strata, and survey type. <code>add_counts()</code> then attaches the count observations and uses the design information to establish the sampling structure needed downstream. The result is still an ordinary R object, but it has an important job: it keeps the design logic from being recreated, and possibly recreated differently, every time we estimate effort, catch, or a rate.</p>
+<p>This is particularly helpful for graduate students learning design-based inference. You do not need to start by writing the machinery that connects strata, sampling units, and weights. You do need to be able to explain those parts of your own survey. The package asks for that information in terms that look like a creel survey: calendar, date, strata, counts, interviews, catch, and lengths.</p>
 </section>
-<section id="expand_limits-and-scale_y_continuous" class="level3">
-<h3 class="anchored" data-anchor-id="expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</h3>
-<p>Another option is to use <code>expand_limits()</code> to force each panel to start at the origin and then use <code>scale_y_continuous(expand=c(0,0))</code> to remove any extra space on around the y-axis limits. The two values in expand are c(multiplier buffer, additive buffer). By including a c(0,0) we are not including any buffer on the axis scale.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-4.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>As you can see in the above plot, using the combo of <code>expand_limits</code> and <code>scale_y_continuous(expand=c(0,0)</code> we can force the minimum to start at 0 but it max values are not as clean as I would like. This is where <code>geom_blank()</code> comes in. The purpose, according to the help files for <a href="http://docs.ggplot2.org/0.9.3.1/geom_blank.html"><code>geom_blank()</code></a> are to essentially draw nothing. When I first saw this, I was really baffled. Why would you not want something that drew nothing? I then realized the benefit of this in axis formatting.</p>
+<section id="why-the-schedule-belongs-in-the-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-schedule-belongs-in-the-analysis">Why the schedule belongs in the analysis</h2>
+<p>In many projects the schedule is treated as paperwork that can be set aside once the field season is over. I prefer to treat it as data. It tells us the available days, the strata, and which opportunities to sample were actually selected.</p>
+<p>That is why the calendar is the starting point for a design object. The count table tells us what was observed. The calendar tells us what those observations need to represent. If a weekday and a weekend are separate strata in the field, they should remain separate in the object used for estimation unless there is a defensible reason to combine them.</p>
+<p>The same idea carries into interviews and catch. As the analysis grows, the design object can be extended with <code>add_interviews()</code>, <code>add_catch()</code>, and <code>add_lengths()</code>. Those additions do not turn a pile of tables into a black box. They make the links between the tables explicit and allow the later functions to check that the pieces make sense together.</p>
 </section>
-<section id="geom_blank" class="level3">
-<h3 class="anchored" data-anchor-id="geom_blank">geom_blank</h3>
-<p>The first thing to do, is to create a dataset with the mins and maxes of the y axis for each group level in our dataset. This is then passed to ggplot using <code>geom_blank</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blank_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">group =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>), <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">50</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_blank</span>(<span class="at">data =</span> blank_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>So we now have a plot with much cleaner y-axis ranges and plots that we can now present in public.</p>
+<section id="the-design-object-also-makes-error-checking-more-useful" class="level2">
+<h2 class="anchored" data-anchor-id="the-design-object-also-makes-error-checking-more-useful">The design object also makes error checking more useful</h2>
+<p>The design object supports two different kinds of error checking. They use the same survey context, but they have different jobs.</p>
+<p><strong>Automatic guardrails</strong> run under the hood when you create or extend a design object, and again when an estimator needs a particular piece of information. They are there to stop an analysis before an assumption is silently violated. For example, <code>creel_design()</code> requires the selected date to be a real <code>Date</code> with no missing values and strata to be usable categories. <code>add_counts()</code> can catch ambiguous repeated sampling units or information that would make a count or its variance hard to interpret. Other survey types bring their own checks: a bus-route design, for example, verifies its inclusion probabilities. These are not optional data-cleaning suggestions; they protect the weights, expansions, units, and variance calculations the estimator will use.</p>
+<p><strong>Diagnostic tools for the analyst</strong> are the checks you run deliberately to understand the data and decide what to do next. <code>validation_report()</code> is a table-level diagnostic that reports column types and flags missingness, implausible dates, negative numeric values, empty text values, and—when a species field is supplied—unmatched species names. It does not decide whether a flagged value should be deleted or changed; it gives the analyst a concise record to investigate.</p>
+<p><code>check_completeness()</code> is the design-aware companion diagnostic. After data are attached, it compares the observed tables with the calendar held by the design object and can identify scheduled days with no count data and strata with too few interviews for a dependable rate estimate. In other words, it asks not only, “Is this cell blank?” but also, “What was supposed to have been sampled here, and what does its absence mean?”</p>
+<p>Here is a useful diagnostic sequence before estimation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the incoming tables; investigate any flags.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">validation_report</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> counts,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">interviews =</span> interviews,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">species_col =</span> <span class="st">"species"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the calendar in the completed design to assess coverage.</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(<span class="at">calendar =</span> schedule, <span class="at">date =</span> date, <span class="at">strata =</span> day_type) <span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_counts</span>(<span class="at">counts =</span> counts) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_interviews</span>(<span class="at">interviews =</span> interviews)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">check_completeness</span>(design)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The distinction matters because neither kind of checking substitutes for a field biologist’s judgment. A flagged long trip may be a data-entry error, or it may be the most informative trip in the dataset. The guardrails prevent invalid analysis states; the diagnostic tools surface questions that require an informed decision before a result is reported.</p>
+</section>
+<section id="where-tidycreel.connect-fits" class="level2">
+<h2 class="anchored" data-anchor-id="where-tidycreel.connect-fits">Where tidycreel.connect fits</h2>
+<p>Most agencies do not export a dataset with the exact variable names used in an R package. The interview identifier might be <code>InterviewID</code>; the date might be <code>SurveyDate</code>; effort might be <code>HoursFished</code>. That is normal. The problem comes when those translations happen informally in several scripts or, worse, by hand.</p>
+<p><a href="https://github.com/chrischizinski/tidycreel/tree/main/tidycreel.connect"><code>tidycreel.connect</code></a> is the layer I use before building the design object. It connects to CSV files, a SQL Server database, or a REST API; applies an explicit column map; and returns tables with the canonical names expected by <code>tidycreel</code>.</p>
+<p>Here is the basic CSV pattern. In a real project, the schema would document the names used by that agency’s export.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel.connect)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>schema <span class="ot">&lt;-</span> <span class="fu">creel_schema</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">survey_type =</span> <span class="st">"instantaneous"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">interview_uid_col =</span> <span class="st">"InterviewID"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">date_col =</span> <span class="st">"SurveyDate"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">effort_col =</span> <span class="st">"HoursFished"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">trip_status_col =</span> <span class="st">"TripStatus"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">bank_anglers_col =</span> <span class="st">"BankAnglers"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">angler_boats_col =</span> <span class="st">"AnglerBoats"</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>conn <span class="ot">&lt;-</span> <span class="fu">creel_connect</span>(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="fu">list</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">interviews =</span> <span class="st">"data/interviews.csv"</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">counts =</span> <span class="st">"data/counts.csv"</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">schema =</span> schema</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>interviews <span class="ot">&lt;-</span> <span class="fu">fetch_interviews</span>(conn)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>counts <span class="ot">&lt;-</span> <span class="fu">fetch_counts</span>(conn)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The connection does not decide how the survey was designed. It performs the translation so that the analysis does not depend on whatever a particular database or spreadsheet happened to call a field. The sampling schedule remains an explicit input, and the fetched tables become the observation inputs. From there, the workflow becomes much easier to read:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">calendar =</span> schedule,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> date,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> day_type</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">add_counts</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  design,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> counts,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">count_col =</span> bank_anglers,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">count_time_col =</span> count_time</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The important point is not that every project must use a database connection. Many projects will begin with a folder of CSV files. The point is that the translation from agency data to analysis data should be declared once, inspected, and reused. That makes a handoff to a colleague, a new field season, or a future version of yourself much less fragile.</p>
+</section>
+<section id="a-runnable-walkthrough" class="level2">
+<h2 class="anchored" data-anchor-id="a-runnable-walkthrough">A runnable walkthrough</h2>
+<p>If you would rather learn by running a complete example, I have also prepared a <a href="../assets/code/tidycreel_walkthrough.R" download="">one-hour tidycreel walkthrough</a> that you can download and open in RStudio. It moves from planning a survey and building a schedule through validation, effort, catch, biological data, plots, and export. The script is deliberately more expansive than this post: use it as a guided tour, and return here when you want the reasoning behind the design object.</p>
+</section>
+<section id="a-useful-habit-before-estimating-anything" class="level2">
+<h2 class="anchored" data-anchor-id="a-useful-habit-before-estimating-anything">A useful habit before estimating anything</h2>
+<p>Before running an estimator, I would ask four questions:</p>
+<ul>
+<li>What are my sampling units?</li>
+<li>What are my strata, and why do they belong in the design?</li>
+<li>Which table contains the observation, and which table describes what it represents?</li>
+<li>Can another analyst see how my agency fields became the variables in the analysis?</li>
+</ul>
+<p>If those answers are clear, the design object becomes more than a programming convenience. It is a compact, inspectable record of the survey logic. If they are not clear, changing estimators rarely fixes the underlying problem.</p>
+<p>The <a href="https://chrischizinski.com/tidycreel/">tidycreel reference site</a> has the function-level details. The chapter <a href="https://modern-creel-surveys.netlify.app/building-a-creel-design-object.html">Building a Creel Design Object</a> in <em>Modern Creel Survey Analysis in R</em> walks through a fuller example, including interviews and species-level catch. The companion chapter on <a href="https://modern-creel-surveys.netlify.app/creel-connect.html">tidycreel.connect</a> shows the connection workflow in more detail.</p>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">next post looks more closely at the sampling calendar</a> and why it needs to survive all the way to the final estimate. The later <a href="../posts/2026-09-18-linked-tables.html">linked-tables tutorial</a> returns to the same design object once counts, interviews, catch, and biological observations are attached.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

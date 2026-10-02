@@ -2,7 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://chrischizinski.com/projects.html</loc>
-    <lastmod>2026-07-19T18:44:38.494Z</lastmod>
+    <lastmod>2026-10-02T17:34:06.234Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-09-25-effort-estimation.html</loc>
+    <lastmod>2026-10-02T14:21:14.674Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-09-11-roving-interviews.html</loc>
+    <lastmod>2026-09-18T14:39:20.033Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-09-01-what-were-working-on-in-tidycreel.html</loc>
+    <lastmod>2026-09-18T14:39:19.858Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-08-18-introducing-tidycreel.html</loc>
+    <lastmod>2026-10-02T14:21:14.652Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-07-26-rmd2qmd.html</loc>
+    <lastmod>2026-07-26T14:03:58.703Z</lastmod>
   </url>
   <url>
     <loc>https://chrischizinski.com/posts/2014-11-24-adonis.html</loc>
@@ -26,15 +46,15 @@
   </url>
   <url>
     <loc>https://chrischizinski.com/cv.html</loc>
-    <lastmod>2026-07-19T18:37:03.237Z</lastmod>
+    <lastmod>2026-10-02T17:34:06.233Z</lastmod>
   </url>
   <url>
     <loc>https://chrischizinski.com/blog.html</loc>
-    <lastmod>2026-07-19T18:37:03.237Z</lastmod>
+    <lastmod>2026-10-02T17:34:06.233Z</lastmod>
   </url>
   <url>
     <loc>https://chrischizinski.com/index.html</loc>
-    <lastmod>2026-07-19T19:06:26.036Z</lastmod>
+    <lastmod>2026-10-02T17:34:06.234Z</lastmod>
   </url>
   <url>
     <loc>https://chrischizinski.com/posts/2014-04-08-models-by-variable.html</loc>
@@ -55,5 +75,25 @@
   <url>
     <loc>https://chrischizinski.com/posts/2015-05-08-shinyschedule.html</loc>
     <lastmod>2026-07-19T18:37:03.241Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-08-17-quarto-sciposter.html</loc>
+    <lastmod>2026-08-19T16:41:17.577Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-08-27-design-object.html</loc>
+    <lastmod>2026-09-18T14:39:19.758Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-09-03-sampling-calendar.html</loc>
+    <lastmod>2026-09-18T14:39:19.934Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-09-18-linked-tables.html</loc>
+    <lastmod>2026-09-18T14:18:40.489Z</lastmod>
+  </url>
+  <url>
+    <loc>https://chrischizinski.com/posts/2026-10-02-catch-harvest-release.html</loc>
+    <lastmod>2026-10-02T14:20:19.321Z</lastmod>
   </url>
 </urlset>

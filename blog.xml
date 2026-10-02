@@ -9,8 +9,2535 @@
 <link>https://chrischizinski.com/blog.html</link>
 <atom:link href="https://chrischizinski.com/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Human dimensions of wildlife &amp; fisheries — research, code, and R notes.</description>
-<generator>quarto-1.9.38</generator>
-<lastBuildDate>Fri, 08 May 2015 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.10.18</generator>
+<lastBuildDate>Fri, 02 Oct 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>From Angler-Hours to Fish: Estimating Catch, Harvest, and Release</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-10-02-catch-harvest-release.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-fish-totals-v2.png" class="img-fluid" data-fig-cap="Counts estimate fishing effort. Interviews estimate fish per unit of effort. A total needs both. Illustration generated with ChatGPT." alt="Overhead watercolor illustration of an open fisheries field notebook on a wooden table. Bluegill drawings represent catch, fish kept beside a cooler, and a fish released into water. Tally marks, an interview sheet, and a mechanical counter surround the notebook as an analyst records observations."></p>
+<p>The <a href="../posts/2026-09-25-effort-estimation.html">previous post</a> turned instantaneous counts into angler-hours. That answers how much fishing occurred across the survey period. To estimate how many fish were caught, kept, or released, we need the other side of the calculation: a rate from interviews.</p>
+<p>The arithmetic looks simple. Multiply angler-hours by fish per angler-hour and the hours cancel, leaving fish. The harder question is whether those two estimates describe the same anglers, places, and periods.</p>
+<p>That question matters even in a small weekday/weekend design. If weekend anglers catch fish at a higher rate, a sample with many weekend interviews can produce a pooled rate that does not match the distribution of fishing effort.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Counts supply total effort; interviews supply catch, harvest, and release rates.</li>
+<li>Match each rate to the effort for its survey stratum, then add the products.</li>
+<li>Specify the full-period target when that is the total you want to report.</li>
+<li>Carry uncertainty from both components into the fish total.</li>
+</ul>
+</blockquote>
+<p>This example uses <strong>tidycreel 7.0.0, “Goldeye”</strong>, and simulated observations. You can <a href="../assets/code/tidycreel_fish_totals.R" download="tidycreel_fish_totals.R">download the complete R example</a> to run the calculation from start to finish.</p>
+<section id="catch-harvest-and-release-describe-different-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="catch-harvest-and-release-describe-different-outcomes">Catch, harvest, and release describe different outcomes</h2>
+<p>Here, catch includes every fish caught. Harvest counts the fish kept, and release counts the fish returned to the water. The example records both outcomes for one species, bluegill.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: left;">Interview information</th>
+<th style="text-align: left;">Rate unit</th>
+<th style="text-align: left;">Expanded total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Catch</td>
+<td style="text-align: left;">All fish caught</td>
+<td style="text-align: left;">Fish per angler-hour</td>
+<td style="text-align: left;">Fish caught</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harvest</td>
+<td style="text-align: left;">Fish kept</td>
+<td style="text-align: left;">Fish per angler-hour</td>
+<td style="text-align: left;">Fish harvested</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Release</td>
+<td style="text-align: left;">Fish released</td>
+<td style="text-align: left;">Fish per angler-hour</td>
+<td style="text-align: left;">Fish released</td>
+</tr>
+</tbody>
+</table>
+<p>These are estimates of fishing outcomes. A release total does not estimate post-release mortality, and a catch total does not count unique individual fish if a fish can be caught more than once.</p>
+<p>The <a href="../posts/2026-09-11-roving-interviews.html">roving-interview post</a> explained why the interview protocol determines the rate estimator. This example uses completed access-point trips and ratio-of-means rates: fish reported by the interview sample divided by its angler-hours, with the survey design supplying the weights.</p>
+<p>An access-point example does not change how roving observations should be analyzed. Preserve the interview type and trip information collected in the field when building your own design.</p>
+</section>
+<section id="start-with-the-same-effort-design" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-the-same-effort-design">Start with the same effort design</h2>
+<p>We keep the June 1–16 calendar from the effort post. It contains ten weekdays and six weekend days, with counts on five weekdays and three weekend days. Each count represents an eight-hour fishing period.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-01"</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-16"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"day"</span>)</span>
+<span id="cb1-4">calendar <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb1-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> dates,</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">day_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ifelse</span>(</span>
+<span id="cb1-7">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.integer</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">format</span>(dates, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"%u"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>L,</span>
+<span id="cb1-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekend"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span></span>
+<span id="cb1-9">  )</span>
+<span id="cb1-10">)</span>
+<span id="cb1-11"></span>
+<span id="cb1-12">sample_dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(</span>
+<span id="cb1-13">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-03"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-05"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-07"</span>,</span>
+<span id="cb1-14">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-11"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-13"</span>,</span>
+<span id="cb1-15">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-01"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-08"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-15"</span></span>
+<span id="cb1-16">))</span>
+<span id="cb1-17">counts <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb1-18">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> sample_dates,</span>
+<span id="cb1-19">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">day_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekend"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)),</span>
+<span id="cb1-20">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_anglers =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">13</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">24</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>),</span>
+<span id="cb1-21">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">period_hours =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span></span>
+<span id="cb1-22">)</span></code></pre></div></div>
+<p>Keeping the full calendar preserves the reporting population established in the <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a>. The checked effort estimates remain <strong>960 weekday angler-hours</strong> and <strong>1,056 weekend angler-hours</strong>, totaling 2,016 angler-hours.</p>
+</section>
+<section id="attach-interviews-and-the-two-catch-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="attach-interviews-and-the-two-catch-outcomes">Attach interviews and the two catch outcomes</h2>
+<p>The interview sample contains ten weekday trips and thirty weekend trips. Every trip is complete and represents one angler fishing for two hours. The different numbers of interviews deliberately make the interview mix different from the effort mix.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">interviews <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb2-2">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_id =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sprintf</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"trip-%02d"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">40</span>),</span>
+<span id="cb2-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(sample_dates, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">times =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))),</span>
+<span id="cb2-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">day_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekend"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>)),</span>
+<span id="cb2-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">hours_fished =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>,</span>
+<span id="cb2-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_anglers =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>L,</span>
+<span id="cb2-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_status =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"complete"</span>,</span>
+<span id="cb2-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_total =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>))</span>
+<span id="cb2-9">)</span>
+<span id="cb2-10">interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_kept <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">floor</span>(interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_total <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb2-11"></span>
+<span id="cb2-12">catch <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rbind</span>(</span>
+<span id="cb2-13">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb2-14">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_id =</span> interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>interview_id,</span>
+<span id="cb2-15">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bluegill"</span>,</span>
+<span id="cb2-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count =</span> interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_kept,</span>
+<span id="cb2-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"harvested"</span></span>
+<span id="cb2-18">  ),</span>
+<span id="cb2-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb2-20">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_id =</span> interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>interview_id,</span>
+<span id="cb2-21">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bluegill"</span>,</span>
+<span id="cb2-22">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count =</span> interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_total <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> interviews<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_kept,</span>
+<span id="cb2-23">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"released"</span></span>
+<span id="cb2-24">  )</span>
+<span id="cb2-25">)</span>
+<span id="cb2-26"></span>
+<span id="cb2-27">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(calendar, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(</span>
+<span id="cb2-29">    counts,</span>
+<span id="cb2-30">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_col =</span> n_anglers,</span>
+<span id="cb2-31">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">period_length_col =</span> period_hours</span>
+<span id="cb2-32">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-33">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_interviews</span>(</span>
+<span id="cb2-34">    interviews,</span>
+<span id="cb2-35">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch =</span> catch_total,</span>
+<span id="cb2-36">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">effort =</span> hours_fished,</span>
+<span id="cb2-37">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">harvest =</span> catch_kept,</span>
+<span id="cb2-38">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_status =</span> trip_status,</span>
+<span id="cb2-39">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_duration =</span> hours_fished,</span>
+<span id="cb2-40">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_anglers =</span> n_anglers,</span>
+<span id="cb2-41">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"access"</span></span>
+<span id="cb2-42">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-43">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_catch</span>(</span>
+<span id="cb2-44">    catch,</span>
+<span id="cb2-45">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_uid =</span> interview_id,</span>
+<span id="cb2-46">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_uid =</span> interview_id,</span>
+<span id="cb2-47">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> species,</span>
+<span id="cb2-48">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count =</span> count,</span>
+<span id="cb2-49">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_type =</span> catch_type</span>
+<span id="cb2-50">  )</span></code></pre></div></div>
+<p>The <a href="../posts/2026-09-18-linked-tables.html">linked-tables post</a> introduced this connection: catch records link to interviews through <code>interview_id</code>. Here, <code>add_interviews()</code> supplies catch and harvest totals for each trip; the linked catch table supplies the release records used by the release estimator. <code>harvested</code> and <code>released</code> are the catch-type labels accepted here.</p>
+<p>Eight interviews report zero catch. We keep them because their fishing time belongs in the rate denominator. Removing unsuccessful trips would change the question to how well anglers did <em>conditional on catching something</em>.</p>
+<p>This teaching example assumes equal interview selection probabilities within each stratum. The package reports that assumption because no interview weights were supplied. It also flags zero catch and the small weekday sample; these observations are intentional, and the example is not a sample-size recommendation.</p>
+</section>
+<section id="multiply-within-strata-then-add-the-totals" class="level2">
+<h2 class="anchored" data-anchor-id="multiply-within-strata-then-add-the-totals">Multiply within strata, then add the totals</h2>
+<p>For a stratified survey, the total is a sum of matched products:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cwidehat%7BC%7D%20=%20%5Csum_h%20%5Cwidehat%7BE%7D_h%5Cwidehat%7Br%7D_%7BC,h%7D,%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?h"> identifies a survey stratum, <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BE%7D_h"> is its effort estimate, and <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7Br%7D_%7BC,h%7D"> is its catch rate. Replacing the catch rate with the harvest or release rate gives the corresponding total.</p>
+<p>Inspect the rates before estimating those totals:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_catch_rate</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> day_type)</span>
+<span id="cb3-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_harvest_rate</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> day_type)</span>
+<span id="cb3-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_release_rate</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> day_type)</span></code></pre></div></div>
+<p>The checked point estimates are:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Stratum</th>
+<th style="text-align: right;">Effort (angler-hours)</th>
+<th style="text-align: right;">Catch rate</th>
+<th style="text-align: right;">Harvest rate</th>
+<th style="text-align: right;">Release rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Weekday</td>
+<td style="text-align: right;">960</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weekend</td>
+<td style="text-align: right;">1,056</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0</td>
+</tr>
+</tbody>
+</table>
+<p>All three rates are in fish per angler-hour. Weekday catch is therefore <img src="https://latex.codecogs.com/png.latex?960%20%5Ctimes%201%20=%20960"> fish; weekend catch is <img src="https://latex.codecogs.com/png.latex?1%7B,%7D056%20%5Ctimes%202%20=%202%7B,%7D112"> fish. Adding them gives <strong>3,072 fish caught</strong> across the full period.</p>
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-fish-totals-flow.svg" class="img-fluid" data-fig-cap="Match effort and rate within each stratum before adding the products. The same calculation applies to harvest and release." alt="Two-row diagram matching 960 weekday angler-hours to a catch rate of 1 fish per angler-hour for 960 fish, and 1,056 weekend angler-hours to a rate of 2 for 2,112 fish. The matched products add to 3,072 fish caught. Uncertainty from effort and rates accompanies the total."></p>
+<p>A pooled interview rate gives a different answer. The forty trips report 140 fish over 80 angler-hours, or 1.75 fish per angler-hour. Multiplying that rate by 2,016 angler-hours would give <strong>3,528 fish</strong>.</p>
+<p>The pooled rate gives weekend trips three quarters of the interview effort. Weekends account for only about half of the estimated period effort. Multiplying within strata preserves that distinction. In this standard stratified workflow, tidycreel’s total functions perform the stratum products internally even when the requested output is a single period-total row.</p>
+</section>
+<section id="request-the-full-period-totals-explicitly" class="level2">
+<h2 class="anchored" data-anchor-id="request-the-full-period-totals-explicitly">Request the full-period totals explicitly</h2>
+<p>Use <code>target = "period_total"</code> to represent all sixteen calendar days:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">total_catch <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_total_catch</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"period_total"</span>)</span>
+<span id="cb4-2">total_harvest <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_total_harvest</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"period_total"</span>)</span>
+<span id="cb4-3">total_release <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_total_release</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"period_total"</span>)</span>
+<span id="cb4-4"></span>
+<span id="cb4-5">total_catch</span>
+<span id="cb4-6">total_harvest</span>
+<span id="cb4-7">total_release</span></code></pre></div></div>
+<p>These calls use the default complete-trip ratio-of-means path for this access-point design. The results below are rounded to whole fish.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Outcome</th>
+<th style="text-align: right;">Estimated fish</th>
+<th style="text-align: right;">Standard error</th>
+<th style="text-align: left;">95% confidence interval</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Catch</td>
+<td style="text-align: right;">3,072</td>
+<td style="text-align: right;">368</td>
+<td style="text-align: left;">2,326–3,818</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harvest</td>
+<td style="text-align: right;">1,440</td>
+<td style="text-align: right;">188</td>
+<td style="text-align: left;">1,060–1,820</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Release</td>
+<td style="text-align: right;">1,632</td>
+<td style="text-align: right;">189</td>
+<td style="text-align: left;">1,250–2,014</td>
+</tr>
+</tbody>
+</table>
+<p>The default target in these functions is <code>"sampled_days"</code>. Omitting the target would give 1,536 fish caught for the eight sampled days in this example, rather than the total for all sixteen days.</p>
+<p>For separate weekday and weekend catch totals, use <code>estimate_total_catch(design, by = day_type, target = "stratum_total")</code>. That returns 960 and 2,112 fish, respectively.</p>
+</section>
+<section id="both-components-contribute-uncertainty" class="level2">
+<h2 class="anchored" data-anchor-id="both-components-contribute-uncertainty">Both components contribute uncertainty</h2>
+<p>A precise effort estimate cannot compensate for an uncertain rate. Likewise, interviewing more anglers cannot repair sparse count coverage. The total’s standard error must reflect both sides of the calculation.</p>
+<p>For this standard product-estimation path, tidycreel 7.0.0 defaults to <code>product_variance = "goodman"</code>. Within each stratum, it combines effort and rate variances using:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cwidehat%7BV%7D(%5Cwidehat%7BE%7D%5Cwidehat%7Br%7D)%20=%0A%5Cwidehat%7BE%7D%5E%7B2%7D%5Cwidehat%7BV%7D(%5Cwidehat%7Br%7D)%20+%0A%5Cwidehat%7Br%7D%5E%7B2%7D%5Cwidehat%7BV%7D(%5Cwidehat%7BE%7D)%20-%0A%5Cwidehat%7BV%7D(%5Cwidehat%7BE%7D)%5Cwidehat%7BV%7D(%5Cwidehat%7Br%7D).%0A"></p>
+<p><strong>Think of the Goodman correction as removing a small double charge in the uncertainty calculation.</strong> Both the effort estimate from counts and the catch rate from interviews have uncertainty. When we use each estimate to scale the other’s uncertainty, the basic calculation effectively counts a little uncertainty twice, making the result too large on average. Goodman’s correction subtracts that extra amount.</p>
+<p>Here, the estimated catch stays <strong>3,072 fish</strong>. The standard error drops slightly, from <strong>368.6 fish without the correction to 368.3 fish with it</strong>, making the confidence interval slightly narrower. The correction adjusts the error bars; it does not improve the underlying data.</p>
+<p>This calculation assumes independently estimated effort and rates. The option <code>"first_order"</code> omits the final term. These choices, including a first-order fallback if the Goodman estimate is nonpositive, are documented in the <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/creel-estimates-total-catch.R">7.0.0 total-catch source</a>. The method cannot establish independence from the field data alone; that assumption needs to fit the sampling protocol.</p>
+<p>The figure follows the same weekday and weekend catch estimates through the uncertainty calculation. Under the independence assumptions used here, the stratum variances add; taking the square root gives the total standard error.</p>
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-fish-totals-variance.svg" class="img-fluid" data-fig-cap="Uncertainty from counts and interviews carries into each stratum's fish total. Combine the stratum variances before taking the square root to obtain the total standard error. The interval shown is the one returned by the example's total-catch estimator; numbers are rounded." alt="Conceptual figure showing rate uncertainty scaled by squared effort plus effort uncertainty scaled by the squared rate, minus the Goodman correction. Applying this within strata gives weekday catch variance of about 52,711 fish squared and weekend variance of 82,944 fish squared. The variances add to about 135,655 fish squared, whose square root is a total standard error of 368 fish. The estimate of 3,072 fish has a 95 percent confidence interval of 2,326 to 3,818 fish. The calculation assumes independent effort and rate estimates and independent strata in this example."></p>
+<p>In this example, the harvest and release point estimates add to the catch estimate because the records partition each trip’s catch into those two outcomes. Their confidence limits should not be added. Harvest and release share interviews and effort, so their uncertainties are related.</p>
+</section>
+<section id="check-the-match-before-reporting-fish" class="level2">
+<h2 class="anchored" data-anchor-id="check-the-match-before-reporting-fish">Check the match before reporting fish</h2>
+<p>Before using a total in a report, I would check:</p>
+<ul>
+<li>Does the calendar cover the intended reporting period, and is the target explicit?</li>
+<li>Do the interviews represent the anglers and areas included in the counts?</li>
+<li>Do the rate and effort use compatible units, including party size?</li>
+<li>Does every effort stratum have interviews that support its rate estimate?</li>
+<li>Are zero-catch trips retained and missing outcomes resolved?</li>
+<li>Does the report name the estimator, standard error, interval, and package version?</li>
+</ul>
+<p>The one-angler trips here make the units easy to follow. For party interviews, fish reported for the party need the party’s angler-hours in the denominator. Similarly, a rate for boat anglers cannot simply be multiplied by effort that also includes bank anglers unless the sampling design supports that match.</p>
+<p>An effort stratum with no usable interviews has an unknown rate. It is not a zero-catch stratum. Inspect coverage before accepting an aggregate; a numeric total alone does not establish that every part of the survey frame contributed.</p>
+<p>The <a href="../posts/2026-08-18-introducing-tidycreel.html">series introduction</a> began with a design-first workflow. Here that design determines which observations can be multiplied together and what the resulting fish total represents. The next question is how to read the diagnostics before an estimate reaches a report, especially when records are missing or sampling coverage is uneven.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Goodman, L. A. 1960. <a href="https://doi.org/10.1080/01621459.1960.10483369">On the Exact Variance of Products</a>. <em>Journal of the American Statistical Association</em> 55:708–713.</li>
+<li>Pollock, K. H., C. M. Jones, and T. L. Brown. 1994. <a href="https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf"><em>Angler survey methods and their applications in fisheries management</em></a>. American Fisheries Society Special Publication 25, Bethesda, Maryland.</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-10-02-catch-harvest-release.html</guid>
+  <pubDate>Fri, 02 Oct 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-fish-totals-v2.png" medium="image" type="image/png" height="81" width="144"/>
+</item>
+<item>
+  <title>How an Instantaneous Count Becomes Angler-Hours</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-09-25-effort-estimation.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-effort-estimation.png" class="img-fluid" data-fig-cap="A count is a snapshot. The survey design determines the period and population that snapshot can represent. Illustration generated with ChatGPT." alt="Watercolor illustration of a creel clerk counting anglers from a lakeside overlook, beside a field-journal diagram that expands a point-in-time observation across a calendar and shows an estimate with an uncertainty interval."></p>
+<p>The <a href="../posts/2026-09-18-linked-tables.html">previous post</a> kept counts, interviews, catch, and biological observations in linked tables. With those pieces attached to the design, the next question is what they estimate.</p>
+<p>Effort comes first. A common mistake among people who are less familiar with creel surveys is to assume that effort comes from interviews because anglers report how long they have fished. In the instantaneous-count design discussed here, those reported hours help estimate catch or harvest per unit effort. They do not provide the total fishing pressure across the survey period.</p>
+<p>Counts provide the effort side of the calculation. Catch and harvest totals eventually combine a rate from interviews with fishing effort from counts. If the effort estimate has the wrong unit or represents the wrong period, every total built from it carries that problem forward.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>An instantaneous count records anglers present at one moment, not hours of fishing.</li>
+<li>Multiplying the count by the length of the period it represents converts the observation to angler-hours.</li>
+<li>The sampling calendar expands sampled days within their declared strata.</li>
+<li>A point estimate should travel with its standard error, confidence interval, unit, and target period.</li>
+</ul>
+</blockquote>
+<p>The example below uses <strong>tidycreel 7.0.0, “Goldeye”</strong>. It is deliberately small enough that we can follow each part of the expansion.</p>
+<section id="a-count-and-an-effort-estimate-are-different-quantities" class="level2">
+<h2 class="anchored" data-anchor-id="a-count-and-an-effort-estimate-are-different-quantities">A count and an effort estimate are different quantities</h2>
+<p>An instantaneous count answers a narrow question: <em>how many anglers were present when the count was made?</em> If 20 anglers are present at 10:15 a.m., the observation is 20 anglers. It is not 20 angler-hours and it is not the number of people who fished that day.</p>
+<p>The count becomes an estimate of effort only after it is connected to time. If the count was randomized within an eight-hour fishing period, the simple period estimate is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cwidehat%7BE%7D_%7Bd%7D%20=%20I_d%20T_d,%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?I_d"> is the instantaneous angler count and <img src="https://latex.codecogs.com/png.latex?T_d"> is the length of the period in hours. A count of 20 anglers across an eight-hour period represents 160 angler-hours for that sampled day.</p>
+<p>That multiplication depends on the field design. The eight hours must describe the period over which the count was randomized and for which the snapshot is intended to be representative. It should not be added later merely because the survey crew worked an eight-hour shift.</p>
+<p>Multiple counts within a period add another step. They estimate the same stock of anglers at different moments, so they are averaged before multiplying by the period length. They are not summed as if each count found a new set of anglers. The longer treatment in <a href="https://modern-creel-surveys.netlify.app/chapters/12-effort-estimation.html"><em>Modern Creel Survey Analysis in R</em></a> works through that within-day case.</p>
+<p>The same logic carries those snapshots through to a monthly estimate:</p>
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-effort-flow.svg" class="img-fluid" data-fig-cap="Counts become daily effort only after the period length is applied. Daily estimates are then expanded within the calendar strata and added to obtain the monthly total. Uncertainty from repeated counts and sampled days travels through the same workflow." alt="Four-step flowchart showing three instantaneous angler counts averaged to a mean count, multiplied by an eight-hour period to estimate daily angler-hours, expanded separately within weekday and weekend calendar strata, and added into a monthly angler-hour estimate with a 95 percent confidence interval. A note identifies within-day and between-day sources of uncertainty."></p>
+</section>
+<section id="keep-the-full-calendar-and-the-sampled-counts" class="level2">
+<h2 class="anchored" data-anchor-id="keep-the-full-calendar-and-the-sampled-counts">Keep the full calendar and the sampled counts</h2>
+<p>This example covers June 1 through June 16. The full calendar defines ten weekdays and six weekend days. Counts were collected on five weekdays and three weekend days.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(</span>
+<span id="cb1-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-01"</span>),</span>
+<span id="cb1-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-16"</span>),</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"day"</span></span>
+<span id="cb1-7">)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9">calendar <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb1-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> dates,</span>
+<span id="cb1-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">day_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ifelse</span>(</span>
+<span id="cb1-12">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.integer</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">format</span>(dates, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"%u"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>L,</span>
+<span id="cb1-13">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekend"</span>,</span>
+<span id="cb1-14">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span></span>
+<span id="cb1-15">  )</span>
+<span id="cb1-16">)</span>
+<span id="cb1-17"></span>
+<span id="cb1-18">sample_dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(</span>
+<span id="cb1-19">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-03"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-05"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-07"</span>,</span>
+<span id="cb1-20">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-11"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-13"</span>,</span>
+<span id="cb1-21">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-01"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-08"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-15"</span></span>
+<span id="cb1-22">))</span>
+<span id="cb1-23"></span>
+<span id="cb1-24">counts <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb1-25">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> sample_dates,</span>
+<span id="cb1-26">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">day_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekend"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)),</span>
+<span id="cb1-27">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_anglers =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">13</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">24</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>),</span>
+<span id="cb1-28">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">period_hours =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>)</span>
+<span id="cb1-29">)</span></code></pre></div></div>
+<p>The unsampled dates remain in <code>calendar</code>, even though they have no row in <code>counts</code>. That is the distinction introduced in the <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a>: the observations come from sampled days, while the calendar defines the population of days they can represent.</p>
+<p>Weekday and weekend also remain separate. Weekend counts are higher in this example, and weekends were sampled at a different rate. Pooling the days before expansion would let the composition of the sample, rather than the sampling design, determine the result.</p>
+</section>
+<section id="let-add_counts-establish-the-effort-unit" class="level2">
+<h2 class="anchored" data-anchor-id="let-add_counts-establish-the-effort-unit">Let <code>add_counts()</code> establish the effort unit</h2>
+<p>The design connects the calendar to the count observations. The important argument here is <code>period_length_col</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb2-2">  calendar,</span>
+<span id="cb2-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb2-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb2-5">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(</span>
+<span id="cb2-7">    counts,</span>
+<span id="cb2-8">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_col =</span> n_anglers,</span>
+<span id="cb2-9">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">period_length_col =</span> period_hours</span>
+<span id="cb2-10">  )</span></code></pre></div></div>
+<p>For each sampled date, <code>add_counts()</code> multiplies <code>n_anglers</code> by <code>period_hours</code>. It also records the resulting effort unit as angler-hours. That unit information matters later when an effort estimate is combined with a rate reported as fish per angler-hour.</p>
+<p>If <code>period_length_col</code> is omitted, tidycreel 7.0.0 warns that an instantaneous count has been expanded without a period length. The resulting sum is not an angler-hour estimate. The warning is worth stopping for because no downstream formatting can repair a missing time basis.</p>
+<p>This example uses one count per sampled day, which keeps the arithmetic visible. A survey with repeated counts should also supply <code>count_time_col</code> so tidycreel can average the within-period counts and retain their contribution to uncertainty.</p>
+</section>
+<section id="choose-the-population-the-estimate-should-represent" class="level2">
+<h2 class="anchored" data-anchor-id="choose-the-population-the-estimate-should-represent">Choose the population the estimate should represent</h2>
+<p><code>estimate_effort()</code> makes the reporting target explicit. Three calls show the progression from observed sample days to the full calendar period.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">sampled_effort <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_effort</span>(</span>
+<span id="cb3-2">  design,</span>
+<span id="cb3-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sampled_days"</span></span>
+<span id="cb3-4">)</span>
+<span id="cb3-5"></span>
+<span id="cb3-6">effort_by_stratum <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_effort</span>(</span>
+<span id="cb3-7">  design,</span>
+<span id="cb3-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> day_type,</span>
+<span id="cb3-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"stratum_total"</span></span>
+<span id="cb3-10">)</span>
+<span id="cb3-11"></span>
+<span id="cb3-12">period_effort <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_effort</span>(</span>
+<span id="cb3-13">  design,</span>
+<span id="cb3-14">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">target =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"period_total"</span></span>
+<span id="cb3-15">)</span></code></pre></div></div>
+<p>The checked 7.0.0 example produces:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Target</th>
+<th style="text-align: left;">What it represents</th>
+<th style="text-align: right;">Estimate (angler-hours)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>sampled_days</code></td>
+<td style="text-align: left;">The eight days with counts</td>
+<td style="text-align: right;">1,008</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>stratum_total</code>, weekday</td>
+<td style="text-align: left;">All ten weekdays in the calendar</td>
+<td style="text-align: right;">960</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>stratum_total</code>, weekend</td>
+<td style="text-align: left;">All six weekend days in the calendar</td>
+<td style="text-align: right;">1,056</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>period_total</code></td>
+<td style="text-align: left;">All 16 calendar days, summed across strata</td>
+<td style="text-align: right;">2,016</td>
+</tr>
+</tbody>
+</table>
+<p>The sampled-day total is the sum of the eight daily effort estimates. The stratum totals first estimate mean daily effort within weekday and weekend, then multiply those means by the number of calendar days in each stratum. The period total adds the two stratum totals.</p>
+<p>In this small example, exactly half of the days were sampled, so the period total happens to be twice the sampled-day total. That shortcut will not usually work. Sampling fractions can differ among strata, period lengths can vary, and the full estimate must preserve those differences.</p>
+</section>
+<section id="read-the-uncertainty-with-the-point-estimate" class="level2">
+<h2 class="anchored" data-anchor-id="read-the-uncertainty-with-the-point-estimate">Read the uncertainty with the point estimate</h2>
+<p>Printing <code>period_effort</code> returns more than 2,016 angler-hours:</p>
+<pre class="text"><code>Method: Total
+Variance: Taylor linearization
+Confidence level: 95%
+Effort target: period_total
+Unit: angler-hours
+
+estimate    se se_between se_within ci_lower ci_upper     n
+    2016    56         56         0     1879     2153     8</code></pre>
+<p>The estimate is 2,016 angler-hours for the 16-day period. Its standard error is 56 angler-hours, and the 95% confidence interval runs from 1,879 to 2,153 angler-hours.</p>
+<p>Here, <code>se_between</code> equals the total standard error because there is only one count on each sampled day. There is no replication within a day from which to estimate moment-to-moment variation, so <code>se_within</code> is zero. Zero does not mean angler abundance was perfectly stable within each day. It means this design did not measure that component.</p>
+<p>With repeated count rounds, <code>se_within</code> can quantify within-day variation. Comparing it with <code>se_between</code> helps identify whether additional field effort would be better spent sampling more days or making more counts on days already selected.</p>
+</section>
+<section id="check-what-the-estimate-does-and-does-not-cover" class="level2">
+<h2 class="anchored" data-anchor-id="check-what-the-estimate-does-and-does-not-cover">Check what the estimate does and does not cover</h2>
+<p>Before reporting the result, I would ask:</p>
+<ul>
+<li>Does the calendar contain every day in the intended reporting period?</li>
+<li>Were the counts randomized within the periods named by <code>period_length_col</code>?</li>
+<li>Do the strata match the field sampling design rather than a grouping created after data collection?</li>
+<li>Are dates without counts known unsampled days, or are some missed visits or missing records?</li>
+<li>Does the output name the expected target and unit?</li>
+<li>Are the confidence interval and variance components reported with the point estimate?</li>
+</ul>
+<p>The estimate cannot extend beyond its frame. If the count route omitted part of the lake, the result represents the covered area unless an additional, defensible spatial expansion is part of the design. Likewise, a June calendar cannot support a summer-season total that includes July and August.</p>
+<p>This is why <code>check_completeness(design)</code> is a diagnostic rather than an automatic decision maker. It can identify calendar dates without counts. The survey record must tell us whether those dates were intentionally unsampled, missed in the field, or lost during data handling.</p>
+<p>An instantaneous count is only a snapshot. The period length gives it a time unit, the calendar gives it a population of days, and stratification controls how sampled days represent that population. <code>estimate_effort()</code> keeps those pieces together and returns the uncertainty needed to interpret the total.</p>
+<p>The <a href="../posts/2026-10-02-catch-harvest-release.html">next post combines effort with interview-based rates to estimate total catch, harvest, and release</a>. That multiplication is meaningful only when the rate and effort describe compatible anglers, places, periods, and units.</p>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<ul>
+<li>Pollock, K. H., C. M. Jones, and T. L. Brown. 1994. <a href="https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf"><em>Angler survey methods and their applications in fisheries management</em></a>. American Fisheries Society Special Publication 25, Bethesda, Maryland.</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-09-25-effort-estimation.html</guid>
+  <pubDate>Fri, 25 Sep 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-effort-estimation.png" medium="image" type="image/png" height="81" width="144"/>
+</item>
+<item>
+  <title>Why a Creel Survey Needs Linked Tables</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-09-18-linked-tables.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-linked-tables.png" class="img-fluid" data-fig-cap="Different observations belong in different tables, with their connections preserved. Illustration generated with ChatGPT." alt="Watercolor illustration of a fisheries clerk measuring a fish at a lakeside field station, beside a panel of linked table icons representing counts, interviews, catch, and length measurements."></p>
+<p>The <a href="../posts/2026-09-11-roving-interviews.html">previous post</a> asked how an angler entered the interview sample. This post follows those observations back to the data: <strong>what does one row represent, and how does it connect to the rest of the survey?</strong></p>
+<p>A count records fishing activity at a particular place and time. An interview records information about a trip or party. Catch records describe species and what happened to the fish. Length and age records describe the fish sampled for biological information. These observations belong together in an analysis, but they do not all belong on the same row.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Keep each table at its own unit of observation.</li>
+<li>Link catch and biological records to interviews with stable identifiers.</li>
+<li>Preserve interviews with zero catch and distinguish them from missing data.</li>
+<li>Attach the tables to the design before asking what they estimate.</li>
+</ul>
+</blockquote>
+<p>The example below uses <strong>tidycreel 7.0.0, “Goldeye”</strong>, and the simulated data shipped with that release. Its <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/NEWS.md">release notes</a> also document a change directly relevant here: interview identifiers are normalized to character when catch, length, and age tables are attached.</p>
+<section id="start-with-what-one-row-means" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-what-one-row-means">Start with what one row means</h2>
+<p>Before joining anything, I want to be able to finish this sentence for every table: <em>one row represents…</em> That answer tells us which values can be repeated and which must remain unique.</p>
+<p>For the instantaneous-count workflow used here, the main tables have these roles:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 48%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Table</th>
+<th>What one row represents</th>
+<th>How it connects</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Calendar</td>
+<td>A date or sampling unit in the declared design</td>
+<td>Dates, strata, and other design keys</td>
+</tr>
+<tr class="even">
+<td>Counts</td>
+<td>A count event at a recorded time</td>
+<td>Calendar dates and applicable sampling-unit keys</td>
+</tr>
+<tr class="odd">
+<td>Interviews</td>
+<td>An interviewed trip or party under the field protocol</td>
+<td>Calendar/design keys and an interview identifier</td>
+</tr>
+<tr class="even">
+<td>Catch</td>
+<td>A species and catch type within an interview</td>
+<td>Interview identifier</td>
+</tr>
+<tr class="odd">
+<td>Lengths</td>
+<td>An individual fish measurement or a release-length bin</td>
+<td>Interview identifier and species</td>
+</tr>
+<tr class="even">
+<td>Ages</td>
+<td>An individual aged fish</td>
+<td>Interview identifier and species</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a> explained why dates and strata matter. Here, the additional connection is the interview identifier. It allows several species records and several fish measurements to belong to the same interview without turning that interview into several independent trips.</p>
+<p>Counts do not need to belong to individual interviews. A clerk might count anglers across a section and interview only some of them. Connecting every count to every interview on that date would create combinations that the field crew never observed.</p>
+</section>
+<section id="one-large-spreadsheet-can-quietly-repeat-effort" class="level2">
+<h2 class="anchored" data-anchor-id="one-large-spreadsheet-can-quietly-repeat-effort">One large spreadsheet can quietly repeat effort</h2>
+<p>Suppose an interview records four hours of fishing and catch of two species. A species-level table needs at least two rows to describe that catch. If we join those rows to the interview, the four hours appear twice. Summing the joined effort column now gives eight hours, although only four were reported.</p>
+<p>Adding individual fish measurements can multiply rows again. Three length records for one species are three measurements, not three more interviews.</p>
+<p>A join can be useful for a particular question. The problem is forgetting that it changes what a row represents. Keeping the original tables separate gives us a way to check a derived table against the observations that produced it.</p>
+<p>This is the practical role of the <a href="../posts/2026-08-27-design-object.html">design object</a>. It holds the related tables and the information needed to interpret them, without requiring us to flatten everything into one spreadsheet.</p>
+</section>
+<section id="attach-counts-and-interviews-first" class="level2">
+<h2 class="anchored" data-anchor-id="attach-counts-and-interviews-first">Attach counts and interviews first</h2>
+<p>The first part of the example should look familiar. Define the calendar, attach counts, and then attach interviews with their catch and effort fields. The interview type remains explicit for the same reason discussed in the last post: it documents how the observations were collected.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This walkthrough was checked against version 7.0.0.</span></span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">packageVersion</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_calendar)</span>
+<span id="cb1-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_counts)</span>
+<span id="cb1-8"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_interviews)</span>
+<span id="cb1-9"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_catch)</span>
+<span id="cb1-10"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_lengths)</span>
+<span id="cb1-11"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_ages)</span>
+<span id="cb1-12"></span>
+<span id="cb1-13">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb1-14">  example_calendar,</span>
+<span id="cb1-15">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb1-16">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb1-17">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb1-18">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(example_counts) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb1-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_interviews</span>(</span>
+<span id="cb1-20">    example_interviews,</span>
+<span id="cb1-21">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch =</span> catch_total,</span>
+<span id="cb1-22">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">effort =</span> hours_fished,</span>
+<span id="cb1-23">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">harvest =</span> catch_kept,</span>
+<span id="cb1-24">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_status =</span> trip_status,</span>
+<span id="cb1-25">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_duration =</span> trip_duration,</span>
+<span id="cb1-26">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_anglers =</span> n_anglers,</span>
+<span id="cb1-27">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"access"</span></span>
+<span id="cb1-28">  )</span></code></pre></div></div>
+<p>This example declares access-point interviews. A roving survey should retain its own interview type and appropriate trip information; organizing the tables does not change the sampling protocol. The example also produces an equal-probability warning because it supplies no explicit sampling weights. It demonstrates table attachment; a survey with unequal selection probabilities needs those probabilities represented in its design before estimation.</p>
+<p>The interview table still contains one row per interview, including interviews with no catch. Those zero-catch observations matter when estimating rates. A catch table alone cannot tell us how much fishing occurred without a fish being caught.</p>
+</section>
+<section id="link-species-level-catch-to-its-interview" class="level2">
+<h2 class="anchored" data-anchor-id="link-species-level-catch-to-its-interview">Link species-level catch to its interview</h2>
+<p><code>add_catch()</code> attaches the species detail through the interview identifier. The two identifier arguments describe opposite sides of that link: <code>catch_uid</code> is the interview ID column in the catch table, and <code>interview_uid</code> is its counterpart in the interview table. Despite its name, <code>catch_uid</code> is not a unique identifier for each fish or catch row.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> design <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_catch</span>(</span>
+<span id="cb2-3">    example_catch,</span>
+<span id="cb2-4">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_uid =</span> interview_id,</span>
+<span id="cb2-5">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_uid =</span> interview_id,</span>
+<span id="cb2-6">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> species,</span>
+<span id="cb2-7">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count =</span> count,</span>
+<span id="cb2-8">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch_type =</span> catch_type</span>
+<span id="cb2-9">  )</span></code></pre></div></div>
+<p>The catch table uses <code>"caught"</code>, <code>"harvested"</code>, and <code>"released"</code> to describe catch type. <strong>Caught is the total; harvested and released are components.</strong> Adding all three together would count fish twice. If a caught row is absent, the package derives that total from harvested plus released. If it is present, it must be at least their sum. These rules are documented in <a href="https://chrischizinski.com/tidycreel/reference/add_catch.html"><code>add_catch()</code></a>.</p>
+<p>An interview can legitimately have no catch rows when nothing was caught. That is different from losing its catch records during an export. The software cannot reconstruct that distinction from an absent row, so the data-preparation workflow must establish what absence means. Version 7.0.0 rejects <code>NA</code> catch counts rather than silently treating an unknown count as zero. Dropping a row with an unknown count is therefore a substantive decision, not a harmless fix.</p>
+<p>Version 7.0.0 also makes the linked identifiers character values. A numeric ID from one source and a character ID from another can otherwise fail to join. Identifiers are labels: keep leading zeros when they are meaningful, and do not expect character conversion to recover zeros already lost during import.</p>
+</section>
+<section id="keep-biological-observations-connected-too" class="level2">
+<h2 class="anchored" data-anchor-id="keep-biological-observations-connected-too">Keep biological observations connected too</h2>
+<p>Length and age records attach to interviews in the same way. They do not need a matching row number in the catch table. Several measured or aged fish can belong to one interview, and many interviews may have no biological records.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> design <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb3-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_lengths</span>(</span>
+<span id="cb3-3">    example_lengths,</span>
+<span id="cb3-4">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">length_uid =</span> interview_id,</span>
+<span id="cb3-5">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_uid =</span> interview_id,</span>
+<span id="cb3-6">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> species,</span>
+<span id="cb3-7">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">length =</span> length,</span>
+<span id="cb3-8">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">length_type =</span> length_type,</span>
+<span id="cb3-9">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count =</span> count,</span>
+<span id="cb3-10">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">release_format =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"binned"</span></span>
+<span id="cb3-11">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb3-12">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_ages</span>(</span>
+<span id="cb3-13">    example_ages,</span>
+<span id="cb3-14">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">age_uid =</span> interview_id,</span>
+<span id="cb3-15">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_uid =</span> interview_id,</span>
+<span id="cb3-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species =</span> species,</span>
+<span id="cb3-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">age =</span> age,</span>
+<span id="cb3-18">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">age_type =</span> age_type</span>
+<span id="cb3-19">  )</span>
+<span id="cb3-20"></span>
+<span id="cb3-21"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">print</span>(design)</span></code></pre></div></div>
+<p>The shipped length example mixes individual harvested-fish measurements with binned release records. That is why this call specifies <code>release_format = "binned"</code> and supplies a count column. The count is the number of released fish in a bin, not an interview count. Length and age fate labels are <code>"harvest"</code> and <code>"release"</code>, whereas the catch table uses <code>"harvested"</code> and <code>"released"</code>. The <a href="https://chrischizinski.com/tidycreel/reference/add_lengths.html"><code>add_lengths()</code></a> and <a href="https://chrischizinski.com/tidycreel/reference/add_ages.html"><code>add_ages()</code></a> references describe those formats.</p>
+<p>An interview ID identifies the interview, not an individual fish. If a project needs to match a fish’s length to its age, retain a separate fish or specimen identifier in the source records. Interview and species alone cannot establish which measurement belongs to which aged fish.</p>
+<p>These links preserve biological observations; they do not automatically make the measured fish representative of the entire catch. That still depends on which fish were available, which were selected for measurement, and the estimation method used.</p>
+</section>
+<section id="check-the-links-before-estimating-anything" class="level2">
+<h2 class="anchored" data-anchor-id="check-the-links-before-estimating-anything">Check the links before estimating anything</h2>
+<p>The attachment functions check that catch and biological records refer to interviews in the design. A record with an unknown interview ID should send us back to the source tables: was the ID mistyped, was an interview omitted, or were records drawn from different survey exports?</p>
+<p>I would also check that the interview identifier uniquely identifies an interview across the data being combined. If numbering restarts each year or at each water body, an ID such as <code>"104"</code> is not enough on its own. Construct a consistent identifier from the necessary source fields and use it in every related table before attachment.</p>
+<p>A separate check asks whether the design has the expected field coverage:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">check_completeness</span>(design)</span></code></pre></div></div>
+<p>For this workflow, that report identifies calendar days without count data and strata with few interviews. Its default low-interview threshold is 10; that is a diagnostic threshold, not proof that a sample is adequate for every survey. On the shipped example, the report finds no missing sampling days but flags one stratum below that threshold. That is a result to inspect, not an error in attaching the tables. The report also does not establish that every fish was measured or every species record was entered. Those checks require the field protocol and source records.</p>
+<p>Before moving on, I would ask:</p>
+<ul>
+<li>Can I explain what a row represents in every table?</li>
+<li>Does each catch, length, and age record point to the intended interview?</li>
+<li>Are zero-catch interviews retained, and are missing records investigated?</li>
+<li>Have any joins repeated effort or turned measurements into extra interviews?</li>
+<li>Can another analyst distinguish observed sample summaries from expanded estimates?</li>
+</ul>
+<p>The calendar defines the survey’s time structure. Interviews retain the trip information and sampling protocol. Linked catch and biological tables add detail without changing how many interviews occurred. Keeping those distinctions visible is what lets the next step—estimating effort, catch, and harvest—start from the observations the field crew actually collected.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-09-18-linked-tables.html</guid>
+  <pubDate>Fri, 18 Sep 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-linked-tables.png" medium="image" type="image/png" height="76" width="144"/>
+</item>
+<item>
+  <title>How an Angler Is Interviewed Matters</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-09-11-roving-interviews.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-roving-interviews.png" class="img-fluid" data-fig-cap="Where an interview occurs changes what it represents. Illustration generated with ChatGPT." alt="Illustration of a fisheries clerk standing at the shoreline and interviewing two anglers in a boat pulled close to shore, with a simple chart showing two interview paths."></p>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a> was about the days a survey can represent. The next question is smaller, but just as important: <strong>how was an angler interviewed?</strong></p>
+<p>An access-point interview usually happens at the end of a trip. A roving interview happens while the angler is still fishing. Both can record hours, catch, harvest, and the species an angler sought, but they are not interchangeable observations. How the interview was collected changes both what has been observed and an angler’s chance of being encountered.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Access-point interviews generally describe completed trips and support a ratio-of-means rate estimator.</li>
+<li>Roving interviews intercept anglers while they are fishing, and longer trips have more opportunity to be encountered. When the design is declared as roving, <code>tidycreel</code> uses all eligible interviews with a mean-of-ratios estimator by default.</li>
+<li>Declaring the interview type is part of specifying the survey design, not a label to add after an estimate has been calculated.</li>
+</ul>
+</blockquote>
+<section id="the-same-questionnaire-can-produce-different-observations" class="level2">
+<h2 class="anchored" data-anchor-id="the-same-questionnaire-can-produce-different-observations">The same questionnaire can produce different observations</h2>
+<p>Imagine that a clerk interviews two anglers at a boat ramp. They have put their boat on the trailer and are heading home. Their reported hours fished and catch describe completed trips. An access-point interview is therefore a natural setting for estimating a rate from total catch divided by total effort across those trips.</p>
+<p>Now imagine a clerk moving through the fishery by boat. The clerk speaks with an angler who launched at dawn and plans to fish until noon. At 9:30, the angler’s reported catch and effort describe only the trip up to the time of the interview. The angler may accumulate more effort, catch more fish, or harvest additional fish before going home.</p>
+<p>There is another important difference. An angler fishing for six hours is available to a roving clerk for longer than an angler fishing for one hour. Longer trips therefore have more opportunity to be intercepted.</p>
+<p>That is not a flaw in roving surveys. It is part of their sampling process. The estimator needs to reflect how anglers entered the interview sample rather than treating a roving interview as though it were simply an unfinished access-point interview.</p>
+</section>
+<section id="what-the-survey-literature-adds" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-survey-literature-adds">What the survey literature adds</h2>
+<p>This distinction comes from the creel-survey literature, not from a software convention. <a href="https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf">Pollock, Jones, and Brown (1994)</a> set out access-point and roving interviews as different ways of contacting anglers within a broader survey design. The practical point is the one that matters here: an access interview normally observes a completed trip, whereas a roving interview observes the part of a trip visible at the time of contact.</p>
+<p><a href="https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2">Pollock et al. (1997)</a> make the sampling consequence explicit. In their formulation, anglers are intercepted with equal probability at access points, but an angler’s chance of being encountered in a roving survey is proportional to the completed-trip length. They therefore recommend ratio-of-means for access interviews and a mean of individual catch-to-effort ratios for roving interviews.</p>
+<p><a href="https://doi.org/10.2307/2533116">Hoenig et al.&nbsp;(1997)</a> develop the roving catch-rate and total-catch estimators in more detail. Under their modelling assumptions, very short observed trips can make an untruncated mean-of-ratios estimate unstable. Their simulation results support dropping interviews observed within the first 30 minutes of a trip before calculating that estimator.</p>
+<p>These sources do not prescribe one estimator for every creel survey. They show why the estimator must follow the interview and sampling design. That is the connection <code>tidycreel</code> is trying to preserve when the analysis records <code>interview_type</code>, trip status, and observed duration.</p>
+</section>
+<section id="start-by-recording-how-the-interview-was-collected" class="level2">
+<h2 class="anchored" data-anchor-id="start-by-recording-how-the-interview-was-collected">Start by recording how the interview was collected</h2>
+<p>In <code>tidycreel</code>, <code>add_interviews()</code> records the interview type along with catch, effort, trip status, and, when available, trip-duration information. This is one place where a small declaration prevents a much larger ambiguity later in the workflow.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_calendar)</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data</span>(example_interviews)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6">roving_design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb1-7">  example_calendar,</span>
+<span id="cb1-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb1-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb1-10">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb1-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_interviews</span>(</span>
+<span id="cb1-12">    example_interviews,</span>
+<span id="cb1-13">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">catch =</span> catch_total,</span>
+<span id="cb1-14">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">effort =</span> hours_fished,</span>
+<span id="cb1-15">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_status =</span> trip_status,</span>
+<span id="cb1-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_duration =</span> trip_duration,</span>
+<span id="cb1-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"roving"</span></span>
+<span id="cb1-18">  )</span></code></pre></div></div>
+<p>The calendar establishes the days and strata that organize the analysis. The interview type answers a different question: <strong>how did an angler become available for an interview?</strong></p>
+<p>Both pieces of information belong in the design object before we estimate a catch or harvest rate.</p>
+<p>An access-point design is declared in the same place with <code>interview_type = "access"</code>. That is currently the default, but I prefer to state it explicitly in a project script. Doing so leaves the field protocol visible to the next person who reads the analysis.</p>
+</section>
+<section id="what-the-roving-declaration-changes" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-roving-declaration-changes">What the roving declaration changes</h2>
+<p>For an access-point design, <code>estimate_catch_rate()</code> defaults to completed-trip interviews and a ratio-of-means estimator. The ratio-of-means pools the interviews first: total catch across the sampled trips is divided by total effort across those trips.</p>
+<p>That aligns the rate estimator with the completed-trip observations collected at the access point.</p>
+<p>For a roving design, <code>tidycreel</code> recognizes a different sampling process. When neither <code>use_trips</code> nor <code>estimator</code> is specified, it uses all eligible complete and incomplete interviews with a mean-of-ratios estimator. Rather than pooling catch and effort first, the mean-of-ratios calculates a catch-per-unit-effort rate for each eligible interview and then averages those individual rates.</p>
+<p>The same design-aware choice carries through the catch, harvest, and release-rate workflows and the totals constructed from those rates.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Roving design: all eligible interviews + mean-of-ratios</span></span>
+<span id="cb2-2">roving_cpue <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_catch_rate</span>(roving_design)</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Override the defaults when completed trips are specifically wanted</span></span>
+<span id="cb2-5">complete_trip_cpue <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">estimate_catch_rate</span>(</span>
+<span id="cb2-6">  roving_design,</span>
+<span id="cb2-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">use_trips =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"complete"</span>,</span>
+<span id="cb2-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">estimator =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"ratio-of-means"</span></span>
+<span id="cb2-9">)</span></code></pre></div></div>
+<p>These calls do not simply calculate the same quantity in two different ways. They use different subsets of the interview sample and different estimators.</p>
+<p>The second can be useful as a diagnostic comparison, or when the scientific question specifically calls for completed trips. It should not quietly replace the roving estimator simply because completed trips are more familiar.</p>
+</section>
+<section id="why-this-matters-for-creel-survey-estimates" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-for-creel-survey-estimates">Why this matters for creel-survey estimates</h2>
+<p>Interview type affects more than the label on a CPUE result. In a conventional creel survey, estimated total catch or harvest is often calculated as estimated total effort multiplied by an estimated rate. The rate must therefore be on the right footing before it is expanded to a day, season, fishery, or management unit (<a href="https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2">Pollock et al. 1997</a>).</p>
+<p>That has several practical implications:</p>
+<ul>
+<li>A mismatch between the interview protocol and estimator can carry into total catch, harvest, and release estimates, rather than remaining a technical difference in a table of CPUE results.</li>
+<li>Rates from years, locations, or survey programs are only directly comparable when the way anglers entered the sample and the estimator used to analyze them are comparable too.</li>
+<li>The field record needs to retain interview type, trip status, and observed duration. Without them, an analyst cannot show which interviews contributed to an estimate or reproduce the decision later.</li>
+</ul>
+<p>Choosing the roving estimator addresses the unequal opportunity for longer trips to be encountered. It does not remove every challenge of a roving design. For example, when an effective bag limit changes angler behavior or catch rates over the course of a trip, an interview during the trip may no longer represent the completed trip in the same way. Pollock et al.&nbsp;(1997) show that this can produce biased roving estimates, so those fisheries warrant a design review rather than an automatic estimator choice.</p>
+</section>
+<section id="very-short-trips-need-special-attention" class="level2">
+<h2 class="anchored" data-anchor-id="very-short-trips-need-special-attention">Very short trips need special attention</h2>
+<p>The default roving path also applies a 30-minute minimum trip duration for mean-of-ratios estimation, following the short-trip treatment discussed by <a href="https://doi.org/10.2307/2533116">Hoenig et al.&nbsp;(1997)</a>.</p>
+<p>The reason follows from how the estimator works. Each interview contributes its own catch-per-unit-effort rate. When very little effort has been observed, even a single early catch can produce an extremely large individual rate. An angler who catches a fish shortly after beginning a trip, for example, can have a very high observed catch-per-hour rate even though little of the trip has actually been observed.</p>
+<p>Those extreme individual rates can make the estimate unstable.</p>
+<p>By default, <code>tidycreel</code> therefore excludes interviews with observed trip durations shorter than 0.5 hours before calculating the mean-of-ratios estimate. The threshold is part of the estimator and should be reported as such. It is not a general data-cleaning rule saying that short fishing trips are invalid observations.</p>
+</section>
+<section id="complete-and-incomplete-are-not-a-data-quality-ranking" class="level2">
+<h2 class="anchored" data-anchor-id="complete-and-incomplete-are-not-a-data-quality-ranking">Complete and incomplete are not a data-quality ranking</h2>
+<p>It is tempting to read an unfinished trip as <em>incomplete data</em>. In the ordinary-language sense, the trip is incomplete. In a roving survey, however, that does not mean the interview is a mistake, a deficient record, or an access-point interview that happened too early.</p>
+<p>The angler was encountered during the trip <strong>by design</strong>.</p>
+<p>The useful question is therefore not whether the trip was complete. It is whether the observation contains the information required by the estimator appropriate to the survey design.</p>
+<p>This distinction is also why <code>trip_status</code> and trip-duration information should be retained during data preparation. They document what the clerk actually observed, support the appropriate estimation path, and make it possible to review later exactly how the rate was calculated.</p>
+</section>
+<section id="a-short-checklist-before-estimating-rates" class="level2">
+<h2 class="anchored" data-anchor-id="a-short-checklist-before-estimating-rates">A short checklist before estimating rates</h2>
+<p>Before estimating CPUE, HPUE, or release rate, I would stop and ask:</p>
+<ul>
+<li>Did interviews occur after anglers completed their trips, or while anglers were still fishing?</li>
+<li>Does the interview table retain valid complete/incomplete trip status?</li>
+<li>For roving interviews, is the information needed to determine observed trip duration available?</li>
+<li>Does the estimator reported in the output match the interview design?</li>
+<li>If a minimum observed duration was applied, is that threshold documented?</li>
+<li>Can someone reading the script tell why this estimator was used?</li>
+</ul>
+<p>These are field-method questions as much as R questions. A well-organized table cannot reconstruct a sampling process that was never recorded. It can, however, keep that process visible throughout the analysis.</p>
+<p>The <a href="https://chrischizinski.com/tidycreel/">tidycreel reference site</a> documents the function-level arguments for <code>add_interviews()</code> and the rate estimators. The earlier posts on the <a href="../posts/2026-08-27-design-object.html">design object</a> and <a href="../posts/2026-09-03-sampling-calendar.html">sampling calendar</a> provide the larger context.</p>
+<p>The calendar tells us <strong>when the fishery could be sampled</strong>. The interview protocol tells us <strong>how anglers entered the sample</strong>. The estimator determines <strong>how those observations become an estimate</strong>.</p>
+<p>Those are parts of the same survey design, not separate decisions to reconcile at the end.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Hoenig, J. M., C. M. Jones, K. H. Pollock, D. S. Robson, and D. L. Wade.
+<ol start="1997" type="1">
+<li><a href="https://doi.org/10.2307/2533116">Calculation of catch rate and total catch in roving surveys of anglers</a>. <em>Biometrics</em> 53:306-317.</li>
+</ol></li>
+<li>Pollock, K. H., J. M. Hoenig, C. M. Jones, D. S. Robson, and C. J. Greene.
+<ol start="1997" type="1">
+<li><a href="https://doi.org/10.1577/1548-8675(1997)017%3C0011:CREFRA%3E2.3.CO;2">Catch rate estimation for roving and access point surveys</a>. <em>North American Journal of Fisheries Management</em> 17:11-19.</li>
+</ol></li>
+<li>Pollock, K. H., C. M. Jones, and T. L. Brown. 1994. <a href="https://fms.fisheries.org/wp-content/uploads/2024/06/ANGLER-SURVEY-METHODS-PDF_OCR.pdf"><em>Angler survey methods and their applications in fisheries management</em></a>. American Fisheries Society Special Publication 25, Bethesda, Maryland.</li>
+</ul>
+<p>The <a href="../posts/2026-09-18-linked-tables.html">next post turns to the linked tables</a> that carry counts, interviews, catch, and biological data through the rest of a creel analysis.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-09-11-roving-interviews.html</guid>
+  <pubDate>Fri, 11 Sep 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Why the sampling calendar belongs in the estimate</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-09-03-sampling-calendar.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-sampling-calendar.png" class="img-fluid" data-fig-cap="A sampling calendar defines what the observations represent. Illustration generated with ChatGPT." alt="Illustration of a creel-survey calendar with selected sampling days, a boat and field gear at a lake, and a chart representing the resulting estimate."></p>
+<p>The <a href="../posts/2026-08-27-design-object.html">design-object post</a> introduced the idea that a creel analysis starts before an estimator is called. This post focuses on one part of that design: the sampling calendar. A calendar does not merely tell a clerk where to be on Tuesday. It defines the set of days that a reported result can represent.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>The calendar distinguishes the days available for sampling from the days that were selected.</li>
+<li>Strata such as weekday and weekend belong in the calendar because fishing pressure can differ between them.</li>
+<li>Retaining the full calendar provides the information needed to expand observations from sampled days to the full survey period.</li>
+</ul>
+</blockquote>
+<section id="what-is-a-sampling-calendar-in-a-creel-survey" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-sampling-calendar-in-a-creel-survey">What is a sampling calendar in a creel survey?</h2>
+<p>A sampling calendar records the dates in the survey period, the strata used to organize them, and the dates selected for fieldwork. That is more useful than thinking of the calendar as a list of work assignments. It distinguishes the period we want to estimate from the smaller set of days on which observations were collected.</p>
+<p>Suppose a survey covers June through August. Every day in that season belongs to the period we want to estimate, but field staff cannot sample all of them. The calendar may separate weekdays from weekends because anglers use the fishery differently on those days. It may also identify holidays, special events, or periods of unusual access.</p>
+<p>The sampled days provide the observations. The full calendar defines the population of days those observations are used to estimate. If that information is lost, a mean count or interview rate can still be calculated, but there is no longer enough information to expand the sampled days to the full season.</p>
+</section>
+<section id="why-available-days-and-sampled-days-are-different" class="level2">
+<h2 class="anchored" data-anchor-id="why-available-days-and-sampled-days-are-different">Why available days and sampled days are different</h2>
+<p>An available day belongs to the population of days the survey could have sampled. A sampled day is one the survey actually selected and worked. Those are related pieces of information, but they have different roles in the analysis.</p>
+<p>For example, a survey might make every summer day available, classify each as a weekday or weekend, and then sample a larger proportion of weekends. That is not a problem. It may be a deliberate design choice when weekend fishing pressure is expected to be higher or more variable. The estimator needs to know both how many days were sampled and how many days are in each stratum so the sampled observations can be expanded correctly.</p>
+<p>This is the practical reason to retain unsampled dates in the survey record, even when they have no count or interview row. They provide information about the population of days and the sampling design. A missing count record might mean “not selected,” “selected but no data were collected,” or “data have not been entered.” Those situations cannot be treated as equivalent.</p>
+</section>
+<section id="accounting-for-strata-in-the-expansion" class="level2">
+<h2 class="anchored" data-anchor-id="accounting-for-strata-in-the-expansion">Accounting for strata in the expansion</h2>
+<p>Strata are groups of days that the sampling design treats separately. Weekday and weekend are common examples, but a survey might also use month, season phase, holiday period, section, or combinations of these when the field protocol supports them.</p>
+<p>The important question is not whether a column can be used as a grouping variable. It is whether those groups were part of the sampling design and have a clear role in defining the population. If a field season deliberately samples weekend days more often, that decision needs to be included in the calendar and in the later expansion, not only in a scheduler’s spreadsheet.</p>
+<p>If fishing pressure differs among strata, the season-wide estimate needs to account for how many days each stratum contributes to the season. A weekend stratum with 26 available days and a weekday stratum with 66 available days represent different portions of the season, regardless of how many days were sampled from each. The calendar provides those population counts for the expansion.</p>
+</section>
+<section id="building-a-calendar-with-tidycreel" class="level2">
+<h2 class="anchored" data-anchor-id="building-a-calendar-with-tidycreel">Building a calendar with tidycreel</h2>
+<p><code>tidycreel</code> can generate a reproducible stratified schedule with <code>generate_schedule()</code>. The example below defines the full season, samples weekday and weekend strata at different rates, and retains all dates with a <code>sampled</code> column identifying those selected for fieldwork.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">schedule <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">generate_schedule</span>(</span>
+<span id="cb1-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">start_date =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-01"</span>,</span>
+<span id="cb1-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">end_date =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-08-31"</span>,</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_periods =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>,</span>
+<span id="cb1-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sampling_rate =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">weekday =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.30</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">weekend =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.60</span>),</span>
+<span id="cb1-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">include_all =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>,</span>
+<span id="cb1-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">expand_periods =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>,</span>
+<span id="cb1-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">seed =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span></span>
+<span id="cb1-11">)</span>
+<span id="cb1-12"></span>
+<span id="cb1-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The full schedule has date, day_type, and sampled columns.</span></span>
+<span id="cb1-14">schedule</span></code></pre></div></div>
+<p>The example is deliberately simple. It does not specify what proportion of weekdays or weekends another survey should sample. That decision depends on the fishery, staffing, budget, survey objectives, and expected variability. The important part here is that the sampling rates and selection are explicit and reproducible rather than stored only in a spreadsheet or calendar export.</p>
+<p>When it is time to analyze the observations, the selected dates become part of the design alongside the field tables:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">sampled_schedule <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> schedule[schedule<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>sampled, ]</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb2-4">  sampled_schedule,</span>
+<span id="cb2-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb2-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb2-7">)</span></code></pre></div></div>
+<p>The <a href="https://chrischizinski.com/tidycreel/">tidycreel reference site</a> documents the scheduling and design arguments in detail. For a fuller explanation of the logic, the companion book’s chapter on <a href="https://modern-creel-surveys.netlify.app/chapters/07-stratification-and-allocation.html">sampling calendars and strata</a> is the better place to start.</p>
+</section>
+<section id="what-to-check-before-the-field-season-starts" class="level2">
+<h2 class="anchored" data-anchor-id="what-to-check-before-the-field-season-starts">What to check before the field season starts</h2>
+<p>Before a schedule becomes a field assignment, I would ask a few questions:</p>
+<ul>
+<li>What dates belong to the period I want to estimate?</li>
+<li>Which differences among days are important enough to define strata?</li>
+<li>How many days are available in each stratum, and how many will be sampled?</li>
+<li>What will a missing record mean after the season: not selected, missed, incomplete, or absent from the data system?</li>
+<li>Can another analyst reconstruct the selection rule without asking the person who made the schedule?</li>
+</ul>
+<p>These questions determine the population that can be estimated from the survey. If the intended result is a summer-season estimate, for example, the design needs to identify the days in that season and how the sampled days were selected from them.</p>
+</section>
+<section id="retaining-the-calendar-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="retaining-the-calendar-for-analysis">Retaining the calendar for analysis</h2>
+<p>By the end of a field season, schedules often live in several places: a shared spreadsheet, email assignments, a database export, and a field notebook. The analysis should preserve a clean version of the original calendar rather than rebuilding it from the dates that happen to have observations.</p>
+<p>That is the same principle behind the <a href="../posts/2026-08-27-design-object.html">design object</a>: the field design and its data belong together. It is also related to the recent <a href="../posts/2026-09-01-what-were-working-on-in-tidycreel.html">tidycreel development update</a>, where the focus was keeping downstream estimators and reporting consistent with the survey design.</p>
+<p>The <a href="../posts/2026-09-18-linked-tables.html">next step is to attach counts and interviews</a> to the design and use that information to estimate angler effort across the defined survey period. Before that, the <a href="../posts/2026-09-11-roving-interviews.html">roving-interviews post</a> shows why the way an interview enters the design determines which estimator is appropriate.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-09-03-sampling-calendar.html</guid>
+  <pubDate>Thu, 03 Sep 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>What we’re working on in tidycreel right now</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-09-01-what-were-working-on-in-tidycreel.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-survey-to-estimate.png" class="img-fluid" data-fig-cap="From sampling calendar to a checkable estimate. Illustration generated with ChatGPT." alt="Illustration of a creel-survey calendar, a clerk interviewing an angler at a lake, and a chart showing an estimate with uncertainty."></p>
+<p>The <a href="../posts/2026-08-27-design-object.html">last post on the design object</a> argued that a creel survey’s calendar, strata, and observation tables should stay together through analysis. This is a short update on why that matters in practice. Before returning to the planned post on sampling calendars, I want to show some of the downstream work needed to keep an estimate aligned with that design.</p>
+<p><code>tidycreel</code> can now take a survey from a calendar and raw field tables through counts, interviews, catch, and lengths to rates, totals, section and species results, and uncertainty estimates. The work right now is less about adding new capabilities and more about making sure those results are calculated consistently and can be inspected.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Roving-survey rates and totals now follow the same estimator logic.</li>
+<li>Results record the estimator and trip set that produced them.</li>
+<li>Clearer checks stop invalid requests and problematic input earlier.</li>
+</ul>
+</blockquote>
+<p>Over the past few days, I have been working through how existing estimates are calculated: which interviews they use, which estimator produced them, and when the package should stop rather than return a plausible but mismatched number. Often the visible change is a number that does not move, a label that finally matches the calculation, or an error that occurs before the result is reported.</p>
+<p>That sounds obvious. It is also where creel analysis gets difficult.</p>
+<p>A survey can have a reasonable sampling schedule, careful field staff, and a well-organized set of tables, then still have problems when the analysis quietly treats two kinds of interviews as though they were the same. The same can happen when a total and the rate used to calculate it are based on different trips, or when a result is split by species or section in a way that no longer matches what was actually sampled.</p>
+<p>Those are the kinds of problems we have been working through.</p>
+<section id="matching-the-estimator-to-the-survey-design" class="level2">
+<h2 class="anchored" data-anchor-id="matching-the-estimator-to-the-survey-design">Matching the estimator to the survey design</h2>
+<p>One of the bigger pieces of work has involved roving interviews. An access interview happens when an angler has completed a trip. A roving interview happens while the person is still fishing. The catch and effort in a roving interview can therefore be partial, and that changes the estimator that makes sense.</p>
+<p>It is worth being precise about what that means. A roving clerk does not only meet anglers in the middle of a trip. Moving through the fishery, the clerk intercepts whoever is present, and some of those people happen to be finishing their trips. What follows from a roving design is that those interviews are used together, complete and incomplete alike, rather than discarding the incomplete ones. The estimator follows from how the clerk sampled, not from the status of any one interview. That is also why the same change was needed for harvest and release. Harvested and released fish are recorded in the same interception as the catch, so they are subject to the same sampling issue.</p>
+<p>For a while, different parts of an analysis could make different choices from the same survey. A catch-rate estimate could use the roving-survey estimator, while a harvest rate, release rate, or total could use a different estimator. The resulting set of estimates therefore did not always use the same underlying method.</p>
+<p>That work is now in place. When a survey calls for the roving approach, the catch rate, harvest rate, release rate, and the totals calculated from them all use it. When an analyst wants the older ratio-of-means approach, specifying it is enough to get it. Bus-route and ice designs, which cannot support a mean-of-ratios total, now reject that argument instead of accepting it and using another estimator.</p>
+<p>That work is not completely finished. A sectioned design given the regression estimator is still accepted and returns ratio-of-means estimates instead. That issue is documented, and it is the next problem of this kind to fix.</p>
+<p>This is not a new feature in the usual sense. It makes the estimator used in the analysis consistent with the field design.</p>
+</section>
+<section id="estimating-by-section-and-species" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-by-section-and-species">Estimating by section and species</h2>
+<p>Lake-wide estimates matter, but managers often need to know what is happening in a particular section of a lake or river, or with a particular species.</p>
+<p>We have been improving how <code>tidycreel</code> handles those estimates. Species totals can now be estimated within sections, and catch, harvest, and release rates use the same estimator logic when results are grouped by species. These functions are closely related, so a change to one needs to be applied consistently to the others.</p>
+<p>There was also a problem with requesting section groupings. A sectioned result is already one row per section. Asking to group it by section a second time does not add another level of information; it repeats the existing grouping. Previously, that request ended in an error about a duplicated column name. The message was technically correct, but it did not identify what was wrong with the requested analysis.</p>
+<p>The revised behavior is to stop and explain that the result is already split by section. Other groupings are unaffected. This makes it easier to identify the problem in the analysis rather than diagnose an unrelated-looking R error.</p>
+</section>
+<section id="recording-which-estimator-was-used" class="level2">
+<h2 class="anchored" data-anchor-id="recording-which-estimator-was-used">Recording which estimator was used</h2>
+<p>A creel estimate depends on the estimator used to calculate it. The same survey can produce different estimates depending on that choice, so the returned result needs to record which estimator was used.</p>
+<p>On several paths, it did not. A total is effort multiplied by a rate, so the label on the returned total described the form of that calculation rather than the estimator used for the rate. Ratio-of-means, mean-of-ratios, and the truncated version therefore all returned the same estimator label. The estimator was used in the calculation, but that information was not retained in the returned result.</p>
+<p>There was also an incorrect label on sectioned rates. A rate estimated section by section could use mean-of-ratios and then be labeled as ratio-of-means. On one test design, mean-of-ratios produces 0.87 fish per hour and ratio-of-means produces 0.59. Both are defensible estimates, but they are different methods and produce different results. Because a roving survey automatically uses mean-of-ratios, this could occur without the analyst explicitly requesting the estimator.</p>
+<p>Results now record the estimator requested by the analyst for rates, sectioned rates, and totals. None of the estimates changed as part of that fix. The tests check both the reported estimator and the calculation. Two settings that resolve to the same calculation must return identical estimates while retaining their requested estimator names, while sectioned estimates calculated with different methods must still differ. Checking only the labels would not detect a case where the estimator argument was reported correctly but ignored in the calculation.</p>
+<p>The original issue describing this problem also turned out to be incorrect. It said that a total reported the mean-of-ratios name. The total actually reports the product-form name. The label quoted in the issue occurs on an intermediate object that is discarded before the result is returned, so the proposed repair would not have fixed the reported output. Going back through the code before making the change identified that problem and two additional issues.</p>
+</section>
+<section id="recording-which-trips-were-used" class="level2">
+<h2 class="anchored" data-anchor-id="recording-which-trips-were-used">Recording which trips were used</h2>
+<p>A mean-of-ratios estimate now reports which trips were included: all trips, complete trips, or incomplete trips. The distinction matters because the roving-survey default uses all interviews, while an explicit diagnostic analysis may use only incomplete ones. Previously, the printed output described every mean-of-ratios result as though it used incomplete trips, including results calculated from all trips.</p>
+<p>The same diagnostic information is now available for catch, harvest, and release rates. Truncation details are still reported because they are part of the estimator. The length-of-stay caution and the recommendation to validate incomplete trips appear only when incomplete trips are included in the calculation. The printed output now corresponds to the interviews actually used in the estimate.</p>
+</section>
+<section id="handling-missing-and-unusable-data" class="level2">
+<h2 class="anchored" data-anchor-id="handling-missing-and-unusable-data">Handling missing and unusable data</h2>
+<p>Some important problems occur when the data do not meet the requirements of an estimator. A trip duration may be missing. A truncation threshold may remove every usable interview. A warning may report a percentage that is not the one an analyst needs to evaluate the problem.</p>
+<p>We have been adding checks so these cases return an explanation related to the survey and the data rather than an error from somewhere deeper in R. A trip with no recorded duration should be identified as a data problem. A truncation threshold that leaves no usable trips should say that directly. The analyst may still need to decide how to handle the problem, but the package should identify what caused it.</p>
+</section>
+<section id="current-focus" class="level2">
+<h2 class="anchored" data-anchor-id="current-focus">Current focus</h2>
+<p><code>tidycreel</code> is being developed around a straightforward idea: a fisheries estimate should remain connected to the survey design and data used to produce it.</p>
+<p>That means keeping the calendar, counts, interviews, catch, and biological data together in an inspectable workflow. The estimator needs to match the interview design, and the same estimator decisions need to carry through rates, totals, species, sections, uncertainty, and reporting. The package should also stop when a requested analysis does not have a clear statistical meaning.</p>
+<p>There is still more to add. Camera surveys, aerial counts, bus routes, ice fisheries, connected agency data, and reporting all have additional problems to work through. For now, the focus is getting the underlying estimation and validation pieces right. The <a href="../posts/2026-08-18-introducing-tidycreel.html">introduction to tidycreel</a> explains the wider purpose of the series. The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar tutorial</a> returns to how the calendar defines the population an estimate represents. The later <a href="../posts/2026-09-11-roving-interviews.html">roving-interviews post</a> and <a href="../posts/2026-09-18-linked-tables.html">linked-tables post</a> continue the same design-first thread.</p>
+<p>That work is less visible than adding new features, but it is necessary before building more on top of it.</p>
+<p>You can follow the package work on <a href="https://github.com/chrischizinski/tidycreel">GitHub</a>, browse the <a href="https://chrischizinski.com/tidycreel/">reference site</a>, or read more of the reasoning in <a href="https://modern-creel-surveys.netlify.app/"><em>Modern Creel Survey Analysis in R</em></a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-09-01-what-were-working-on-in-tidycreel.html</guid>
+  <pubDate>Wed, 02 Sep 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Start with the design object</title>
+  <link>https://chrischizinski.com/posts/2026-08-27-design-object.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>When I start looking at a creel survey, I usually have more than one table in front of me. There is a sampling schedule, a table of angler counts, interview records, and often a separate table for catch or lengths. Each table tells part of the story. None of them, by itself, defines the survey.</p>
+<p>That distinction matters. A count of 25 anglers has a different meaning if it came from a sampled weekend day than if it came from an opportunistic visit on a Tuesday afternoon. Likewise, an interview record is not enough to estimate catch or harvest unless we retain the design that produced it.</p>
+<p>This is the problem that the <code>creel_design</code> object in <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> is meant to solve. It keeps the survey structure and its observation tables together so that the estimation step can use the same design information that guided field sampling.</p>
+<section id="the-design-object-is-where-analysis-begins" class="level2">
+<h2 class="anchored" data-anchor-id="the-design-object-is-where-analysis-begins">The design object is where analysis begins</h2>
+<p>It is tempting to think that the analysis begins when the first estimator is called. I think it begins earlier, when we state what was sampled, how it was stratified, and what each observation represents.</p>
+<p>For a straightforward instantaneous-count survey, the smallest useful example looks like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The calendar says which days belong to each stratum.</span></span>
+<span id="cb1-4">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb1-5">  example_calendar,</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb1-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb1-8">)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The count table supplies the observations made on sampled days.</span></span>
+<span id="cb1-11">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(design, example_counts)</span>
+<span id="cb1-12"></span>
+<span id="cb1-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># `design` now carries both the sampling structure and the count data.</span></span>
+<span id="cb1-14">design</span></code></pre></div></div>
+<p><code>creel_design()</code> does not estimate anything. It creates an object that records the survey’s calendar, date field, strata, and survey type. <code>add_counts()</code> then attaches the count observations and uses the design information to establish the sampling structure needed downstream. The result is still an ordinary R object, but it has an important job: it keeps the design logic from being recreated, and possibly recreated differently, every time we estimate effort, catch, or a rate.</p>
+<p>This is particularly helpful for graduate students learning design-based inference. You do not need to start by writing the machinery that connects strata, sampling units, and weights. You do need to be able to explain those parts of your own survey. The package asks for that information in terms that look like a creel survey: calendar, date, strata, counts, interviews, catch, and lengths.</p>
+</section>
+<section id="why-the-schedule-belongs-in-the-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-schedule-belongs-in-the-analysis">Why the schedule belongs in the analysis</h2>
+<p>In many projects the schedule is treated as paperwork that can be set aside once the field season is over. I prefer to treat it as data. It tells us the available days, the strata, and which opportunities to sample were actually selected.</p>
+<p>That is why the calendar is the starting point for a design object. The count table tells us what was observed. The calendar tells us what those observations need to represent. If a weekday and a weekend are separate strata in the field, they should remain separate in the object used for estimation unless there is a defensible reason to combine them.</p>
+<p>The same idea carries into interviews and catch. As the analysis grows, the design object can be extended with <code>add_interviews()</code>, <code>add_catch()</code>, and <code>add_lengths()</code>. Those additions do not turn a pile of tables into a black box. They make the links between the tables explicit and allow the later functions to check that the pieces make sense together.</p>
+</section>
+<section id="the-design-object-also-makes-error-checking-more-useful" class="level2">
+<h2 class="anchored" data-anchor-id="the-design-object-also-makes-error-checking-more-useful">The design object also makes error checking more useful</h2>
+<p>The design object supports two different kinds of error checking. They use the same survey context, but they have different jobs.</p>
+<p><strong>Automatic guardrails</strong> run under the hood when you create or extend a design object, and again when an estimator needs a particular piece of information. They are there to stop an analysis before an assumption is silently violated. For example, <code>creel_design()</code> requires the selected date to be a real <code>Date</code> with no missing values and strata to be usable categories. <code>add_counts()</code> can catch ambiguous repeated sampling units or information that would make a count or its variance hard to interpret. Other survey types bring their own checks: a bus-route design, for example, verifies its inclusion probabilities. These are not optional data-cleaning suggestions; they protect the weights, expansions, units, and variance calculations the estimator will use.</p>
+<p><strong>Diagnostic tools for the analyst</strong> are the checks you run deliberately to understand the data and decide what to do next. <code>validation_report()</code> is a table-level diagnostic that reports column types and flags missingness, implausible dates, negative numeric values, empty text values, and—when a species field is supplied—unmatched species names. It does not decide whether a flagged value should be deleted or changed; it gives the analyst a concise record to investigate.</p>
+<p><code>check_completeness()</code> is the design-aware companion diagnostic. After data are attached, it compares the observed tables with the calendar held by the design object and can identify scheduled days with no count data and strata with too few interviews for a dependable rate estimate. In other words, it asks not only, “Is this cell blank?” but also, “What was supposed to have been sampled here, and what does its absence mean?”</p>
+<p>Here is a useful diagnostic sequence before estimation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Inspect the incoming tables; investigate any flags.</span></span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">validation_report</span>(</span>
+<span id="cb2-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> counts,</span>
+<span id="cb2-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interviews =</span> interviews,</span>
+<span id="cb2-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">species_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span></span>
+<span id="cb2-6">)</span>
+<span id="cb2-7"></span>
+<span id="cb2-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Use the calendar in the completed design to assess coverage.</span></span>
+<span id="cb2-9">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">calendar =</span> schedule, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-10">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> counts) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb2-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_interviews</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interviews =</span> interviews)</span>
+<span id="cb2-12"></span>
+<span id="cb2-13"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">check_completeness</span>(design)</span></code></pre></div></div>
+<p>The distinction matters because neither kind of checking substitutes for a field biologist’s judgment. A flagged long trip may be a data-entry error, or it may be the most informative trip in the dataset. The guardrails prevent invalid analysis states; the diagnostic tools surface questions that require an informed decision before a result is reported.</p>
+</section>
+<section id="where-tidycreel.connect-fits" class="level2">
+<h2 class="anchored" data-anchor-id="where-tidycreel.connect-fits">Where tidycreel.connect fits</h2>
+<p>Most agencies do not export a dataset with the exact variable names used in an R package. The interview identifier might be <code>InterviewID</code>; the date might be <code>SurveyDate</code>; effort might be <code>HoursFished</code>. That is normal. The problem comes when those translations happen informally in several scripts or, worse, by hand.</p>
+<p><a href="https://github.com/chrischizinski/tidycreel/tree/main/tidycreel.connect"><code>tidycreel.connect</code></a> is the layer I use before building the design object. It connects to CSV files, a SQL Server database, or a REST API; applies an explicit column map; and returns tables with the canonical names expected by <code>tidycreel</code>.</p>
+<p>Here is the basic CSV pattern. In a real project, the schema would document the names used by that agency’s export.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb3-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel.connect)</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">schema <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_schema</span>(</span>
+<span id="cb3-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">survey_type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"instantaneous"</span>,</span>
+<span id="cb3-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interview_uid_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"InterviewID"</span>,</span>
+<span id="cb3-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"SurveyDate"</span>,</span>
+<span id="cb3-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">effort_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"HoursFished"</span>,</span>
+<span id="cb3-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">trip_status_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"TripStatus"</span>,</span>
+<span id="cb3-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">bank_anglers_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"BankAnglers"</span>,</span>
+<span id="cb3-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">angler_boats_col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"AnglerBoats"</span></span>
+<span id="cb3-12">)</span>
+<span id="cb3-13"></span>
+<span id="cb3-14">conn <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_connect</span>(</span>
+<span id="cb3-15">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">con =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(</span>
+<span id="cb3-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interviews =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/interviews.csv"</span>,</span>
+<span id="cb3-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/counts.csv"</span></span>
+<span id="cb3-18">  ),</span>
+<span id="cb3-19">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">schema =</span> schema</span>
+<span id="cb3-20">)</span>
+<span id="cb3-21"></span>
+<span id="cb3-22">interviews <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fetch_interviews</span>(conn)</span>
+<span id="cb3-23">counts <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fetch_counts</span>(conn)</span></code></pre></div></div>
+<p>The connection does not decide how the survey was designed. It performs the translation so that the analysis does not depend on whatever a particular database or spreadsheet happened to call a field. The sampling schedule remains an explicit input, and the fetched tables become the observation inputs. From there, the workflow becomes much easier to read:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb4-2">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">calendar =</span> schedule,</span>
+<span id="cb4-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb4-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb4-5">)</span>
+<span id="cb4-6"></span>
+<span id="cb4-7">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(</span>
+<span id="cb4-8">  design,</span>
+<span id="cb4-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> counts,</span>
+<span id="cb4-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_col =</span> bank_anglers,</span>
+<span id="cb4-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_time_col =</span> count_time</span>
+<span id="cb4-12">)</span></code></pre></div></div>
+<p>The important point is not that every project must use a database connection. Many projects will begin with a folder of CSV files. The point is that the translation from agency data to analysis data should be declared once, inspected, and reused. That makes a handoff to a colleague, a new field season, or a future version of yourself much less fragile.</p>
+</section>
+<section id="a-runnable-walkthrough" class="level2">
+<h2 class="anchored" data-anchor-id="a-runnable-walkthrough">A runnable walkthrough</h2>
+<p>If you would rather learn by running a complete example, I have also prepared a <a href="../assets/code/tidycreel_walkthrough.R" download="">one-hour tidycreel walkthrough</a> that you can download and open in RStudio. It moves from planning a survey and building a schedule through validation, effort, catch, biological data, plots, and export. The script is deliberately more expansive than this post: use it as a guided tour, and return here when you want the reasoning behind the design object.</p>
+</section>
+<section id="a-useful-habit-before-estimating-anything" class="level2">
+<h2 class="anchored" data-anchor-id="a-useful-habit-before-estimating-anything">A useful habit before estimating anything</h2>
+<p>Before running an estimator, I would ask four questions:</p>
+<ul>
+<li>What are my sampling units?</li>
+<li>What are my strata, and why do they belong in the design?</li>
+<li>Which table contains the observation, and which table describes what it represents?</li>
+<li>Can another analyst see how my agency fields became the variables in the analysis?</li>
+</ul>
+<p>If those answers are clear, the design object becomes more than a programming convenience. It is a compact, inspectable record of the survey logic. If they are not clear, changing estimators rarely fixes the underlying problem.</p>
+<p>The <a href="https://chrischizinski.com/tidycreel/">tidycreel reference site</a> has the function-level details. The chapter <a href="https://modern-creel-surveys.netlify.app/building-a-creel-design-object.html">Building a Creel Design Object</a> in <em>Modern Creel Survey Analysis in R</em> walks through a fuller example, including interviews and species-level catch. The companion chapter on <a href="https://modern-creel-surveys.netlify.app/creel-connect.html">tidycreel.connect</a> shows the connection workflow in more detail.</p>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">next post looks more closely at the sampling calendar</a> and why it needs to survive all the way to the final estimate. The later <a href="../posts/2026-09-18-linked-tables.html">linked-tables tutorial</a> returns to the same design object once counts, interviews, catch, and biological observations are attached.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-08-27-design-object.html</guid>
+  <pubDate>Thu, 27 Aug 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Introducing tidycreel and Modern Creel Survey Analysis in R</title>
+  <link>https://chrischizinski.com/posts/2026-08-18-introducing-tidycreel.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Creel surveys are a way to estimate angler effort, catch, or harvest from interviews at a lake. That is true, but it leaves out most of the work. A useful estimate depends on decisions made well before anyone opens R: which days are available for sampling, how they are stratified, how counts and interviews are collected, what happens when an angler has not finished a trip, and what population the final number is meant to describe.</p>
+<p>Those details can make creel analysis feel more difficult than it needs to be. They also make it interesting. A creel survey joins field work, data management, sampling theory, statistical estimation, and communication with people who need to make decisions. I built <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> to give that work a more consistent home in R.</p>
+<p><code>tidycreel</code> is an R package for creel-survey design, data management, estimation, visualization, and reporting. It supports common survey settings, including instantaneous count, bus-route, ice-fishing, camera, and aerial workflows. It is not intended to make the judgment calls disappear. It is meant to make the decisions, data, and assumptions that support an estimate easier to see and reproduce.</p>
+<p>This blog series will be a place to work through those ideas in small pieces. I will use real <code>tidycreel</code> workflows and R code, but I do not want to repeat the package reference page function by function. The reference site is where I will keep the arguments, return values, and examples closest to the code. Here, I want to spend more time on why a workflow is structured as it is and how it relates to the work of fisheries scientists, managers, students, and analysts.</p>
+<section id="why-creel-analysis-gets-complicated" class="level2">
+<h2 class="anchored" data-anchor-id="why-creel-analysis-gets-complicated">Why creel analysis gets complicated</h2>
+<p>The arithmetic behind an estimate can be simple. The surrounding survey is not. A count at an access point is not automatically a measure of effort across a lake. An interview from an angler who is still fishing does not mean the same thing as an interview at the end of a trip. A catch table may have a different unit of observation than an interview table. Weekday and weekend samples may need different treatment because the fishery behaves differently and because the sampling design says they do.</p>
+<p>Those are not annoying details to clean up after the fact. They determine what an estimate means and how much confidence we should place in it. A good workflow keeps the sampling design attached to the data instead of reducing everything to a spreadsheet of numbers before analysis starts.</p>
+<p>That is also why I think reproducibility matters here. It is not only about being able to rerun a script. A reproducible creel analysis should let a colleague see how the schedule, raw data, cleaning decisions, and estimation choices became a reported result. That is useful in a graduate methods course, but it is equally useful when a manager asks what a change in estimated harvest means for a fishery.</p>
+</section>
+<section id="why-build-on-the-tidyverse-and-survey-packages" class="level2">
+<h2 class="anchored" data-anchor-id="why-build-on-the-tidyverse-and-survey-packages">Why build on the tidyverse and survey packages</h2>
+<p>I did not want to rebuild the parts of R that already work well. <code>tidycreel</code> uses tidyverse conventions because they make data work readable. Tables stay as data frames or tibbles. Common tasks use verbs that many R users already know, such as <code>filter()</code>, <code>mutate()</code>, <code>group_by()</code>, <code>summarise()</code>, and <code>left_join()</code>. The package also uses tidy-select style column arguments, so the code can stay close to the names used in a survey.</p>
+<p>For example, the start of a simple workflow reads like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">creel_design</span>(</span>
+<span id="cb1-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">calendar =</span> survey_calendar,</span>
+<span id="cb1-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> date,</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> day_type</span>
+<span id="cb1-7">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb1-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_counts</span>(</span>
+<span id="cb1-9">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> angler_counts,</span>
+<span id="cb1-10">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_col =</span> angler_count,</span>
+<span id="cb1-11">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">count_time_col =</span> count_time</span>
+<span id="cb1-12">  )</span></code></pre></div></div>
+<p>The tidyverse style helps us build and inspect the data. It is not the statistical engine. For that, <code>tidycreel</code> builds on the <a href="https://cran.r-project.org/package=survey"><code>survey</code></a> package. The <code>survey</code> package has a long record of implementing design-based analysis: stratification, sampling units, probabilities, totals, ratios, and variance estimation. Those are the pieces we need when a count or interview has to represent more than itself.</p>
+<p>That combination is deliberate. The tidyverse makes the workflow legible. The <code>survey</code> package supplies the design-based machinery. <code>tidycreel</code> adds creel survey vocabulary and guardrails around both, so an analysis can say <code>creel_design()</code>, <code>add_interviews()</code>, or <code>estimate_effort()</code> instead of forcing every user to reconstruct the same survey objects and variance calculations.</p>
+</section>
+<section id="the-book-and-the-package-have-different-jobs" class="level2">
+<h2 class="anchored" data-anchor-id="the-book-and-the-package-have-different-jobs">The book and the package have different jobs</h2>
+<p>The companion book, <a href="https://modern-creel-surveys.netlify.app/"><em>Modern Creel Survey Analysis in R</em></a>, takes the slower route through these topics. It is for readers who want to understand the design-based logic, data structures, diagnostics, and interpretation behind a workflow. The book is broader than package documentation because an analysis is broader than a list of functions.</p>
+<p>The package provides the working tools. The book explains the reasoning and gives the larger arc. This series sits between them. Posts will be shorter and more conversational than book chapters, while still providing code that readers can run, adapt, and question.</p>
+</section>
+<section id="who-i-am-writing-for" class="level2">
+<h2 class="anchored" data-anchor-id="who-i-am-writing-for">Who I am writing for</h2>
+<p>I have graduate students in mind, especially those who have field data and a question but have not yet had to translate a sampling design into an analysis. I am also writing for fisheries scientists and managers who need estimates that are transparent enough to explain, review, and use. Some posts will assume more R experience than others; I will try to be clear about that and to keep examples small enough that readers can see what changes from one step to the next.</p>
+<p>If you work with creel data in a different setting, I hope the series is still useful. The particular species, water body, agency database, and reporting requirements will vary. The need to connect field observations to a defined population and sampling design does not.</p>
+</section>
+<section id="what-is-coming-in-this-series" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-coming-in-this-series">What is coming in this series</h2>
+<p>Here are the first topics I plan to cover:</p>
+<ul>
+<li><a href="../posts/2026-08-27-design-object.html">Building a creel design object</a> and keeping survey structure attached to the data</li>
+<li><a href="../posts/2026-09-03-sampling-calendar.html">Sampling calendars</a>, strata, and the difference between an available day and a sampled day</li>
+<li><a href="../posts/2026-09-11-roving-interviews.html">Access-point and roving surveys</a>, including what changes when interviews occur during trips</li>
+<li><a href="../posts/2026-09-18-linked-tables.html">Data as linked tables</a>: schedules, counts, interviews, catch, and biological data</li>
+<li>Using <code>tidycreel.connect</code> to turn agency CSV files, databases, or APIs into consistent analysis inputs</li>
+<li>Validating data before an estimator turns a small problem into a large one</li>
+<li><a href="../posts/2026-09-25-effort-estimation.html">Estimating angler effort from count data</a> and describing the uncertainty around it</li>
+<li><a href="../posts/2026-10-02-catch-harvest-release.html">Catch, harvest, release, and rate estimates</a>, including the distinction between complete and incomplete trips</li>
+<li>Building reproducible Quarto reports that are useful to managers as well as analysts</li>
+<li>Reading results carefully: domains, precision, bias, and what a creel estimate does not say</li>
+<li>And more, as the package, book, and questions from readers develop</li>
+</ul>
+<p>The <a href="../posts/2026-08-27-design-object.html">next post starts with the design object</a>. It is the point where a survey plan and its observation tables become an analysis that can support the later estimates.</p>
+<p>You can find the source code for <a href="https://github.com/chrischizinski/tidycreel"><code>tidycreel</code> on GitHub</a>, the <a href="https://chrischizinski.com/tidycreel/">package reference site</a>, and the full <a href="https://modern-creel-surveys.netlify.app/">book</a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-08-18-introducing-tidycreel.html</guid>
+  <pubDate>Tue, 18 Aug 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>quarto-sciposter: scientific posters from Quarto markdown</title>
+  <link>https://chrischizinski.com/posts/2026-08-17-quarto-sciposter.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I have made more than a few conference posters by copying text and figures into a slide deck, then spending the last few hours before printing moving boxes by a few pixels. It works, but it is hard to repeat, difficult to review, and easy to break when a figure changes.</p>
+<p><a href="https://github.com/chrischizinski/quarto-sciposter"><code>quarto-sciposter</code></a> is a Quarto extension I built to make that workflow more reproducible. It takes a plain Quarto Markdown document and renders a scientific poster with <a href="https://typst.app/">Typst</a>, which is bundled with recent versions of Quarto. There is no separate LaTeX installation and no need to build the entire layout by hand.</p>
+<p><img src="https://chrischizinski.com/assets/images/projects/quarto-sciposter-hex.jpeg" class="sciposter-hex img-fluid" alt="quarto-sciposter hex sticker showing a scientific poster with charts and a peach pushpin"></p>
+<p>The package is intended for the parts of poster production that should be repeatable: poster size, column layout, typography, logos, figure placement, references, and a footer. The writing and the choices about what belongs on the poster are still mine. That is the useful division of labor.</p>
+<section id="a-poster-is-a-document-not-a-slide-with-a-large-page-size" class="level2">
+<h2 class="anchored" data-anchor-id="a-poster-is-a-document-not-a-slide-with-a-large-page-size">A poster is a document, not a slide with a large page size</h2>
+<p>I wanted a poster format that treats the document as a document. The source is Markdown, headings organize the content, code chunks can create figures, and the same source can be rendered again when a result changes. That is especially helpful for an R-based project, where the analysis, figures, and poster should not be separate final versions of the same work.</p>
+<p>The format supports poster sizes from a custom 48 by 36 inch layout to A-series sizes, with one to five columns. It includes controls for title bars, logos, references, figures, QR codes, callout boxes, evidence strips, and a prominent takeaway. It also includes a draft mode for checking the amount of content before the poster reaches the printer.</p>
+<p>Here is the smallest starting point:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> use template chrischizinski/quarto-sciposter</span></code></pre></div></div>
+<p>That command copies the extension and a <code>template.qmd</code> file into a new project. For an existing Quarto project, add the format instead:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> add chrischizinski/quarto-sciposter</span></code></pre></div></div>
+<p>Then render a poster with:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">quarto</span> render my-poster.qmd <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--to</span> sciposter-typst</span></code></pre></div></div>
+<p>The beginning of the document declares the poster rather than relying on manual page setup:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb4-1"><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">---</span></span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">title</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Poster title"</span></span>
+<span id="cb4-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">author</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Your name"</span></span>
+<span id="cb4-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">format</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb4-5"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sciposter-typst</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb4-6"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">poster</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb4-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">size</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"48x36"</span></span>
+<span id="cb4-8"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">columns</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span></span>
+<span id="cb4-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> generic</span></span>
+<span id="cb4-10"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">footer</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Conference 2026"</span></span>
+<span id="cb4-11"><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">---</span></span></code></pre></div></div>
+<p>From there, the body is ordinary Quarto Markdown. A figure generated in an R chunk is part of the poster source, and a change to the analysis can flow into a new poster PDF without another round of copying and pasting.</p>
+</section>
+<section id="making-it-your-poster" class="level2">
+<h2 class="anchored" data-anchor-id="making-it-your-poster">Making it your poster</h2>
+<p>The point of the format is not to force every poster into the same visual style. Most customization happens in the document YAML, so a project can have its own colors, typography, size, logos, and footer without editing the extension.</p>
+<p>Start with one of the supplied themes, <code>generic</code> or <code>unl</code>, then override only the parts that belong to the project. This example changes the primary and accent colors, uses a distinct heading font, sets the type scale explicitly, and adds institutional logos:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">format</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-2"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sciposter-typst</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-3"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">poster</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-4"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">size</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"48x36"</span></span>
+<span id="cb5-5"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">columns</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span></span>
+<span id="cb5-6"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> generic</span></span>
+<span id="cb5-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">colors</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-8"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">primary</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#0D3B66"</span></span>
+<span id="cb5-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">accent</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07A5F"</span></span>
+<span id="cb5-10"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fonts</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Source Sans Pro"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Helvetica"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb5-11"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">heading-fonts</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Source Serif Pro"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb5-12"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">base-font-size</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 28pt</span></span>
+<span id="cb5-13"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">title-font-size</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 72pt</span></span>
+<span id="cb5-14"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">footer</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-15"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">left</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"American Fisheries Society 2026"</span></span>
+<span id="cb5-16"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">        </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">right</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"your-project.org"</span></span>
+<span id="cb5-17"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">logos</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb5-18"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">left</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">logos/university.svg</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb5-19"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">right</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">logos/funder.png</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span></code></pre></div></div>
+<p>The body has its own layout controls. A takeaway makes one result readable from across the aisle, a <code>poster-box</code> groups supporting material, and a <code>poster-grid</code> places related items on a shared row. They are ordinary fenced divs in the source:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1">::: {.takeaway label="Key finding"}</span>
+<span id="cb6-2">Catch rates fell after the regulation change.</span>
+<span id="cb6-3">:::</span>
+<span id="cb6-4"></span>
+<span id="cb6-5">::: {.poster-box title="Methods"}</span>
+<span id="cb6-6">Brief text, a figure, or a table that readers should consider together.</span>
+<span id="cb6-7">:::</span></code></pre></div></div>
+<p>For a more specific change, the extension also exposes <code>theme-overrides</code>. That is useful when, for example, the title bar and section bars need different colors, or a project needs a custom heading treatment. The full set of options and layout blocks is in the <a href="https://github.com/chrischizinski/quarto-sciposter#readme">quarto-sciposter README</a>.</p>
+</section>
+<section id="an-example-from-afs-2026" class="level2">
+<h2 class="anchored" data-anchor-id="an-example-from-afs-2026">An example from AFS 2026</h2>
+<p>I used <code>quarto-sciposter</code> to make a poster for the 2026 American Fisheries Society meeting: <a href="../assets/documents/tidycreel-afs-2026.pdf"><em>tidycreel: A Unified R Framework for Modern Creel Surveys</em></a>. It is a useful example of the type of project I had in mind: a poster that needs to explain a technical workflow, show figures and a code-adjacent conceptual structure, include several authors and affiliations, and remain readable from a few feet away.</p>
+<p>The poster is a PDF, but its source is still a Quarto document. That means I can adjust a figure, revise a sentence, add a collaborator, or change the conference footer without rebuilding the layout from scratch.</p>
+<p>The source and installation instructions are available at <a href="https://github.com/chrischizinski/quarto-sciposter">github.com/chrischizinski/quarto-sciposter</a>. I will keep adding examples as I use the format for different poster sizes and types of analysis.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>rstats</category>
+  <category>quarto</category>
+  <guid>https://chrischizinski.com/posts/2026-08-17-quarto-sciposter.html</guid>
+  <pubDate>Mon, 17 Aug 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>rmd2qmd: migrating legacy R Markdown to Quarto</title>
+  <link>https://chrischizinski.com/posts/2026-07-26-rmd2qmd.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I have been spending more time moving older analysis projects, notes, and reports from R Markdown to Quarto. That work is usually straightforward until you hit the edge cases: YAML options that matter, chunk behavior that needs to stay intact, or formatting that falls apart when the conversion is handled with simple find-and-replace scripts.</p>
+<p>To make that migration less brittle, I put together <a href="https://github.com/chrischizinski/rmd2qmd"><code>rmd2qmd</code></a>, an R package for converting legacy <code>.Rmd</code> documents to <code>.qmd</code> while preserving rendering behavior, executable code, and document structure.</p>
+<p><img src="https://chrischizinski.com/assets/images/projects/hex-rmd2qmd.png" class="img-fluid" alt="rmd2qmd hex logo" width="220"></p>
+<p>The package is built around a few simple principles:</p>
+<ul>
+<li>preserve behavior before appearance</li>
+<li>parse structure instead of guessing with regex</li>
+<li>warn when a conversion is uncertain</li>
+<li>never overwrite the original <code>.Rmd</code> file unless explicitly requested</li>
+<li>keep the generated Quarto readable</li>
+</ul>
+<p>Under the hood, <code>rmd2qmd</code> works with YAML front matter, the Markdown abstract syntax tree, and knitr chunks so the output is closer to idiomatic Quarto than what you usually get from a quick text substitution.</p>
+<p>Right now the package supports a few common workflows:</p>
+<ul>
+<li>converting a single <code>.Rmd</code> file</li>
+<li>converting a directory recursively</li>
+<li>optionally validating converted outputs by rendering them with Quarto</li>
+<li>generating a Markdown conversion report after a run</li>
+</ul>
+<p>If you want to try it, install the development version from GitHub:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># install.packages("pak")</span></span>
+<span id="cb1-2">pak<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pak</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"chrischizinski/rmd2qmd"</span>)</span></code></pre></div></div>
+<p>Then convert a file or an entire project:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(rmd2qmd)</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Convert one file</span></span>
+<span id="cb2-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">convert_file</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"chapter1.Rmd"</span>)</span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Convert a directory and validate the outputs</span></span>
+<span id="cb2-7">results <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">convert_directory</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"book/"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">validate =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)</span>
+<span id="cb2-8"></span>
+<span id="cb2-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Write a conversion summary</span></span>
+<span id="cb2-10"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">generate_report</span>(results, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">output =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"conversion-report.md"</span>)</span></code></pre></div></div>
+<p>The package is still early, but the main goal is already in place: make it easier to modernize older R Markdown material without introducing silent changes.</p>
+<p>The source code is on GitHub at <a href="https://github.com/chrischizinski/rmd2qmd"><code>chrischizinski/rmd2qmd</code></a>, and the reference site is available at <a href="https://chrischizinski.com/rmd2qmd/">chrischizinski.com/rmd2qmd</a>.</p>
+
+
+
+ ]]></description>
+  <category>rstats</category>
+  <category>quarto</category>
+  <guid>https://chrischizinski.com/posts/2026-07-26-rmd2qmd.html</guid>
+  <pubDate>Sun, 26 Jul 2026 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A Shiny Creel Scheduler</title>
   <link>https://chrischizinski.com/posts/2015-05-08-shinyschedule.html</link>

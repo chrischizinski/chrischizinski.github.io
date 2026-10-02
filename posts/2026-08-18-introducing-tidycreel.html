@@ -6,9 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2014-08-24">
+<meta name="dcterms.date" content="2026-08-18">
+<meta name="description" content="An introduction to tidycreel, its companion book, and a new series on practical creel-survey analysis in R.">
 
-<title>Using geom_blank for better axis ranges in ggplot – Christopher Chizinski</title>
+<title>Introducing tidycreel and Modern Creel Survey Analysis in R – Christopher Chizinski</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -176,12 +177,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#plot-as-is" id="toc-plot-as-is" class="nav-link active" data-scroll-target="#plot-as-is">Plot as is</a>
-  <ul class="collapse">
-  <li><a href="#coord_cartesian" id="toc-coord_cartesian" class="nav-link" data-scroll-target="#coord_cartesian">coord_cartesian</a></li>
-  <li><a href="#expand_limits-and-scale_y_continuous" id="toc-expand_limits-and-scale_y_continuous" class="nav-link" data-scroll-target="#expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</a></li>
-  <li><a href="#geom_blank" id="toc-geom_blank" class="nav-link" data-scroll-target="#geom_blank">geom_blank</a></li>
-  </ul></li>
+  <li><a href="#why-creel-analysis-gets-complicated" id="toc-why-creel-analysis-gets-complicated" class="nav-link active" data-scroll-target="#why-creel-analysis-gets-complicated">Why creel analysis gets complicated</a></li>
+  <li><a href="#why-build-on-the-tidyverse-and-survey-packages" id="toc-why-build-on-the-tidyverse-and-survey-packages" class="nav-link" data-scroll-target="#why-build-on-the-tidyverse-and-survey-packages">Why build on the tidyverse and survey packages</a></li>
+  <li><a href="#the-book-and-the-package-have-different-jobs" id="toc-the-book-and-the-package-have-different-jobs" class="nav-link" data-scroll-target="#the-book-and-the-package-have-different-jobs">The book and the package have different jobs</a></li>
+  <li><a href="#who-i-am-writing-for" id="toc-who-i-am-writing-for" class="nav-link" data-scroll-target="#who-i-am-writing-for">Who I am writing for</a></li>
+  <li><a href="#what-is-coming-in-this-series" id="toc-what-is-coming-in-this-series" class="nav-link" data-scroll-target="#what-is-coming-in-this-series">What is coming in this series</a></li>
   </ul>
 </nav>
     </div>
@@ -190,12 +190,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using geom_blank for better axis ranges in ggplot</h1>
+<h1 class="title">Introducing tidycreel and Modern Creel Survey Analysis in R</h1>
   <div class="quarto-categories">
+    <div class="quarto-category">tidycreel</div>
     <div class="quarto-category">rstats</div>
+    <div class="quarto-category">fisheries</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    An introduction to tidycreel, its companion book, and a new series on practical creel-survey analysis in R.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -204,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 24, 2014</p>
+      <p class="date">August 18, 2026</p>
     </div>
   </div>
   
@@ -216,80 +223,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The RMarkdown source to this file can be found <a href="\Rmd\2014-08-24-using_geom_blank.Rmd">here</a></p>
-<p>Using facet_wrap() in <strong>ggplot2</strong> is a great way to create multiple panelled plots. Though when I am running these, particularly on datasets with different scales, the axis are not as clean as I like. To provide an illustration of what I am referring to, I will make up some fake data with some different scales in the y values and then plot these in ggplot</p>
-<section id="plot-as-is" class="level2">
-<h2 class="anchored" data-anchor-id="plot-as-is">Plot as is</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140824</span>)</span>
+<p>Creel surveys are a way to estimate angler effort, catch, or harvest from interviews at a lake. That is true, but it leaves out most of the work. A useful estimate depends on decisions made well before anyone opens R: which days are available for sampling, how they are stratified, how counts and interviews are collected, what happens when an angler has not finished a trip, and what population the final number is meant to describe.</p>
+<p>Those details can make creel analysis feel more difficult than it needs to be. They also make it interesting. A creel survey joins field work, data management, sampling theory, statistical estimation, and communication with people who need to make decisions. I built <a href="https://chrischizinski.com/tidycreel/"><code>tidycreel</code></a> to give that work a more consistent home in R.</p>
+<p><code>tidycreel</code> is an R package for creel-survey design, data management, estimation, visualization, and reporting. It supports common survey settings, including instantaneous count, bus-route, ice-fishing, camera, and aerial workflows. It is not intended to make the judgment calls disappear. It is meant to make the decisions, data, and assumptions that support an estimate easier to see and reproduce.</p>
+<p>This blog series will be a place to work through those ideas in small pieces. I will use real <code>tidycreel</code> workflows and R code, but I do not want to repeat the package reference page function by function. The reference site is where I will keep the arguments, return values, and examples closest to the code. Here, I want to spend more time on why a workflow is structured as it is and how it relates to the work of fisheries scientists, managers, students, and analysts.</p>
+<section id="why-creel-analysis-gets-complicated" class="level2">
+<h2 class="anchored" data-anchor-id="why-creel-analysis-gets-complicated">Why creel analysis gets complicated</h2>
+<p>The arithmetic behind an estimate can be simple. The surrounding survey is not. A count at an access point is not automatically a measure of effort across a lake. An interview from an angler who is still fishing does not mean the same thing as an interview at the end of a trip. A catch table may have a different unit of observation than an interview table. Weekday and weekend samples may need different treatment because the fishery behaves differently and because the sampling design says they do.</p>
+<p>Those are not annoying details to clean up after the fact. They determine what an estimate means and how much confidence we should place in it. A good workflow keeps the sampling design attached to the data instead of reducing everything to a spreadsheet of numbers before analysis starts.</p>
+<p>That is also why I think reproducibility matters here. It is not only about being able to rerun a script. A reproducible creel analysis should let a colleague see how the schedule, raw data, cleaning decisions, and estimation choices became a reported result. That is useful in a graduate methods course, but it is equally useful when a manager asks what a change in estimated harvest means for a fishery.</p>
+</section>
+<section id="why-build-on-the-tidyverse-and-survey-packages" class="level2">
+<h2 class="anchored" data-anchor-id="why-build-on-the-tidyverse-and-survey-packages">Why build on the tidyverse and survey packages</h2>
+<p>I did not want to rebuild the parts of R that already work well. <code>tidycreel</code> uses tidyverse conventions because they make data work readable. Tables stay as data frames or tibbles. Common tasks use verbs that many R users already know, such as <code>filter()</code>, <code>mutate()</code>, <code>group_by()</code>, <code>summarise()</code>, and <code>left_join()</code>. The package also uses tidy-select style column arguments, so the code can stay close to the names used in a survey.</p>
+<p>For example, the start of a simple workflow reads like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycreel)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>## Use suppressPackageStartupMessages to eliminate package startup messages.</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># First make up some data with different values for y with different scales</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>foo.dat<span class="ot">&lt;-</span><span class="fu">rbind</span>(<span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"A"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"B"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">3</span>)<span class="sc">+</span><span class="dv">20</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">data.frame</span>(<span class="at">group=</span><span class="st">"C"</span>, <span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">50</span>), <span class="at">y=</span><span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="at">mean=</span><span class="dv">5</span>,<span class="at">sd=</span><span class="dv">5</span>)<span class="sc">+</span><span class="dv">30</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>foo.dat,<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">colour=</span>group),<span class="at">size=</span><span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>group,<span class="at">scales=</span><span class="st">"free_y"</span>) <span class="sc">+</span> <span class="do">## using scales="free_y" allows the y-axis to vary while keeping x-axis constant among plots</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<section id="coord_cartesian" class="level3">
-<h3 class="anchored" data-anchor-id="coord_cartesian">coord_cartesian</h3>
-<p>When using a single panel or data that is all on the same scale, I frequently use <code>coord_cartesian</code>. Unfortunately when you have panels with different scales this is no longer as useful because it forces everything on the same scale (which depending on what you are looking at may not be bad).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>)) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-3.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">creel_design</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">calendar =</span> survey_calendar,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> date,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> day_type</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_counts</span>(</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">counts =</span> angler_counts,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">count_col =</span> angler_count,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">count_time_col =</span> count_time</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The tidyverse style helps us build and inspect the data. It is not the statistical engine. For that, <code>tidycreel</code> builds on the <a href="https://cran.r-project.org/package=survey"><code>survey</code></a> package. The <code>survey</code> package has a long record of implementing design-based analysis: stratification, sampling units, probabilities, totals, ratios, and variance estimation. Those are the pieces we need when a count or interview has to represent more than itself.</p>
+<p>That combination is deliberate. The tidyverse makes the workflow legible. The <code>survey</code> package supplies the design-based machinery. <code>tidycreel</code> adds creel survey vocabulary and guardrails around both, so an analysis can say <code>creel_design()</code>, <code>add_interviews()</code>, or <code>estimate_effort()</code> instead of forcing every user to reconstruct the same survey objects and variance calculations.</p>
 </section>
-<section id="expand_limits-and-scale_y_continuous" class="level3">
-<h3 class="anchored" data-anchor-id="expand_limits-and-scale_y_continuous">expand_limits and scale_y_continuous</h3>
-<p>Another option is to use <code>expand_limits()</code> to force each panel to start at the origin and then use <code>scale_y_continuous(expand=c(0,0))</code> to remove any extra space on around the y-axis limits. The two values in expand are c(multiplier buffer, additive buffer). By including a c(0,0) we are not including any buffer on the axis scale.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-4.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>As you can see in the above plot, using the combo of <code>expand_limits</code> and <code>scale_y_continuous(expand=c(0,0)</code> we can force the minimum to start at 0 but it max values are not as clean as I would like. This is where <code>geom_blank()</code> comes in. The purpose, according to the help files for <a href="http://docs.ggplot2.org/0.9.3.1/geom_blank.html"><code>geom_blank()</code></a> are to essentially draw nothing. When I first saw this, I was really baffled. Why would you not want something that drew nothing? I then realized the benefit of this in axis formatting.</p>
+<section id="the-book-and-the-package-have-different-jobs" class="level2">
+<h2 class="anchored" data-anchor-id="the-book-and-the-package-have-different-jobs">The book and the package have different jobs</h2>
+<p>The companion book, <a href="https://modern-creel-surveys.netlify.app/"><em>Modern Creel Survey Analysis in R</em></a>, takes the slower route through these topics. It is for readers who want to understand the design-based logic, data structures, diagnostics, and interpretation behind a workflow. The book is broader than package documentation because an analysis is broader than a list of functions.</p>
+<p>The package provides the working tools. The book explains the reasoning and gives the larger arc. This series sits between them. Posts will be shorter and more conversational than book chapters, while still providing code that readers can run, adapt, and question.</p>
 </section>
-<section id="geom_blank" class="level3">
-<h3 class="anchored" data-anchor-id="geom_blank">geom_blank</h3>
-<p>The first thing to do, is to create a dataset with the mins and maxes of the y axis for each group level in our dataset. This is then passed to ggplot using <code>geom_blank</code></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>blank_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">group =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>), <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">50</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot it in ggplot</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">data =</span> foo.dat, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">colour =</span> group), <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_blank</span>(<span class="at">data =</span> blank_data, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>group, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../figs/2014-08-24-using_geom_blank/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>So we now have a plot with much cleaner y-axis ranges and plots that we can now present in public.</p>
+<section id="who-i-am-writing-for" class="level2">
+<h2 class="anchored" data-anchor-id="who-i-am-writing-for">Who I am writing for</h2>
+<p>I have graduate students in mind, especially those who have field data and a question but have not yet had to translate a sampling design into an analysis. I am also writing for fisheries scientists and managers who need estimates that are transparent enough to explain, review, and use. Some posts will assume more R experience than others; I will try to be clear about that and to keep examples small enough that readers can see what changes from one step to the next.</p>
+<p>If you work with creel data in a different setting, I hope the series is still useful. The particular species, water body, agency database, and reporting requirements will vary. The need to connect field observations to a defined population and sampling design does not.</p>
+</section>
+<section id="what-is-coming-in-this-series" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-coming-in-this-series">What is coming in this series</h2>
+<p>Here are the first topics I plan to cover:</p>
+<ul>
+<li><a href="../posts/2026-08-27-design-object.html">Building a creel design object</a> and keeping survey structure attached to the data</li>
+<li><a href="../posts/2026-09-03-sampling-calendar.html">Sampling calendars</a>, strata, and the difference between an available day and a sampled day</li>
+<li><a href="../posts/2026-09-11-roving-interviews.html">Access-point and roving surveys</a>, including what changes when interviews occur during trips</li>
+<li><a href="../posts/2026-09-18-linked-tables.html">Data as linked tables</a>: schedules, counts, interviews, catch, and biological data</li>
+<li>Using <code>tidycreel.connect</code> to turn agency CSV files, databases, or APIs into consistent analysis inputs</li>
+<li>Validating data before an estimator turns a small problem into a large one</li>
+<li><a href="../posts/2026-09-25-effort-estimation.html">Estimating angler effort from count data</a> and describing the uncertainty around it</li>
+<li><a href="../posts/2026-10-02-catch-harvest-release.html">Catch, harvest, release, and rate estimates</a>, including the distinction between complete and incomplete trips</li>
+<li>Building reproducible Quarto reports that are useful to managers as well as analysts</li>
+<li>Reading results carefully: domains, precision, bias, and what a creel estimate does not say</li>
+<li>And more, as the package, book, and questions from readers develop</li>
+</ul>
+<p>The <a href="../posts/2026-08-27-design-object.html">next post starts with the design object</a>. It is the point where a survey plan and its observation tables become an analysis that can support the later estimates.</p>
+<p>You can find the source code for <a href="https://github.com/chrischizinski/tidycreel"><code>tidycreel</code> on GitHub</a>, the <a href="https://chrischizinski.com/tidycreel/">package reference site</a>, and the full <a href="https://modern-creel-surveys.netlify.app/">book</a>.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
