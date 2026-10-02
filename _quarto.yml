@@ -31,7 +31,6 @@ website:
       - text: "Lab"
         href: https://humandimensions.unl.edu
   page-footer:
-    left: "© 2026 Christopher Chizinski"
     center: |
       <span class="footer-links">
       <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a>
@@ -40,7 +39,7 @@ website:
       <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a>
       <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a>
       </span>
-    right: "Built with [Quarto](https://quarto.org)"
+      <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span>
 
 format:
   html:

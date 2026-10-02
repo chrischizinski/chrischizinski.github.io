@@ -16,6 +16,16 @@ title-block-banner: false
 fishes, how participation changes over time, and what that means for the agencies
 that manage public resources.
 
+I combine survey science, quantitative methods, and reproducible data analysis
+to study participation, behavior, harvest, and decision-making. Much of this
+work involves creel and angler surveys, capture–recapture methods, recruitment,
+retention, and reactivation (R3), and open-source R tools for conservation
+research and management.
+
+I teach undergraduate courses in human dimensions and natural resource policy,
+and graduate courses in R programming, data visualization, and reproducible
+science, and help lead the School's research and graduate programs.
+
 <div class="hero-links">
 <a href="https://github.com/chrischizinski" aria-label="GitHub"><i class="bi bi-github"></i> GitHub</a>
 <a href="https://bsky.app/profile/chrischizinski.bsky.social" aria-label="Bluesky"><i class="bi bi-cloud"></i> Bluesky</a>
@@ -55,21 +65,5 @@ that manage public resources.
 <span class="tile-title">Lab&nbsp;↗</span>
 <span class="tile-desc">Members, current projects, and joining the group.</span>
 </a>
-
-:::
-
-::: {.home-section .home-about}
-
-[About]{.specimen-label}
-
-I combine survey science, quantitative methods, and reproducible data analysis
-to study participation, behavior, harvest, and decision-making. Much of this
-work involves creel and angler surveys, capture–recapture methods, recruitment,
-retention, and reactivation (R3), and open-source R tools for conservation
-research and management.
-
-I teach undergraduate courses in human dimensions and natural resource policy,
-and graduate courses in R programming, data visualization, and reproducible
-science, and help lead the School's research and graduate programs.
 
 :::

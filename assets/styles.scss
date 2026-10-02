@@ -365,6 +365,11 @@ pre.sourceCode {
   font-size: 1.15rem;
   max-width: 34rem;
 }
+// Lead paragraph is large; the longer bio paragraphs after it are body size.
+.home-hero .hero-text h1 + p ~ p {
+  font-size: 1rem;
+  color: $ink;
+}
 .hero-tagline {
   font-family: $headings-font-family;
   font-weight: 600;
@@ -576,4 +581,32 @@ pre.sourceCode {
 }
 .nav-footer .footer-links i {
   margin-right: 0.25rem;
+}
+// Two tidy rows: links on top, credit line below. Quarto still emits empty
+// left/right columns (&nbsp;); hide them so they don't stack up on mobile.
+.nav-footer .nav-footer-left,
+.nav-footer .nav-footer-right {
+  display: none;
+}
+.nav-footer .nav-footer-center {
+  text-align: center;
+  margin: 0;       // Quarto adds a ~36px top margin on mobile
+  min-height: 0;
+  padding: 0.4rem 0;
+}
+.nav-footer .nav-footer-center p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+}
+@media (max-width: 480px) {
+  // cap the width so five links wrap 3 + 2 rather than 4 + 1
+  .nav-footer .footer-links { gap: 0.4rem 0.9rem; max-width: 17rem; }
+  .nav-footer .footer-links a { font-size: 0.72rem; }
+}
+.nav-footer .footer-credit {
+  font-size: 0.8rem;
+  color: $stone;
 }
