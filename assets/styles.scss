@@ -560,3 +560,24 @@ pre.sourceCode {
     min-height: 0;
   }
 }
+
+// ── Footer links ─────────────────────────────────────────────────────────
+.nav-footer .footer-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.25rem;
+}
+.nav-footer .footer-links a {
+  font-family: $font-family-monospace;
+  font-size: 0.78rem;
+  color: $stone;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.nav-footer .footer-links a:hover {
+  color: $water;
+}
+.nav-footer .footer-links i {
+  margin-right: 0.25rem;
+}
