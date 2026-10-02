@@ -13,6 +13,46 @@ Open-source tools and dashboards from my lab and research.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
+![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
+
+[R Package]{.project-tag}
+
+[tidycreel]{.card-title}
+
+Tidy R tools for creel survey design, estimation, validation, and
+management-ready reporting.
+
+<div class="project-links">
+<a href="https://chrischizinski.github.io/tidycreel/"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/tidycreel"><i class="bi bi-github"></i> GitHub</a>
+</div>
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
+::: {.card .project-card}
+::: {.card-body}
+![](assets/images/projects/hex-book.svg){.project-hex fig-alt="Modern Creel Survey Analysis book hex logo"}
+
+[Quarto Book]{.project-tag}
+
+[Modern Creel Survey Analysis in R]{.card-title}
+
+Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
+— design, estimation, diagnostics, and reporting. Companion to the package.
+
+<div class="project-links">
+<a href="https://modern-creel-surveys.netlify.app"><i class="bi bi-globe"></i> Website</a>
+<a href="https://github.com/chrischizinski/modern-creel-surveys"><i class="bi bi-github"></i> GitHub</a>
+</div>
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
+::: {.card .project-card}
+::: {.card-body}
 ![](assets/images/projects/hex-rmd2qmd.png){.project-hex fig-alt="rmd2qmd hex logo"}
 
 [R Package]{.project-tag}
@@ -46,46 +86,6 @@ Quarto Markdown.
 <div class="project-links">
 <a href="posts/2026-08-17-quarto-sciposter.html"><i class="bi bi-journal-text"></i> Post</a>
 <a href="https://github.com/chrischizinski/quarto-sciposter"><i class="bi bi-github"></i> GitHub</a>
-</div>
-:::
-:::
-:::
-
-::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
-::: {.card .project-card}
-::: {.card-body}
-![](assets/images/projects/tidycreel.png){.project-hex fig-alt="tidycreel hex logo"}
-
-[R Package]{.project-tag}
-
-[tidycreel]{.card-title}
-
-Tidy R tools for creel survey design, estimation, validation, and
-management-ready reporting.
-
-<div class="project-links">
-<a href="https://chrischizinski.github.io/tidycreel/"><i class="bi bi-globe"></i> Website</a>
-<a href="https://github.com/chrischizinski/tidycreel"><i class="bi bi-github"></i> GitHub</a>
-</div>
-:::
-:::
-:::
-
-::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
-::: {.card .project-card}
-::: {.card-body}
-![](assets/images/projects/hex-book.svg){.project-hex fig-alt="Modern Creel Survey Analysis book hex logo"}
-
-[Quarto Book]{.project-tag}
-
-[Modern Creel Survey Analysis in R]{.card-title}
-
-Methods-first Quarto book on design-based creel survey analysis with `tidycreel`
-— design, estimation, diagnostics, and reporting. Companion to the package.
-
-<div class="project-links">
-<a href="https://modern-creel-surveys.netlify.app"><i class="bi bi-globe"></i> Website</a>
-<a href="https://github.com/chrischizinski/modern-creel-surveys"><i class="bi bi-github"></i> GitHub</a>
 </div>
 :::
 :::
