@@ -26,9 +26,14 @@ website:
         href: cv.qmd
     right:
       - icon: github
+        text: GitHub
         href: https://github.com/chrischizinski
         aria-label: GitHub
-      - text: "Lab"
+      - icon: cloud
+        text: Bluesky
+        href: https://bsky.app/profile/chrischizinski.bsky.social
+        aria-label: Bluesky
+      - text: "Lab ↗"
         href: https://humandimensions.unl.edu
   page-footer:
     center: |

@@ -84,6 +84,28 @@ h3 { font-size: 1.28rem; }
 .navbar .nav-link:hover {
   color: $water !important;
 }
+.navbar .nav-link:not(.active):hover::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem; right: 0.5rem; bottom: 0.15rem;
+  height: 2px;
+  background: rgba($water, 0.3);
+}
+// Icon-only links on desktop; the text label shows in the collapsed mobile menu.
+@media (min-width: 992px) {
+  .navbar .nav-link[href*="github.com"] .menu-text,
+  .navbar .nav-link[href*="bsky.app"] .menu-text {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+// Narrow screens: shrink the brand so the full name fits beside the menu and search icons.
+@media (max-width: 575.98px) {
+  .navbar-brand { font-size: 1rem; }
+}
 .navbar .nav-link.active::after {
   content: "";
   position: absolute;
