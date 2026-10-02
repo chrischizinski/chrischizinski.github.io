@@ -114,7 +114,7 @@ assistantship postings — salaries, timing, and geography.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.card .project-card}
 ::: {.card-body}
-![](assets/images/projects/hex-huntfish.svg){.project-hex fig-alt="huntfishapp hex logo"}
+![](assets/images/projects/hex-huntfishapp.png){.project-hex fig-alt="huntfishapp hex logo showing an elk and a leaping rainbow trout over rising charts"}
 
 [Shiny App]{.project-tag}
 
