@@ -1,9 +1,14 @@
 ---
 title: "Blog"
+subtitle: "Notes on R, data analysis, and creel survey methods"
 listing:
   contents: posts
   sort: "date desc"
-  type: default
+  type: grid
+  grid-columns: 3
+  image-placeholder: assets/images/blog-placeholder.svg
+  image-height: 190px
+  fields: [image, date, title, categories, reading-time]
   categories: true
   sort-ui: false
   filter-ui: false
