@@ -1,12 +1,42 @@
 ---
 title: "CV"
+page-layout: full
+toc: false
 ---
 
-A PDF of my full curriculum vitae is generated from structured data in a
-separate Quarto project.
+[Curriculum vitae · at a glance]{.specimen-label}
 
-[Download CV (PDF)](https://raw.githubusercontent.com/chrischizinski/chizinski_cv/main/chizinski_cv.pdf){.btn .btn-primary}
-[View source](https://github.com/chrischizinski/chizinski_cv){.btn .btn-outline-secondary}
+The short version. The full CV (publications, grants, teaching, advising,
+service) is built from structured data and rebuilt monthly in a separate
+Quarto project.
 
-The CV project maintains the data, bibliography, and reproducible PDF build
-independently from this website.
+::: {.cv-links}
+[Full CV (web)](https://chrischizinski.com/chizinski_cv/){.btn .btn-primary}
+[Download PDF](https://raw.githubusercontent.com/chrischizinski/chizinski_cv/main/chizinski_cv.pdf){.btn .btn-outline-secondary}
+[Source](https://github.com/chrischizinski/chizinski_cv){.btn .btn-outline-secondary}
+:::
+
+::: {.cv-glance}
+
+::: {.cv-card}
+[Positions]{.specimen-label}
+
+<dl class="cv-list">
+<dt>2025 – present</dt><dd><strong>Professor of Human Dimensions</strong><br>School of Natural Resources, University of Nebraska–Lincoln</dd>
+<dt>2024 – present</dt><dd><strong>Associate Director of Research and Graduate Education</strong><br>School of Natural Resources, University of Nebraska–Lincoln</dd>
+<dt>2019 – 2025</dt><dd><strong>Associate Professor</strong> of Human Dimensions of Wildlife Management</dd>
+<dt>2015 – 2019</dt><dd><strong>Assistant Professor</strong> of Human Dimensions of Wildlife Management</dd>
+</dl>
+:::
+
+::: {.cv-card}
+[Education]{.specimen-label}
+
+<dl class="cv-list">
+<dt>2007</dt><dd><strong>Ph.D., Fisheries Science</strong><br>Texas Tech University</dd>
+<dt>2002</dt><dd><strong>M.S., Fisheries Science</strong><br>Texas Tech University</dd>
+<dt>1999</dt><dd><strong>B.S., Ecology and Evolutionary Biology and Environmental Biology</strong><br>University of Connecticut</dd>
+</dl>
+:::
+
+:::
