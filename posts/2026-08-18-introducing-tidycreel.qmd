@@ -4,7 +4,10 @@ date: 2026-08-18
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, creel survey, survey design, rstats, fisheries science]
 description: "An introduction to tidycreel, its companion book, and a new series on practical creel-survey analysis in R."
+image: /assets/images/projects/tidycreel-introduction.png
 ---
+
+![](/assets/images/projects/tidycreel-introduction.png){fig-alt="Watercolor illustration of a fisheries clerk recording observations at a lakeside table with a calendar, field notebook, binoculars, and laptop, beside a panel connecting survey records to a data table and an estimate with uncertainty." fig-cap="A creel-survey workflow connects field decisions, observations, and reproducible estimates. Illustration generated with ChatGPT."}
 
 Creel surveys are  a way to estimate angler effort, catch, or
 harvest from interviews at a lake. That is true, but it leaves out most of the work. A useful estimate

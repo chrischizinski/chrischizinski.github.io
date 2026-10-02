@@ -5,7 +5,10 @@ date: 2026-08-27
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, creel survey, survey design, rstats, fisheries science]
 description: "A practical introduction to the tidycreel design object and the role of tidycreel.connect in a reproducible creel-survey workflow."
+image: /assets/images/projects/tidycreel-design-object.png
 ---
+
+![](/assets/images/projects/tidycreel-design-object.png){fig-alt="Watercolor illustration of an analyst organizing a survey calendar and observation sheets in an open binder at a lakeside table, surrounded by field records, binoculars, and a shoreline map with sampling locations marked." fig-cap="The design object keeps the survey structure and its observations together. Illustration generated with ChatGPT."}
 
 When I start looking at a creel survey, I usually have more than one table in
 front of me. There is a sampling schedule, a table of angler counts, interview
