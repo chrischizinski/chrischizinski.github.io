@@ -26,16 +26,17 @@ I teach undergraduate courses in human dimensions and natural resource policy,
 and graduate courses in R programming, data visualization, and reproducible
 science, and help lead the School's research and graduate programs.
 
+:::
+
+::: {.hero-photo}
+![](assets/images/chizinski-namib.jpg){fig-alt="Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"}
+
 <div class="hero-links">
 <a href="https://github.com/chrischizinski" aria-label="GitHub"><i class="bi bi-github"></i> GitHub</a>
 <a href="https://bsky.app/profile/chrischizinski.bsky.social" aria-label="Bluesky"><i class="bi bi-cloud"></i> Bluesky</a>
 <a href="mailto:cchizinski2@unl.edu" aria-label="Email"><i class="bi bi-envelope"></i> Email</a>
 <a href="blog.xml" aria-label="RSS"><i class="bi bi-rss"></i> RSS</a>
 </div>
-:::
-
-::: {.hero-photo}
-![](assets/images/chizinski-namib.jpg){fig-alt="Chris Chizinski on Big Daddy Dune in the Sossusvlei area of the Namib Desert"}
 :::
 
 :::
