@@ -135,7 +135,7 @@ Here are the first topics I plan to cover:
 - [Access-point and roving surveys](/posts/2026-09-11-roving-interviews.html), including what changes when interviews occur during trips
 - [Data as linked tables](/posts/2026-09-18-linked-tables.html): schedules, counts, interviews, catch, and biological data
 - Using `tidycreel.connect` to turn agency CSV files, databases, or APIs into consistent analysis inputs
-- Validating data before an estimator turns a small problem into a large one
+- [Validating data](/posts/2026-10-09-reading-diagnostics.html) before an estimator turns a small problem into a large one
 - [Estimating angler effort from count data](/posts/2026-09-25-effort-estimation.html) and describing the uncertainty around it
 - [Catch, harvest, release, and rate estimates](/posts/2026-10-02-catch-harvest-release.html), including the distinction between complete and incomplete trips
 - Building reproducible Quarto reports that are useful to managers as well as analysts

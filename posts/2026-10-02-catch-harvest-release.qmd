@@ -320,8 +320,9 @@ total alone does not establish that every part of the survey frame contributed.
 The [series introduction](/posts/2026-08-18-introducing-tidycreel.html) began
 with a design-first workflow. Here that design determines which observations
 can be multiplied together and what the resulting fish total represents.
-The next question is how to read the diagnostics before an estimate reaches
-a report, especially when records are missing or sampling coverage is uneven.
+The [next post reads the diagnostics before an estimate reaches a
+report](/posts/2026-10-09-reading-diagnostics.html), especially when records
+are missing or sampling coverage is uneven.
 
 ## References
 
