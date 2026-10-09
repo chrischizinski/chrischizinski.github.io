@@ -9,8 +9,426 @@
 <link>https://chrischizinski.com/blog.html</link>
 <atom:link href="https://chrischizinski.com/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Human dimensions of wildlife &amp; fisheries — research, code, and R notes.</description>
-<generator>quarto-1.10.18</generator>
-<lastBuildDate>Fri, 02 Oct 2026 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.10.19</generator>
+<lastBuildDate>Fri, 09 Oct 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Zero, Missing, or Unsampled? Reading Creel Diagnostics</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-10-09-reading-diagnostics.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-diagnostics.png" class="img-fluid" data-fig-cap="A blank record needs an explanation from the survey plan or field notes before it becomes an analysis decision. Illustration generated with ChatGPT." alt="Watercolor illustration of a fisheries analyst comparing interview sheets with a wall calendar and laptop in a field office. Marked and blank calendar cells represent visits that need different interpretations."></p>
+<p>In the <a href="../posts/2026-10-02-catch-harvest-release.html">previous post</a>, we combined counts and interview rates to estimate 3,072 fish caught. We used a small, deliberately tidy example so we could follow the calculation. Real creel data usually bring more questions: a blank catch entry, a selected day with no count, or a group of anglers represented in the counts but absent from the interviews.</p>
+<p>Those gaps do not all mean the same thing. <strong>Zero catch is an observed outcome. A missing catch value is unknown. An unsampled day can be an intentional part of a probability sample.</strong> Treating all three as zero changes the data and can change the estimate.</p>
+<p><code>tidycreel</code> provides diagnostics to help locate these problems. I want to work through what those diagnostics tell us and where we still need to look at the sampling plan or the clerk’s notes before making a decision.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Check raw tables before attaching them to a design.</li>
+<li>Compare observed records with planned visits, as well as the full calendar.</li>
+<li>Check every expected interview stratum, including strata with no records.</li>
+<li>Keep valid zero-catch trips and investigate missing values.</li>
+<li>Record the decision behind each correction or exclusion.</li>
+</ul>
+</blockquote>
+<p>This post uses <strong>tidycreel 7.0.0, “Goldeye”</strong>, and the simulated June 1–16 example from the last two installments. You can <a href="../assets/code/tidycreel_diagnostics.R" download="tidycreel_diagnostics.R">download the complete R example</a> to recreate the design and run every check below. The code deliberately introduces problems into copies of the data, leaving the original teaching example intact. The snippets below start with the <code>calendar</code>, <code>counts</code>, <code>interviews</code>, and <code>design</code> objects created in that script.</p>
+<section id="start-with-the-tables-before-building-the-design" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-the-tables-before-building-the-design">Start with the tables before building the design</h2>
+<p><code>validation_report()</code> checks supplied count and interview tables. It does not need a <code>creel_design</code> object. That makes it useful when an export first arrives, before the <a href="../posts/2026-08-27-design-object.html">design object</a> supplies the sampling context.</p>
+<p>Suppose an imported count is negative, another count has a July date in a June survey, and one interview has a missing catch value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">counts_import <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> counts</span>
+<span id="cb1-2">interviews_import <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> interviews</span>
+<span id="cb1-3">counts_import<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>n_anglers[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb1-4">counts_import<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>date[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-07-05"</span>)</span>
+<span id="cb1-5">interviews_import<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>catch_total[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NA_real_</span></span>
+<span id="cb1-6"></span>
+<span id="cb1-7">raw_report <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">validation_report</span>(</span>
+<span id="cb1-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> counts_import,</span>
+<span id="cb1-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interviews =</span> interviews_import,</span>
+<span id="cb1-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na_threshold =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb1-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date_range =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">range</span>(calendar<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>date)</span>
+<span id="cb1-12">)</span>
+<span id="cb1-13">raw_report</span></code></pre></div></div>
+<p>The report flags the negative <code>n_anglers</code> value as a failure, the count date as outside the supplied range, and <code>catch_total</code> as having missing data. The summary’s <code>n_pass</code>, <code>n_warn</code>, and <code>n_fail</code> count <strong>columns checked</strong>, not bad records. Its <code>detail</code> column identifies which columns need attention.</p>
+<p>For the underlying column-level results, use <code>validate_creel_data()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">field_report <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">validate_creel_data</span>(</span>
+<span id="cb2-2">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">counts =</span> counts_import,</span>
+<span id="cb2-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interviews =</span> interviews_import,</span>
+<span id="cb2-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na_threshold =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb2-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date_range =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">range</span>(calendar<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>date)</span>
+<span id="cb2-6">)</span>
+<span id="cb2-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">subset</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.data.frame</span>(field_report), status <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pass"</span>)</span></code></pre></div></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Table</th>
+<th style="text-align: left;">Column</th>
+<th style="text-align: left;">Check</th>
+<th style="text-align: left;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Counts</td>
+<td style="text-align: left;"><code>date</code></td>
+<td style="text-align: left;">Date range</td>
+<td style="text-align: left;">One value outside June 1–16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Counts</td>
+<td style="text-align: left;"><code>n_anglers</code></td>
+<td style="text-align: left;">Negative values</td>
+<td style="text-align: left;">One negative value</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Interviews</td>
+<td style="text-align: left;"><code>catch_total</code></td>
+<td style="text-align: left;">Missing-value rate</td>
+<td style="text-align: left;">One of 40 values missing</td>
+</tr>
+</tbody>
+</table>
+<p>These are review prompts, not instructions to replace values. A negative count might be a database sentinel, a transcription mistake, or a problem in an import. The field sheet or database documentation determines the correction. Preserve the imported table and make corrections in a separate, documented step.</p>
+<p>The <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validate-creel-data.R">7.0.0 table checks</a> also have limits. A type check reports a column’s class; it does not establish that the class matches your intended schema. A date-range check applies to a <code>Date</code> column, so parse imported date strings and check parsing failures first. Table-level checks also cannot establish that linked records describe the same trip. The keys introduced in the <a href="../posts/2026-09-18-linked-tables.html">linked-tables post</a> still need attention.</p>
+</section>
+<section id="a-passing-threshold-can-still-contain-missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="a-passing-threshold-can-still-contain-missing-data">A passing threshold can still contain missing data</h2>
+<p>The default <code>na_threshold</code> is 0.10. A column warns when its missing fraction <strong>exceeds</strong> that threshold. One missing catch value among forty interviews is 2.5%, so this column passes the default missing-value check even though one trip still has an unknown catch value.</p>
+<p>Here I set <code>na_threshold = 0</code> to surface any missing values in the teaching example. That is a review setting, not a universal rule that every column must be complete. An optional comment field and the fishing-time denominator have different consequences for analysis.</p>
+<p>Likewise, supplying the survey’s actual date range is more useful than accepting the broad default range of 1970–2100. Neither a threshold nor a green status establishes that an observation can safely enter an estimator. Check the fields that the intended calculation requires.</p>
+</section>
+<section id="compare-calendar-gaps-with-the-actual-sampling-plan" class="level2">
+<h2 class="anchored" data-anchor-id="compare-calendar-gaps-with-the-actual-sampling-plan">Compare calendar gaps with the actual sampling plan</h2>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a> distinguished available days from selected days. Our calendar contains sixteen days; the survey sampled eight. Those eight intentionally unsampled days remain in the calendar because they belong to the population of days represented by the <a href="../posts/2026-09-25-effort-estimation.html">effort estimate</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">coverage <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">check_completeness</span>(design)</span>
+<span id="cb3-2">coverage<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>missing_days</span></code></pre></div></div>
+<p>In this example, <code>$missing_days</code> contains eight dates. In the <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/design-validator.R">7.0.0 implementation</a>, this component identifies calendar dates with no count records. It does not compare them with the selected schedule. The label alone therefore cannot tell us which dates represent missed fieldwork.</p>
+<p>To answer that question, compare the planned visits with the observed records:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">planned_dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">date =</span> sample_dates)</span>
+<span id="cb4-2">observed_dates <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(counts[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"date"</span>])</span>
+<span id="cb4-3"></span>
+<span id="cb4-4">missing_visits <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">anti_join</span>(</span>
+<span id="cb4-5">  planned_dates, observed_dates, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"date"</span></span>
+<span id="cb4-6">)</span>
+<span id="cb4-7">missing_visits</span></code></pre></div></div>
+<p>There are no missing planned visits in the original example. Now remove the June 13 count to simulate a lost record:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">counts_missing <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">subset</span>(counts, date <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2024-06-13"</span>))</span>
+<span id="cb5-2">missing_visits <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">anti_join</span>(</span>
+<span id="cb5-3">  planned_dates, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(counts_missing[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"date"</span>]), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"date"</span></span>
+<span id="cb5-4">)</span>
+<span id="cb5-5">missing_visits</span></code></pre></div></div>
+<p>This check identifies <strong>June 13</strong>, a selected day. It needs follow-up: did the clerk miss the visit, did the record fail to upload, or was the survey schedule changed? An observed count of zero would mean the count occurred and found no anglers. An absent record does not establish that outcome.</p>
+<p>This example has one count per selected day. With multiple shifts, count rounds, or sites, compare the full visit key, such as date, shift, site, and round. One count on a date does not establish that every scheduled visit occurred. Keep the full population calendar; shrinking it to observed dates would change the population represented by the expansion.</p>
+</section>
+<section id="look-for-strata-with-few-interviews-and-strata-with-none" class="level2">
+<h2 class="anchored" data-anchor-id="look-for-strata-with-few-interviews-and-strata-with-none">Look for strata with few interviews and strata with none</h2>
+<p><code>check_completeness()</code> also flags interview strata below <code>n_min</code>, which defaults to ten. Our original sample has ten weekday and thirty weekend interviews. For illustration, a review threshold of fifteen flags the weekday stratum:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">review <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">check_completeness</span>(design, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_min =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>L)</span>
+<span id="cb6-2">review<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>low_n_strata</span></code></pre></div></div>
+<p>The result has <code>key = "weekday"</code> and <code>n_observed = 10</code>. Fifteen is an illustrative review threshold here, not a sample-size recommendation. This component counts interview rows; it does not assess their independence, weights, or eligibility for a particular estimator. Enough rows to pass a threshold do not guarantee useful precision.</p>
+<p>In 7.0.0, this low-n check counts strata appearing in the interview table. A stratum with no rows can be absent from the result. To illustrate why that matters, we will keep only the weekday interviews, then join their row counts to the strata in the calendar. Starting with the calendar makes the missing weekend interviews visible:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">expected_strata <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(calendar[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"day_type"</span>])</span>
+<span id="cb7-2">weekday_only <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">subset</span>(interviews, day_type <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weekday"</span>)</span>
+<span id="cb7-3">observed_n <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">count</span>(</span>
+<span id="cb7-4">  weekday_only, day_type, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">name =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n_interviews"</span></span>
+<span id="cb7-5">)</span>
+<span id="cb7-6"></span>
+<span id="cb7-7">interview_coverage <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">left_join</span>(</span>
+<span id="cb7-8">  expected_strata, observed_n, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">by =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"day_type"</span></span>
+<span id="cb7-9">)</span>
+<span id="cb7-10">interview_coverage<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>n_interviews[</span>
+<span id="cb7-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">is.na</span>(interview_coverage<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>n_interviews)</span>
+<span id="cb7-12">] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>L</span>
+<span id="cb7-13">interview_coverage</span></code></pre></div></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Stratum</th>
+<th style="text-align: right;">Interview rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Weekday</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weekend</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p>Replacing the missing <strong>row count</strong> with zero here is appropriate: there are no weekend interviews in this deliberately reduced table. It does not assign a catch rate of zero. The weekend effort estimate still needs a supported rate before it can contribute to a fish total.</p>
+<p>Repeat the coverage check for the observations eligible for your estimator. For the access-point example, inspect complete trips with recorded catch and positive fishing time. Roving interviews need the protocol and trip treatment described in the <a href="../posts/2026-09-11-roving-interviews.html">roving-interview post</a>. Use all the relevant stratum columns when your design has more than day type.</p>
+</section>
+<section id="keep-valid-zero-catch-trips-in-the-denominator" class="level2">
+<h2 class="anchored" data-anchor-id="keep-valid-zero-catch-trips-in-the-denominator">Keep valid zero-catch trips in the denominator</h2>
+<p>Our forty interviews include eight trips with zero catch. They contribute sixteen angler-hours even though they contribute no fish. Removing those trips raises the sample’s apparent success rate:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Interview sample</th>
+<th style="text-align: right;">Fish reported</th>
+<th style="text-align: right;">Angler-hours</th>
+<th style="text-align: right;">Pooled fish per angler-hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">All forty trips</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">1.7500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Thirty-two successful trips</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">2.1875</td>
+</tr>
+</tbody>
+</table>
+<p>That is a <strong>25% increase</strong> caused entirely by dropping unsuccessful trips. These pooled sample ratios illustrate the effect of deletion; the previous post’s full-period total still requires rates matched to weekday and weekend effort.</p>
+<p>A missing catch value needs a different decision. Setting it to zero asserts that the angler caught nothing. Deleting the interview removes fishing time and changes the represented sample. Recover the value where possible; otherwise, document how missing outcomes affect the analysis and its assumptions. Using <code>na.rm = TRUE</code> does not resolve that question, especially when fish and hours then come from different sets of trips.</p>
+</section>
+<section id="we-are-expanding-tidycreels-error-checking" class="level2">
+<h2 class="anchored" data-anchor-id="we-are-expanding-tidycreels-error-checking">We are expanding tidycreel’s error checking</h2>
+<p>These examples also help explain why we are expanding tidycreel’s error checking. The review documented in <a href="https://github.com/chrischizinski/tidycreel/issues/388">#388</a> used a real 2025 reservoir season to show that a report can identify problems without stopping them from reaching an estimator. In 7.0.0, <code>validate_creel_data()</code> returns the report; it does not stop, remove, or change the supplied data. Calling it is an analyst’s choice, and a <code>fail</code> in the report does not itself stop the pipeline.</p>
+<p>The proposed approach has three parts: stop on impossible values or missing fields required by the design when data are attached; warn about suspicious values with counts and examples; and retain a report for broader review. I want a problem such as a negative angler count to be visible where the data enter the analysis, with enough information to find and correct the record.</p>
+<p>Related work addresses the coverage questions we just walked through: distinguishing unsampled days from missed scheduled visits (<a href="https://github.com/chrischizinski/tidycreel/issues/391">#391</a>), deciding how to handle interviews on unsampled days (<a href="https://github.com/chrischizinski/tidycreel/issues/454">#454</a>), and checking counts and interviews against declared shifts (<a href="https://github.com/chrischizinski/tidycreel/issues/426">#426</a>). Recent development changes already check count dates and strata against the calendar (<a href="https://github.com/chrischizinski/tidycreel/issues/449">#449</a>); those changes are beyond the 7.0.0 release used in this example.</p>
+<p>The broader work is still in development. For now, the checks above give us a way to inspect the records, identify the questions, and document the decisions before calculating a total.</p>
+</section>
+<section id="carry-the-decisions-into-the-report" class="level2">
+<h2 class="anchored" data-anchor-id="carry-the-decisions-into-the-report">Carry the decisions into the report</h2>
+<p>I would keep a short record of each issue, the evidence used to resolve it, and the resulting action. That might be a correction supported by the original field sheet, a confirmed unsampled date, or an unresolved missing interview outcome that limits a reported total.</p>
+<p>Before reporting this example, I would check that:</p>
+<ul>
+<li>The calendar still covers June 1–16 and the total uses <code>target = "period_total"</code>.</li>
+<li>Each selected visit has a count or a documented explanation for its absence.</li>
+<li>Every effort stratum has interviews eligible for its rate estimator.</li>
+<li>Valid zero-catch trips remain in the analysis and required missing values have a documented treatment.</li>
+<li>Linked records, party size, and units agree across the count and interview components.</li>
+<li>The report states the estimator, package version, standard error, and confidence interval.</li>
+</ul>
+<p>The <a href="../posts/2026-08-18-introducing-tidycreel.html">series introduction</a> described reproducibility as being able to explain how survey decisions become reported results. For me, that includes being able to explain why we corrected one record, kept a zero-catch trip, or left an unsampled day in the calendar. The real creel data, sampling plan, and clerk’s notes supply the evidence for those decisions.</p>
+<p>The next step is to carry those checks, decisions, and estimates into a reproducible Quarto report that a colleague or manager can follow.</p>
+</section>
+<section id="package-references" class="level2">
+<h2 class="anchored" data-anchor-id="package-references">Package references</h2>
+<ul>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validate-creel-data.R">Table-level checks in tidycreel 7.0.0</a></li>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validation-report.R">Validation summary implementation</a></li>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/design-validator.R">Design and completeness diagnostics</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-10-09-reading-diagnostics.html</guid>
+  <pubDate>Fri, 09 Oct 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-diagnostics.png" medium="image" type="image/png" height="81" width="144"/>
+</item>
 <item>
   <title>From Angler-Hours to Fish: Estimating Catch, Harvest, and Release</title>
   <dc:creator>Christopher Chizinski</dc:creator>
@@ -619,7 +1037,7 @@ font-style: inherit;">"period_total"</span>)</span>
 </ul>
 <p>The one-angler trips here make the units easy to follow. For party interviews, fish reported for the party need the party’s angler-hours in the denominator. Similarly, a rate for boat anglers cannot simply be multiplied by effort that also includes bank anglers unless the sampling design supports that match.</p>
 <p>An effort stratum with no usable interviews has an unknown rate. It is not a zero-catch stratum. Inspect coverage before accepting an aggregate; a numeric total alone does not establish that every part of the survey frame contributed.</p>
-<p>The <a href="../posts/2026-08-18-introducing-tidycreel.html">series introduction</a> began with a design-first workflow. Here that design determines which observations can be multiplied together and what the resulting fish total represents. The next question is how to read the diagnostics before an estimate reaches a report, especially when records are missing or sampling coverage is uneven.</p>
+<p>The <a href="../posts/2026-08-18-introducing-tidycreel.html">series introduction</a> began with a design-first workflow. Here that design determines which observations can be multiplied together and what the resulting fish total represents. The <a href="../posts/2026-10-09-reading-diagnostics.html">next post reads the diagnostics before an estimate reaches a report</a>, especially when records are missing or sampling coverage is uneven.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
@@ -2052,7 +2470,7 @@ font-style: inherit;">count_time_col =</span> count_time</span>
 <li><a href="../posts/2026-09-11-roving-interviews.html">Access-point and roving surveys</a>, including what changes when interviews occur during trips</li>
 <li><a href="../posts/2026-09-18-linked-tables.html">Data as linked tables</a>: schedules, counts, interviews, catch, and biological data</li>
 <li>Using <code>tidycreel.connect</code> to turn agency CSV files, databases, or APIs into consistent analysis inputs</li>
-<li>Validating data before an estimator turns a small problem into a large one</li>
+<li><a href="../posts/2026-10-09-reading-diagnostics.html">Validating data</a> before an estimator turns a small problem into a large one</li>
 <li><a href="../posts/2026-09-25-effort-estimation.html">Estimating angler effort from count data</a> and describing the uncertainty around it</li>
 <li><a href="../posts/2026-10-02-catch-harvest-release.html">Catch, harvest, release, and rate estimates</a>, including the distinction between complete and incomplete trips</li>
 <li>Building reproducible Quarto reports that are useful to managers as well as analysts</li>
@@ -10726,1203 +11144,6 @@ font-style: inherit;">#uses llply (list input - list output) to display the summ
   <category>rstats</category>
   <guid>https://chrischizinski.com/posts/2014-04-08-models-by-variable.html</guid>
   <pubDate>Tue, 08 Apr 2014 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Plotting igraph objects with ggplot2</title>
-  <link>https://chrischizinski.com/posts/2014-04-04-igraph-ggplotll.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>I have been working collaborating on a project with <a href="https://sites.google.com/site/martinfisheries/">Dustin Martin</a> using network theory.<br>
-We have are utilizing the <em>igraph</em> package in R, which ultimately produces graphs of networks.<br>
-Including these graphs in presentations and publications has been difficult because they are difficult to customize (at least with my understanding of them). I am sure it is possible to get the figures the way you want them using the plot function in <em>igraph</em> but I feel much more comfortable working with <em>ggplot</em>, plus I have themes created for <em>ggplot</em>. So I explored a way to create the <em>igraph</em> plots in <em>ggplot</em>.</p>
-<section id="igraph-plots" class="level2">
-<h2 class="anchored" data-anchor-id="igraph-plots"><em>igraph plots</em></h2>
-<p>First, I will bring in the data, which is a matrix of species relative abundances. Columns are the species and each row is an observation. Here is a snapshot of what the data looks like</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">head</span>(caught.wide<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">.2</span>)</span></code></pre></div></div>
-<pre><code>##                    BLG    CCF COC CRP FHC FWD     HSB LMB NOP WAE WHB
-## 6915.2009-04-07.8    0 0.2222   0   0   0   0 0.00000   0   0 0.0   0
-## 6915.2009-04-11.14   0 0.0000   0   0   0   0 0.00000   0   0 0.4   0
-## 6915.2009-04-11.17   0 0.0000   0   0   0   0 0.09091   0   0 0.0   0
-## 6915.2009-04-13.22   0 0.2500   0   0   0   0 0.00000   0   0 0.0   0
-## 6915.2009-04-14.26   0 0.5000   0   0   0   0 0.00000   0   0 0.0   0
-## 6915.2009-04-14.30   0 0.1429   0   0   0   0 0.00000   0   0 0.0   0</code></pre>
-<p>Load the <em>igraph</em> library and run through the first few steps of generating the network</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(igraph)</span>
-<span id="cb3-2">caught.inc <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">graph.incidence</span>(caught.wide<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">.2</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">weighted =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#make data into a bipartite graph object</span></span>
-<span id="cb3-3">obs.parties.all <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">bipartite.projection</span>(caught.inc)[[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]]</span>
-<span id="cb3-4">obs.spp.all <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">bipartite.projection</span>(caught.inc)[[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>]]</span></code></pre></div></div>
-<p>Plotting these two plots produces okay graphs, but as I mentioned earlier, they are not great.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">op <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">par</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">mfrow =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb4-2">fr.all <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">layout.fruchterman.reingold</span>(obs.spp.all)</span>
-<span id="cb4-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(obs.spp.all, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">layout =</span> fr.all, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">edge.color =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">edge.width =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">E</span>(obs.spp.all)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>weight <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> </span>
-<span id="cb4-4">    <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">vertex.label =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">V</span>(obs.spp.all)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>name)</span>
-<span id="cb4-5">obs.sg.all <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">fastgreedy.community</span>(obs.spp.all, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">weights =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">E</span>(obs.spp.all)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>weight)</span>
-<span id="cb4-6"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(obs.sg.all, obs.spp.all, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">layout =</span> fr.all, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">edge.width =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">E</span>(obs.spp.all)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>weight <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> </span>
-<span id="cb4-7">    <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.25</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">vertex.label =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">V</span>(obs.spp.all)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>name, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">vertex.label.color =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"blue"</span>)</span>
-<span id="cb4-8"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">par</span>(op)</span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://chrischizinski.com/figs/2014-04-04-igraph-ggplotll/chunck2.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-</section>
-<section id="create-graphs-in-ggplot" class="level2">
-<h2 class="anchored" data-anchor-id="create-graphs-in-ggplot">Create graphs in <em>ggplot</em></h2>
-<p>Okay first lets extract the data to produce the basic graph of the network on the left. <em>ggplot</em> needs the data as a data.frame so extract the data and coerce it to a data.frame</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">fr.all.df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.data.frame</span>(fr.all)  <span class="do" style="color: #5E5E5E;
-background-color: null;
-font-style: italic;">## convert the layout to a data.frame</span></span>
-<span id="cb5-2">fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">colnames</span>(caught.wide<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">.2</span>)  <span class="do" style="color: #5E5E5E;
-background-color: null;
-font-style: italic;">## add in the species codes</span></span>
-<span id="cb5-3"></span>
-<span id="cb5-4">fr.all.df  <span class="do" style="color: #5E5E5E;
-background-color: null;
-font-style: italic;">## display the x (V1) and y (V2) coordinates for each of the nodes.</span></span></code></pre></div></div>
-<pre><code>##         V1      V2 species
-## 1   2.3192 -3.0746     BLG
-## 2  -2.4960 -3.3497     CCF
-## 3   0.2719 -5.7700     COC
-## 4  -0.7398 -2.6457     CRP
-## 5  -1.1411  0.4478     FHC
-## 6   0.7329 -3.7887     FWD
-## 7  -3.2541 -5.7682     HSB
-## 8   0.3530 -1.2192     LMB
-## 9  -4.6923 -2.4240     NOP
-## 10 -1.3122 -4.3867     WAE
-## 11 -2.0786 -1.7555     WHB</code></pre>
-<p>Now we have all the coordinates for the nodes in the plot, we can display it in <em>ggplot</em></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb7-2"></span>
-<span id="cb7-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-4">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">21</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># adds a black border around the nodes</span></span>
-<span id="cb7-5">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightgrey"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-6">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_text</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">label=</span>species)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add the node labels</span></span>
-<span id="cb7-7">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_x_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the x limits </span></span>
-<span id="cb7-8">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the y limits</span></span>
-<span id="cb7-9">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_bw</span>()  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># use the ggplot black and white theme</span></span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://chrischizinski.com/figs/2014-04-04-igraph-ggplotll/unnamed-chunk-5.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>Now that we have the nodes in the right place, lets draw the connections between the nodes</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">g <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">get.data.frame</span>(obs.spp.all)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># get the edge information using the get.data.frame function</span></span>
-<span id="cb8-2"></span>
-<span id="cb8-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">head</span>(g)</span></code></pre></div></div>
-<pre><code>##   from  to weight
-## 1  BLG CCF     20
-## 2  BLG COC      6
-## 3  BLG WHB      4
-## 4  BLG WAE      8
-## 5  BLG LMB      7
-## 6  BLG CRP      6</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"></span>
-<span id="cb10-2">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>from.x <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>V1[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>from, fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  match the from locations from the node data.frame we previously connected</span></span>
-<span id="cb10-3">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>from.y <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>V2[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>from, fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]</span>
-<span id="cb10-4">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>to.x <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>V1[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>to, fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  match the to locations from the node data.frame we previously connected</span></span>
-<span id="cb10-5">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>to.y <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>V2[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>to, fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]</span>
-<span id="cb10-6"></span>
-<span id="cb10-7">g</span></code></pre></div></div>
-<pre><code>##    from  to weight  from.x  from.y    to.x    to.y
-## 1   BLG CCF     20  2.3192 -3.0746 -2.4960 -3.3497
-## 2   BLG COC      6  2.3192 -3.0746  0.2719 -5.7700
-## 3   BLG WHB      4  2.3192 -3.0746 -2.0786 -1.7555
-## 4   BLG WAE      8  2.3192 -3.0746 -1.3122 -4.3867
-## 5   BLG LMB      7  2.3192 -3.0746  0.3530 -1.2192
-## 6   BLG CRP      6  2.3192 -3.0746 -0.7398 -2.6457
-## 7   BLG FWD     13  2.3192 -3.0746  0.7329 -3.7887
-## 8   CCF FWD    117 -2.4960 -3.3497  0.7329 -3.7887
-## 9   CCF COC      9 -2.4960 -3.3497  0.2719 -5.7700
-## 10  CCF WHB    211 -2.4960 -3.3497 -2.0786 -1.7555
-## 11  CCF CRP     15 -2.4960 -3.3497 -0.7398 -2.6457
-## 12  CCF LMB      7 -2.4960 -3.3497  0.3530 -1.2192
-## 13  CCF WAE     55 -2.4960 -3.3497 -1.3122 -4.3867
-## 14  CCF HSB     11 -2.4960 -3.3497 -3.2541 -5.7682
-## 15  CCF NOP      3 -2.4960 -3.3497 -4.6923 -2.4240
-## 16  CCF FHC      6 -2.4960 -3.3497 -1.1411  0.4478
-## 17  COC FWD     12  0.2719 -5.7700  0.7329 -3.7887
-## 18  COC WHB      4  0.2719 -5.7700 -2.0786 -1.7555
-## 19  COC HSB      2  0.2719 -5.7700 -3.2541 -5.7682
-## 20  COC LMB      3  0.2719 -5.7700  0.3530 -1.2192
-## 21  COC WAE      2  0.2719 -5.7700 -1.3122 -4.3867
-## 22  COC CRP      1  0.2719 -5.7700 -0.7398 -2.6457
-## 23  CRP WHB     41 -0.7398 -2.6457 -2.0786 -1.7555
-## 24  CRP LMB      3 -0.7398 -2.6457  0.3530 -1.2192
-## 25  CRP WAE      9 -0.7398 -2.6457 -1.3122 -4.3867
-## 26  CRP FWD      7 -0.7398 -2.6457  0.7329 -3.7887
-## 27  CRP NOP      3 -0.7398 -2.6457 -4.6923 -2.4240
-## 28  CRP HSB      2 -0.7398 -2.6457 -3.2541 -5.7682
-## 29  CRP FHC      1 -0.7398 -2.6457 -1.1411  0.4478
-## 30  FHC FWD      4 -1.1411  0.4478  0.7329 -3.7887
-## 31  FHC WAE      1 -1.1411  0.4478 -1.3122 -4.3867
-## 32  FHC WHB      2 -1.1411  0.4478 -2.0786 -1.7555
-## 33  FHC LMB      1 -1.1411  0.4478  0.3530 -1.2192
-## 34  FWD HSB      6  0.7329 -3.7887 -3.2541 -5.7682
-## 35  FWD WHB    161  0.7329 -3.7887 -2.0786 -1.7555
-## 36  FWD WAE     49  0.7329 -3.7887 -1.3122 -4.3867
-## 37  FWD LMB      4  0.7329 -3.7887  0.3530 -1.2192
-## 38  HSB WAE      8 -3.2541 -5.7682 -1.3122 -4.3867
-## 39  HSB WHB     46 -3.2541 -5.7682 -2.0786 -1.7555
-## 40  HSB NOP      1 -3.2541 -5.7682 -4.6923 -2.4240
-## 41  LMB WAE      6  0.3530 -1.2192 -1.3122 -4.3867
-## 42  LMB WHB      6  0.3530 -1.2192 -2.0786 -1.7555
-## 43  LMB NOP      1  0.3530 -1.2192 -4.6923 -2.4240
-## 44  NOP WHB      5 -4.6923 -2.4240 -2.0786 -1.7555
-## 45  NOP WAE      1 -4.6923 -2.4240 -1.3122 -4.3867
-## 46  WAE WHB    120 -1.3122 -4.3867 -2.0786 -1.7555</code></pre>
-<p>and plot it out.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"></span>
-<span id="cb12-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-3">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_segment</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>g,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>from.x,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xend =</span> to.x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>from.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">yend =</span> to.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span>weight),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-4">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">21</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># adds a black border around the nodes</span></span>
-<span id="cb12-5">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightgrey"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb12-6">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_text</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">label=</span>species)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add the node labels</span></span>
-<span id="cb12-7">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_x_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the x limits </span></span>
-<span id="cb12-8">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the y limits</span></span>
-<span id="cb12-9">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_bw</span>()  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># use the ggplot black and white theme</span></span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://chrischizinski.com/figs/2014-04-04-igraph-ggplotll/unnamed-chunk-7.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>Lets mess with the themes and remove the grid lines and axis labels etc.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"></span>
-<span id="cb13-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb13-3">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_segment</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>g,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>from.x,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xend =</span> to.x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>from.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">yend =</span> to.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span>weight),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb13-4">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">21</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># adds a black border around the nodes</span></span>
-<span id="cb13-5">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightgrey"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb13-6">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_text</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">label=</span>species)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add the node labels</span></span>
-<span id="cb13-7">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_x_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the x limits </span></span>
-<span id="cb13-8">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the y limits</span></span>
-<span id="cb13-9">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_bw</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># use the ggplot black and white theme</span></span>
-<span id="cb13-10">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme</span>(</span>
-<span id="cb13-11">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.text.x =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove x-axis text</span></span>
-<span id="cb13-12">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.text.y =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove y-axis text</span></span>
-<span id="cb13-13">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.ticks =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove axis ticks</span></span>
-<span id="cb13-14">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.title.x =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove x-axis labels</span></span>
-<span id="cb13-15">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.title.y =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove y-axis labels</span></span>
-<span id="cb13-16">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.background =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), </span>
-<span id="cb13-17">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.border =</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), </span>
-<span id="cb13-18">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#remove major-grid labels</span></span>
-<span id="cb13-19">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.grid.minor =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#remove minor-grid labels</span></span>
-<span id="cb13-20">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">plot.background =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>())</span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://chrischizinski.com/figs/2014-04-04-igraph-ggplotll/unnamed-chunk-8.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-<p>If we wanted to incorporate some of the elements of the community detection algorithms present in the igraph on the right. We can make elements in the one group red and the other blue. Connections within a group will be a solid line and between groups a dashed line.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1">grouping <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">species =</span> obs.sg.all<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>names, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">group =</span> obs.sg.all<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>membership)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#create a data.frame of species and group membership</span></span>
-<span id="cb14-2">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp.from <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>group[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>from, grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># match group membership within the g data.frame for from and to nodes</span></span>
-<span id="cb14-3">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp.to <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>group[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>to, grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]</span>
-<span id="cb14-4">g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp.type <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ifelse</span>(g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp.from <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp.to, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># if from and to nodes are the in same group then type is 1 else 0</span></span>
-<span id="cb14-5">g  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># display the additions</span></span></code></pre></div></div>
-<pre><code>##    from  to weight  from.x  from.y    to.x    to.y grp.from grp.to
-## 1   BLG CCF     20  2.3192 -3.0746 -2.4960 -3.3497        1      2
-## 2   BLG COC      6  2.3192 -3.0746  0.2719 -5.7700        1      1
-## 3   BLG WHB      4  2.3192 -3.0746 -2.0786 -1.7555        1      2
-## 4   BLG WAE      8  2.3192 -3.0746 -1.3122 -4.3867        1      2
-## 5   BLG LMB      7  2.3192 -3.0746  0.3530 -1.2192        1      1
-## 6   BLG CRP      6  2.3192 -3.0746 -0.7398 -2.6457        1      1
-## 7   BLG FWD     13  2.3192 -3.0746  0.7329 -3.7887        1      2
-## 8   CCF FWD    117 -2.4960 -3.3497  0.7329 -3.7887        2      2
-## 9   CCF COC      9 -2.4960 -3.3497  0.2719 -5.7700        2      1
-## 10  CCF WHB    211 -2.4960 -3.3497 -2.0786 -1.7555        2      2
-## 11  CCF CRP     15 -2.4960 -3.3497 -0.7398 -2.6457        2      1
-## 12  CCF LMB      7 -2.4960 -3.3497  0.3530 -1.2192        2      1
-## 13  CCF WAE     55 -2.4960 -3.3497 -1.3122 -4.3867        2      2
-## 14  CCF HSB     11 -2.4960 -3.3497 -3.2541 -5.7682        2      2
-## 15  CCF NOP      3 -2.4960 -3.3497 -4.6923 -2.4240        2      1
-## 16  CCF FHC      6 -2.4960 -3.3497 -1.1411  0.4478        2      1
-## 17  COC FWD     12  0.2719 -5.7700  0.7329 -3.7887        1      2
-## 18  COC WHB      4  0.2719 -5.7700 -2.0786 -1.7555        1      2
-## 19  COC HSB      2  0.2719 -5.7700 -3.2541 -5.7682        1      2
-## 20  COC LMB      3  0.2719 -5.7700  0.3530 -1.2192        1      1
-## 21  COC WAE      2  0.2719 -5.7700 -1.3122 -4.3867        1      2
-## 22  COC CRP      1  0.2719 -5.7700 -0.7398 -2.6457        1      1
-## 23  CRP WHB     41 -0.7398 -2.6457 -2.0786 -1.7555        1      2
-## 24  CRP LMB      3 -0.7398 -2.6457  0.3530 -1.2192        1      1
-## 25  CRP WAE      9 -0.7398 -2.6457 -1.3122 -4.3867        1      2
-## 26  CRP FWD      7 -0.7398 -2.6457  0.7329 -3.7887        1      2
-## 27  CRP NOP      3 -0.7398 -2.6457 -4.6923 -2.4240        1      1
-## 28  CRP HSB      2 -0.7398 -2.6457 -3.2541 -5.7682        1      2
-## 29  CRP FHC      1 -0.7398 -2.6457 -1.1411  0.4478        1      1
-## 30  FHC FWD      4 -1.1411  0.4478  0.7329 -3.7887        1      2
-## 31  FHC WAE      1 -1.1411  0.4478 -1.3122 -4.3867        1      2
-## 32  FHC WHB      2 -1.1411  0.4478 -2.0786 -1.7555        1      2
-## 33  FHC LMB      1 -1.1411  0.4478  0.3530 -1.2192        1      1
-## 34  FWD HSB      6  0.7329 -3.7887 -3.2541 -5.7682        2      2
-## 35  FWD WHB    161  0.7329 -3.7887 -2.0786 -1.7555        2      2
-## 36  FWD WAE     49  0.7329 -3.7887 -1.3122 -4.3867        2      2
-## 37  FWD LMB      4  0.7329 -3.7887  0.3530 -1.2192        2      1
-## 38  HSB WAE      8 -3.2541 -5.7682 -1.3122 -4.3867        2      2
-## 39  HSB WHB     46 -3.2541 -5.7682 -2.0786 -1.7555        2      2
-## 40  HSB NOP      1 -3.2541 -5.7682 -4.6923 -2.4240        2      1
-## 41  LMB WAE      6  0.3530 -1.2192 -1.3122 -4.3867        1      2
-## 42  LMB WHB      6  0.3530 -1.2192 -2.0786 -1.7555        1      2
-## 43  LMB NOP      1  0.3530 -1.2192 -4.6923 -2.4240        1      1
-## 44  NOP WHB      5 -4.6923 -2.4240 -2.0786 -1.7555        1      2
-## 45  NOP WAE      1 -4.6923 -2.4240 -1.3122 -4.3867        1      2
-## 46  WAE WHB    120 -1.3122 -4.3867 -2.0786 -1.7555        2      2
-##    grp.type
-## 1         0
-## 2         1
-## 3         0
-## 4         0
-## 5         1
-## 6         1
-## 7         0
-## 8         1
-## 9         0
-## 10        1
-## 11        0
-## 12        0
-## 13        1
-## 14        1
-## 15        0
-## 16        0
-## 17        0
-## 18        0
-## 19        0
-## 20        1
-## 21        0
-## 22        1
-## 23        0
-## 24        1
-## 25        0
-## 26        0
-## 27        1
-## 28        0
-## 29        1
-## 30        0
-## 31        0
-## 32        0
-## 33        1
-## 34        1
-## 35        1
-## 36        1
-## 37        0
-## 38        1
-## 39        1
-## 40        0
-## 41        0
-## 42        0
-## 43        1
-## 44        0
-## 45        0
-## 46        1</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"></span>
-<span id="cb16-2">fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>grp <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>group[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">match</span>(fr.all.df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species, grouping<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>species)]  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add group type to node data.frame</span></span></code></pre></div></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"></span>
-<span id="cb17-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb17-3">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_segment</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>g,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>from.x,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xend =</span> to.x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>from.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">yend =</span> to.y,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span>weight,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">linetype=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.factor</span>(grp.type)),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add line type</span></span>
-<span id="cb17-4">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">21</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># adds a black border around the nodes</span></span>
-<span id="cb17-5">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">colour=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.factor</span>(grp)),<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">show_guide=</span><span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">FALSE</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb17-6">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_text</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>fr.all.df,<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x=</span>V1,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y=</span>V2,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">label=</span>species)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add the node labels</span></span>
-<span id="cb17-7">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_colour_manual</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">values=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"1"</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"red"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"2"</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add colour scaling for group membership</span></span>
-<span id="cb17-8">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_linetype_manual</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">values=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"0"</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"dashed"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"1"</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"solid"</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># add linteyp scaling for within and between groups</span></span>
-<span id="cb17-9">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_x_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the x limits </span></span>
-<span id="cb17-10">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">expand=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expand the y limits</span></span>
-<span id="cb17-11">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_bw</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># use the ggplot black and white theme</span></span>
-<span id="cb17-12">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme</span>(</span>
-<span id="cb17-13">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.text.x =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove x-axis text</span></span>
-<span id="cb17-14">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.text.y =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove y-axis text</span></span>
-<span id="cb17-15">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.ticks =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove axis ticks</span></span>
-<span id="cb17-16">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.title.x =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove x-axis labels</span></span>
-<span id="cb17-17">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">axis.title.y =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># remove y-axis labels</span></span>
-<span id="cb17-18">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.background =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), </span>
-<span id="cb17-19">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.border =</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(), </span>
-<span id="cb17-20">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#remove major-grid labels</span></span>
-<span id="cb17-21">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">panel.grid.minor =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>(),  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#remove minor-grid labels</span></span>
-<span id="cb17-22">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">plot.background =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">element_blank</span>())</span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://chrischizinski.com/figs/2014-04-04-igraph-ggplotll/unnamed-chunk-10.png" class="img-fluid figure-img"></p>
-<figcaption>center</figcaption>
-</figure>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>rstats</category>
-  <guid>https://chrischizinski.com/posts/2014-04-04-igraph-ggplotll.html</guid>
-  <pubDate>Fri, 04 Apr 2014 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

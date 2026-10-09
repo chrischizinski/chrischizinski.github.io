@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Christopher Chizinski">
+<meta name="dcterms.date" content="2026-10-09">
+<meta name="description" content="Use tidycreel diagnostics to distinguish zero catch, missing records, and unsampled days. Check planned visits and interview coverage before reporting totals.">
+
+<title>Zero, Missing, or Unsampled? Reading Creel Diagnostics – Christopher Chizinski</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../assets/images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-5ffb8ee80c79420b917ead795f6f9a55.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-60175760e148eec4384ebd95ee3f1ffb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;df5dfaf0e39b4658b43226cb083be41f&quot;}"></script>
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Christopher Chizinski</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../projects.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/chrischizinski"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text">GitHub</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://bsky.app/profile/chrischizinski.bsky.social"> <i class="bi bi-cloud" role="img" aria-label="Bluesky">
+</i> 
+<span class="menu-text">Bluesky</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://humandimensions.unl.edu"> 
+<span class="menu-text">Lab ↗</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#start-with-the-tables-before-building-the-design" id="toc-start-with-the-tables-before-building-the-design" class="nav-link active" data-scroll-target="#start-with-the-tables-before-building-the-design">Start with the tables before building the design</a></li>
+  <li><a href="#a-passing-threshold-can-still-contain-missing-data" id="toc-a-passing-threshold-can-still-contain-missing-data" class="nav-link" data-scroll-target="#a-passing-threshold-can-still-contain-missing-data">A passing threshold can still contain missing data</a></li>
+  <li><a href="#compare-calendar-gaps-with-the-actual-sampling-plan" id="toc-compare-calendar-gaps-with-the-actual-sampling-plan" class="nav-link" data-scroll-target="#compare-calendar-gaps-with-the-actual-sampling-plan">Compare calendar gaps with the actual sampling plan</a></li>
+  <li><a href="#look-for-strata-with-few-interviews-and-strata-with-none" id="toc-look-for-strata-with-few-interviews-and-strata-with-none" class="nav-link" data-scroll-target="#look-for-strata-with-few-interviews-and-strata-with-none">Look for strata with few interviews and strata with none</a></li>
+  <li><a href="#keep-valid-zero-catch-trips-in-the-denominator" id="toc-keep-valid-zero-catch-trips-in-the-denominator" class="nav-link" data-scroll-target="#keep-valid-zero-catch-trips-in-the-denominator">Keep valid zero-catch trips in the denominator</a></li>
+  <li><a href="#we-are-expanding-tidycreels-error-checking" id="toc-we-are-expanding-tidycreels-error-checking" class="nav-link" data-scroll-target="#we-are-expanding-tidycreels-error-checking">We are expanding tidycreel’s error checking</a></li>
+  <li><a href="#carry-the-decisions-into-the-report" id="toc-carry-the-decisions-into-the-report" class="nav-link" data-scroll-target="#carry-the-decisions-into-the-report">Carry the decisions into the report</a></li>
+  <li><a href="#package-references" id="toc-package-references" class="nav-link" data-scroll-target="#package-references">Package references</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Zero, Missing, or Unsampled? Reading Creel Diagnostics</h1>
+<p class="subtitle lead">What a validation report can tell us about real creel data</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">tidycreel</div>
+    <div class="quarto-category">rstats</div>
+    <div class="quarto-category">fisheries</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Use tidycreel diagnostics to distinguish zero catch, missing records, and unsampled days. Check planned visits and interview coverage before reporting totals.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Christopher Chizinski </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 9, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="../assets/images/projects/tidycreel-diagnostics.png" class="img-fluid" data-fig-cap="A blank record needs an explanation from the survey plan or field notes before it becomes an analysis decision. Illustration generated with ChatGPT." alt="Watercolor illustration of a fisheries analyst comparing interview sheets with a wall calendar and laptop in a field office. Marked and blank calendar cells represent visits that need different interpretations."></p>
+<p>In the <a href="../posts/2026-10-02-catch-harvest-release.html">previous post</a>, we combined counts and interview rates to estimate 3,072 fish caught. We used a small, deliberately tidy example so we could follow the calculation. Real creel data usually bring more questions: a blank catch entry, a selected day with no count, or a group of anglers represented in the counts but absent from the interviews.</p>
+<p>Those gaps do not all mean the same thing. <strong>Zero catch is an observed outcome. A missing catch value is unknown. An unsampled day can be an intentional part of a probability sample.</strong> Treating all three as zero changes the data and can change the estimate.</p>
+<p><code>tidycreel</code> provides diagnostics to help locate these problems. I want to work through what those diagnostics tell us and where we still need to look at the sampling plan or the clerk’s notes before making a decision.</p>
+<blockquote class="blockquote">
+<p><strong>In brief</strong></p>
+<ul>
+<li>Check raw tables before attaching them to a design.</li>
+<li>Compare observed records with planned visits, as well as the full calendar.</li>
+<li>Check every expected interview stratum, including strata with no records.</li>
+<li>Keep valid zero-catch trips and investigate missing values.</li>
+<li>Record the decision behind each correction or exclusion.</li>
+</ul>
+</blockquote>
+<p>This post uses <strong>tidycreel 7.0.0, “Goldeye”</strong>, and the simulated June 1–16 example from the last two installments. You can <a href="../assets/code/tidycreel_diagnostics.R" download="tidycreel_diagnostics.R">download the complete R example</a> to recreate the design and run every check below. The code deliberately introduces problems into copies of the data, leaving the original teaching example intact. The snippets below start with the <code>calendar</code>, <code>counts</code>, <code>interviews</code>, and <code>design</code> objects created in that script.</p>
+<section id="start-with-the-tables-before-building-the-design" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-the-tables-before-building-the-design">Start with the tables before building the design</h2>
+<p><code>validation_report()</code> checks supplied count and interview tables. It does not need a <code>creel_design</code> object. That makes it useful when an export first arrives, before the <a href="../posts/2026-08-27-design-object.html">design object</a> supplies the sampling context.</p>
+<p>Suppose an imported count is negative, another count has a July date in a June survey, and one interview has a missing catch value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>counts_import <span class="ot">&lt;-</span> counts</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>interviews_import <span class="ot">&lt;-</span> interviews</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>counts_import<span class="sc">$</span>n_anglers[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>counts_import<span class="sc">$</span>date[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2024-07-05"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>interviews_import<span class="sc">$</span>catch_total[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="cn">NA_real_</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>raw_report <span class="ot">&lt;-</span> <span class="fu">validation_report</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> counts_import,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">interviews =</span> interviews_import,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_threshold =</span> <span class="dv">0</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">date_range =</span> <span class="fu">range</span>(calendar<span class="sc">$</span>date)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>raw_report</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The report flags the negative <code>n_anglers</code> value as a failure, the count date as outside the supplied range, and <code>catch_total</code> as having missing data. The summary’s <code>n_pass</code>, <code>n_warn</code>, and <code>n_fail</code> count <strong>columns checked</strong>, not bad records. Its <code>detail</code> column identifies which columns need attention.</p>
+<p>For the underlying column-level results, use <code>validate_creel_data()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>field_report <span class="ot">&lt;-</span> <span class="fu">validate_creel_data</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> counts_import,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">interviews =</span> interviews_import,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_threshold =</span> <span class="dv">0</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">date_range =</span> <span class="fu">range</span>(calendar<span class="sc">$</span>date)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(<span class="fu">as.data.frame</span>(field_report), status <span class="sc">!=</span> <span class="st">"pass"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Table</th>
+<th style="text-align: left;">Column</th>
+<th style="text-align: left;">Check</th>
+<th style="text-align: left;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Counts</td>
+<td style="text-align: left;"><code>date</code></td>
+<td style="text-align: left;">Date range</td>
+<td style="text-align: left;">One value outside June 1–16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Counts</td>
+<td style="text-align: left;"><code>n_anglers</code></td>
+<td style="text-align: left;">Negative values</td>
+<td style="text-align: left;">One negative value</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Interviews</td>
+<td style="text-align: left;"><code>catch_total</code></td>
+<td style="text-align: left;">Missing-value rate</td>
+<td style="text-align: left;">One of 40 values missing</td>
+</tr>
+</tbody>
+</table>
+<p>These are review prompts, not instructions to replace values. A negative count might be a database sentinel, a transcription mistake, or a problem in an import. The field sheet or database documentation determines the correction. Preserve the imported table and make corrections in a separate, documented step.</p>
+<p>The <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validate-creel-data.R">7.0.0 table checks</a> also have limits. A type check reports a column’s class; it does not establish that the class matches your intended schema. A date-range check applies to a <code>Date</code> column, so parse imported date strings and check parsing failures first. Table-level checks also cannot establish that linked records describe the same trip. The keys introduced in the <a href="../posts/2026-09-18-linked-tables.html">linked-tables post</a> still need attention.</p>
+</section>
+<section id="a-passing-threshold-can-still-contain-missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="a-passing-threshold-can-still-contain-missing-data">A passing threshold can still contain missing data</h2>
+<p>The default <code>na_threshold</code> is 0.10. A column warns when its missing fraction <strong>exceeds</strong> that threshold. One missing catch value among forty interviews is 2.5%, so this column passes the default missing-value check even though one trip still has an unknown catch value.</p>
+<p>Here I set <code>na_threshold = 0</code> to surface any missing values in the teaching example. That is a review setting, not a universal rule that every column must be complete. An optional comment field and the fishing-time denominator have different consequences for analysis.</p>
+<p>Likewise, supplying the survey’s actual date range is more useful than accepting the broad default range of 1970–2100. Neither a threshold nor a green status establishes that an observation can safely enter an estimator. Check the fields that the intended calculation requires.</p>
+</section>
+<section id="compare-calendar-gaps-with-the-actual-sampling-plan" class="level2">
+<h2 class="anchored" data-anchor-id="compare-calendar-gaps-with-the-actual-sampling-plan">Compare calendar gaps with the actual sampling plan</h2>
+<p>The <a href="../posts/2026-09-03-sampling-calendar.html">sampling-calendar post</a> distinguished available days from selected days. Our calendar contains sixteen days; the survey sampled eight. Those eight intentionally unsampled days remain in the calendar because they belong to the population of days represented by the <a href="../posts/2026-09-25-effort-estimation.html">effort estimate</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>coverage <span class="ot">&lt;-</span> <span class="fu">check_completeness</span>(design)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>coverage<span class="sc">$</span>missing_days</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In this example, <code>$missing_days</code> contains eight dates. In the <a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/design-validator.R">7.0.0 implementation</a>, this component identifies calendar dates with no count records. It does not compare them with the selected schedule. The label alone therefore cannot tell us which dates represent missed fieldwork.</p>
+<p>To answer that question, compare the planned visits with the observed records:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>planned_dates <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">date =</span> sample_dates)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>observed_dates <span class="ot">&lt;-</span> <span class="fu">unique</span>(counts[<span class="st">"date"</span>])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>missing_visits <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  planned_dates, observed_dates, <span class="at">by =</span> <span class="st">"date"</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>missing_visits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>There are no missing planned visits in the original example. Now remove the June 13 count to simulate a lost record:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>counts_missing <span class="ot">&lt;-</span> <span class="fu">subset</span>(counts, date <span class="sc">!=</span> <span class="fu">as.Date</span>(<span class="st">"2024-06-13"</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>missing_visits <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  planned_dates, <span class="fu">unique</span>(counts_missing[<span class="st">"date"</span>]), <span class="at">by =</span> <span class="st">"date"</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>missing_visits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This check identifies <strong>June 13</strong>, a selected day. It needs follow-up: did the clerk miss the visit, did the record fail to upload, or was the survey schedule changed? An observed count of zero would mean the count occurred and found no anglers. An absent record does not establish that outcome.</p>
+<p>This example has one count per selected day. With multiple shifts, count rounds, or sites, compare the full visit key, such as date, shift, site, and round. One count on a date does not establish that every scheduled visit occurred. Keep the full population calendar; shrinking it to observed dates would change the population represented by the expansion.</p>
+</section>
+<section id="look-for-strata-with-few-interviews-and-strata-with-none" class="level2">
+<h2 class="anchored" data-anchor-id="look-for-strata-with-few-interviews-and-strata-with-none">Look for strata with few interviews and strata with none</h2>
+<p><code>check_completeness()</code> also flags interview strata below <code>n_min</code>, which defaults to ten. Our original sample has ten weekday and thirty weekend interviews. For illustration, a review threshold of fifteen flags the weekday stratum:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>review <span class="ot">&lt;-</span> <span class="fu">check_completeness</span>(design, <span class="at">n_min =</span> <span class="dv">15</span>L)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>review<span class="sc">$</span>low_n_strata</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The result has <code>key = "weekday"</code> and <code>n_observed = 10</code>. Fifteen is an illustrative review threshold here, not a sample-size recommendation. This component counts interview rows; it does not assess their independence, weights, or eligibility for a particular estimator. Enough rows to pass a threshold do not guarantee useful precision.</p>
+<p>In 7.0.0, this low-n check counts strata appearing in the interview table. A stratum with no rows can be absent from the result. To illustrate why that matters, we will keep only the weekday interviews, then join their row counts to the strata in the calendar. Starting with the calendar makes the missing weekend interviews visible:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>expected_strata <span class="ot">&lt;-</span> <span class="fu">unique</span>(calendar[<span class="st">"day_type"</span>])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>weekday_only <span class="ot">&lt;-</span> <span class="fu">subset</span>(interviews, day_type <span class="sc">==</span> <span class="st">"weekday"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>observed_n <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">count</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  weekday_only, day_type, <span class="at">name =</span> <span class="st">"n_interviews"</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>interview_coverage <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  expected_strata, observed_n, <span class="at">by =</span> <span class="st">"day_type"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>interview_coverage<span class="sc">$</span>n_interviews[</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">is.na</span>(interview_coverage<span class="sc">$</span>n_interviews)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>] <span class="ot">&lt;-</span> <span class="dv">0</span>L</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>interview_coverage</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Stratum</th>
+<th style="text-align: right;">Interview rows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Weekday</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Weekend</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p>Replacing the missing <strong>row count</strong> with zero here is appropriate: there are no weekend interviews in this deliberately reduced table. It does not assign a catch rate of zero. The weekend effort estimate still needs a supported rate before it can contribute to a fish total.</p>
+<p>Repeat the coverage check for the observations eligible for your estimator. For the access-point example, inspect complete trips with recorded catch and positive fishing time. Roving interviews need the protocol and trip treatment described in the <a href="../posts/2026-09-11-roving-interviews.html">roving-interview post</a>. Use all the relevant stratum columns when your design has more than day type.</p>
+</section>
+<section id="keep-valid-zero-catch-trips-in-the-denominator" class="level2">
+<h2 class="anchored" data-anchor-id="keep-valid-zero-catch-trips-in-the-denominator">Keep valid zero-catch trips in the denominator</h2>
+<p>Our forty interviews include eight trips with zero catch. They contribute sixteen angler-hours even though they contribute no fish. Removing those trips raises the sample’s apparent success rate:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Interview sample</th>
+<th style="text-align: right;">Fish reported</th>
+<th style="text-align: right;">Angler-hours</th>
+<th style="text-align: right;">Pooled fish per angler-hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">All forty trips</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">1.7500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Thirty-two successful trips</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">2.1875</td>
+</tr>
+</tbody>
+</table>
+<p>That is a <strong>25% increase</strong> caused entirely by dropping unsuccessful trips. These pooled sample ratios illustrate the effect of deletion; the previous post’s full-period total still requires rates matched to weekday and weekend effort.</p>
+<p>A missing catch value needs a different decision. Setting it to zero asserts that the angler caught nothing. Deleting the interview removes fishing time and changes the represented sample. Recover the value where possible; otherwise, document how missing outcomes affect the analysis and its assumptions. Using <code>na.rm = TRUE</code> does not resolve that question, especially when fish and hours then come from different sets of trips.</p>
+</section>
+<section id="we-are-expanding-tidycreels-error-checking" class="level2">
+<h2 class="anchored" data-anchor-id="we-are-expanding-tidycreels-error-checking">We are expanding tidycreel’s error checking</h2>
+<p>These examples also help explain why we are expanding tidycreel’s error checking. The review documented in <a href="https://github.com/chrischizinski/tidycreel/issues/388">#388</a> used a real 2025 reservoir season to show that a report can identify problems without stopping them from reaching an estimator. In 7.0.0, <code>validate_creel_data()</code> returns the report; it does not stop, remove, or change the supplied data. Calling it is an analyst’s choice, and a <code>fail</code> in the report does not itself stop the pipeline.</p>
+<p>The proposed approach has three parts: stop on impossible values or missing fields required by the design when data are attached; warn about suspicious values with counts and examples; and retain a report for broader review. I want a problem such as a negative angler count to be visible where the data enter the analysis, with enough information to find and correct the record.</p>
+<p>Related work addresses the coverage questions we just walked through: distinguishing unsampled days from missed scheduled visits (<a href="https://github.com/chrischizinski/tidycreel/issues/391">#391</a>), deciding how to handle interviews on unsampled days (<a href="https://github.com/chrischizinski/tidycreel/issues/454">#454</a>), and checking counts and interviews against declared shifts (<a href="https://github.com/chrischizinski/tidycreel/issues/426">#426</a>). Recent development changes already check count dates and strata against the calendar (<a href="https://github.com/chrischizinski/tidycreel/issues/449">#449</a>); those changes are beyond the 7.0.0 release used in this example.</p>
+<p>The broader work is still in development. For now, the checks above give us a way to inspect the records, identify the questions, and document the decisions before calculating a total.</p>
+</section>
+<section id="carry-the-decisions-into-the-report" class="level2">
+<h2 class="anchored" data-anchor-id="carry-the-decisions-into-the-report">Carry the decisions into the report</h2>
+<p>I would keep a short record of each issue, the evidence used to resolve it, and the resulting action. That might be a correction supported by the original field sheet, a confirmed unsampled date, or an unresolved missing interview outcome that limits a reported total.</p>
+<p>Before reporting this example, I would check that:</p>
+<ul>
+<li>The calendar still covers June 1–16 and the total uses <code>target = "period_total"</code>.</li>
+<li>Each selected visit has a count or a documented explanation for its absence.</li>
+<li>Every effort stratum has interviews eligible for its rate estimator.</li>
+<li>Valid zero-catch trips remain in the analysis and required missing values have a documented treatment.</li>
+<li>Linked records, party size, and units agree across the count and interview components.</li>
+<li>The report states the estimator, package version, standard error, and confidence interval.</li>
+</ul>
+<p>The <a href="../posts/2026-08-18-introducing-tidycreel.html">series introduction</a> described reproducibility as being able to explain how survey decisions become reported results. For me, that includes being able to explain why we corrected one record, kept a zero-catch trip, or left an unsampled day in the calendar. The real creel data, sampling plan, and clerk’s notes supply the evidence for those decisions.</p>
+<p>The next step is to carry those checks, decisions, and estimates into a reproducible Quarto report that a colleague or manager can follow.</p>
+</section>
+<section id="package-references" class="level2">
+<h2 class="anchored" data-anchor-id="package-references">Package references</h2>
+<ul>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validate-creel-data.R">Table-level checks in tidycreel 7.0.0</a></li>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/validation-report.R">Validation summary implementation</a></li>
+<li><a href="https://github.com/chrischizinski/tidycreel/blob/v7.0.0/R/design-validator.R">Design and completeness diagnostics</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/chrischizinski\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "chrischizinski/chrischizinski.github.io";
+    script.dataset.repoId = "MDEwOlJlcG9zaXRvcnk5MDI5NDA0OA==";
+    script.dataset.category = "Announcements";
+    script.dataset.categoryId = "DIC_kwDOBWHHIM4DBiNi";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><span class="footer-links"> <a href="https://github.com/chrischizinski"><i class="bi bi-github"></i> GitHub</a> <a href="https://bsky.app/profile/chrischizinski.bsky.social"><i class="bi bi-cloud"></i> Bluesky</a> <a href="mailto:cchizinski2@unl.edu"><i class="bi bi-envelope"></i> Email</a> <a href="https://chrischizinski.com/blog.xml"><i class="bi bi-rss"></i> RSS</a> <a href="https://humandimensions.unl.edu"><i class="bi bi-people"></i> Lab</a> </span> <span class="footer-credit">© 2026 Christopher Chizinski · Built with <a href="https://quarto.org">Quarto</a></span></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
