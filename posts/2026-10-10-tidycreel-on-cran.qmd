@@ -1,0 +1,102 @@
+---
+title: "tidycreel is now on CRAN"
+subtitle: "Install the release and find your way into the examples"
+date: 2026-10-10
+author: "Christopher Chizinski"
+categories: [tidycreel, rstats, fisheries]
+tags: [tidycreel, CRAN, creel survey, fisheries science, rstats]
+description: "tidycreel 8.0.0 is on CRAN. Install the release or GitHub development version, then explore the blog series, companion book, and 24 package vignettes."
+draft: false
+image: /assets/images/projects/tidycreel-cran-release.png
+toc: false
+---
+
+![](/assets/images/projects/tidycreel-cran-release.png){fig-alt="Screen-print illustration in navy, teal, and orange on cream paper. A freshwater fish appears above a lake, a survey notebook with tally marks, a data table, and an open reference book." fig-cap="Field observations, analysis, and the resources to connect them. Illustration generated with ChatGPT."}
+
+`tidycreel` has been accepted and is now available on
+[CRAN](https://cran.r-project.org/package=tidycreel). The release is **8.0.0**.
+I am pleased to see it reach this point, and grateful to everyone who has
+offered questions, corrections, and feedback along the way.
+
+If you are new to the package, creel surveys combine angler counts and
+interviews to estimate fishing effort, catch, and harvest. `tidycreel` provides
+a tidy R workflow for survey design, data validation, estimation, and reporting,
+with the `survey` package supplying the design-based foundation.
+
+## Install tidycreel
+
+You can now install the CRAN release using the usual R command:
+
+```r
+install.packages("tidycreel")
+library(tidycreel)
+```
+
+As of October 10, the source package is available, while Windows and macOS
+binaries are not yet available. I expect those to appear within the next couple
+of days. If a binary is not yet available for your R installation, you can
+install the source release explicitly:
+
+```r
+install.packages("tidycreel", type = "source")
+```
+
+`tidycreel` itself has no compiled code. Dependencies installed from source
+may require build tools.
+
+For the development version from [GitHub](https://github.com/chrischizinski/tidycreel),
+use `pak`:
+
+```r
+install.packages("pak")  # Once, if pak is not already installed
+pak::pak("chrischizinski/tidycreel")
+```
+
+Use the CRAN release for most analyses. Install from GitHub if you want to try
+the latest development changes.
+
+**Aerial surveys:** Use the GitHub development version for catch, harvest, and
+release totals until 8.0.1 reaches CRAN. It fixes an underestimation issue in
+8.0.0; non-aerial designs are unaffected
+([release notes](https://github.com/chrischizinski/tidycreel/releases/tag/v8.0.0)).
+
+## Examples, methods, and vignettes
+
+There are three places to go after installation, depending on what you want to
+work through:
+
+- **The [blog series](/posts/2026-08-18-introducing-tidycreel.html)** follows
+  small examples from [design objects](/posts/2026-08-27-design-object.html)
+  and [sampling calendars](/posts/2026-09-03-sampling-calendar.html) through
+  [roving interviews](/posts/2026-09-11-roving-interviews.html),
+  [linked tables](/posts/2026-09-18-linked-tables.html),
+  [effort](/posts/2026-09-25-effort-estimation.html),
+  [catch, harvest, and release](/posts/2026-10-02-catch-harvest-release.html),
+  and [diagnostics](/posts/2026-10-09-reading-diagnostics.html).
+- **The companion book, [*Modern Creel Survey Analysis in R*](https://modern-creel-surveys.netlify.app/),**
+  develops the reasoning behind those workflows: sampling design, estimands,
+  uncertainty, and interpretation. It remains a work in progress as the methods,
+  examples, and package develop.
+- **The [full vignette collection](https://chrischizinski.com/tidycreel/articles/)**
+  provides focused package walkthroughs. CRAN includes **24 vignettes**, covering
+  getting started, survey designs, interview estimation, incomplete trips,
+  effort and catch calculations, variance methods, scheduling, visualization,
+  and more. They are also available directly from the
+  [CRAN package page](https://cran.r-project.org/web/packages/tidycreel/index.html).
+
+To browse the installed vignettes or open the getting-started guide in R:
+
+```r
+browseVignettes("tidycreel")
+vignette("tidycreel", package = "tidycreel")
+```
+
+The online collection is useful with a GitHub installation too, since that
+installation does not build local vignettes by default. Recent blog examples
+identify the 7.0.0 release they used; this announcement marks the 8.0.0 release.
+
+If you try `tidycreel` with your own creel data, I would like to hear where the
+data structures, diagnostics, or examples need more explanation. Questions are
+welcome in [GitHub Discussions](https://github.com/chrischizinski/tidycreel/discussions),
+and reproducible bug reports help through the
+[issue tracker](https://github.com/chrischizinski/tidycreel/issues).
