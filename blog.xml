@@ -10,7 +10,96 @@
 <atom:link href="https://chrischizinski.com/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Human dimensions of wildlife &amp; fisheries — research, code, and R notes.</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Fri, 09 Oct 2026 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 10 Oct 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>tidycreel is now on CRAN</title>
+  <dc:creator>Christopher Chizinski</dc:creator>
+  <link>https://chrischizinski.com/posts/2026-10-10-tidycreel-on-cran.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://chrischizinski.com/assets/images/projects/tidycreel-cran-release.png" class="img-fluid" data-fig-cap="Field observations, analysis, and the resources to connect them. Illustration generated with ChatGPT." alt="Screen-print illustration in navy, teal, and orange on cream paper. A freshwater fish appears above a lake, a survey notebook with tally marks, a data table, and an open reference book."></p>
+<p><code>tidycreel</code> has been accepted and is now available on <a href="https://cran.r-project.org/package=tidycreel">CRAN</a>. The release is <strong>8.0.0</strong>. I am pleased to see it reach this point, and grateful to everyone who has offered questions, corrections, and feedback along the way.</p>
+<p>If you are new to the package, creel surveys combine angler counts and interviews to estimate fishing effort, catch, and harvest. <code>tidycreel</code> provides a tidy R workflow for survey design, data validation, estimation, and reporting, with the <code>survey</code> package supplying the design-based foundation.</p>
+<section id="install-tidycreel" class="level2">
+<h2 class="anchored" data-anchor-id="install-tidycreel">Install tidycreel</h2>
+<p>You can now install the CRAN release using the usual R command:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">install.packages</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidycreel)</span></code></pre></div></div>
+<p>As of October 10, the source package is available, while Windows and macOS binaries are not yet available. I expect those to appear within the next couple of days. If a binary is not yet available for your R installation, you can install the source release explicitly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">install.packages</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"source"</span>)</span></code></pre></div></div>
+<p><code>tidycreel</code> itself has no compiled code. Dependencies installed from source may require build tools.</p>
+<p>For the development version from <a href="https://github.com/chrischizinski/tidycreel">GitHub</a>, use <code>pak</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">install.packages</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pak"</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Once, if pak is not already installed</span></span>
+<span id="cb3-2">pak<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pak</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"chrischizinski/tidycreel"</span>)</span></code></pre></div></div>
+<p>Use the CRAN release for most analyses. Install from GitHub if you want to try the latest development changes.</p>
+<p><strong>Aerial surveys:</strong> Use the GitHub development version for catch, harvest, and release totals until 8.0.1 reaches CRAN. It fixes an underestimation issue in 8.0.0; non-aerial designs are unaffected (<a href="https://github.com/chrischizinski/tidycreel/releases/tag/v8.0.0">release notes</a>).</p>
+</section>
+<section id="examples-methods-and-vignettes" class="level2">
+<h2 class="anchored" data-anchor-id="examples-methods-and-vignettes">Examples, methods, and vignettes</h2>
+<p>There are three places to go after installation, depending on what you want to work through:</p>
+<ul>
+<li><strong>The <a href="../posts/2026-08-18-introducing-tidycreel.html">blog series</a></strong> follows small examples from <a href="../posts/2026-08-27-design-object.html">design objects</a> and <a href="../posts/2026-09-03-sampling-calendar.html">sampling calendars</a> through <a href="../posts/2026-09-11-roving-interviews.html">roving interviews</a>, <a href="../posts/2026-09-18-linked-tables.html">linked tables</a>, <a href="../posts/2026-09-25-effort-estimation.html">effort</a>, <a href="../posts/2026-10-02-catch-harvest-release.html">catch, harvest, and release</a>, and <a href="../posts/2026-10-09-reading-diagnostics.html">diagnostics</a>.</li>
+<li><strong>The companion book, <a href="https://modern-creel-surveys.netlify.app/"><em>Modern Creel Survey Analysis in R</em></a>,</strong> develops the reasoning behind those workflows: sampling design, estimands, uncertainty, and interpretation. It remains a work in progress as the methods, examples, and package develop.</li>
+<li><strong>The <a href="https://chrischizinski.com/tidycreel/articles/">full vignette collection</a></strong> provides focused package walkthroughs. CRAN includes <strong>24 vignettes</strong>, covering getting started, survey designs, interview estimation, incomplete trips, effort and catch calculations, variance methods, scheduling, visualization, and more. They are also available directly from the <a href="https://cran.r-project.org/web/packages/tidycreel/index.html">CRAN package page</a>.</li>
+</ul>
+<p>To browse the installed vignettes or open the getting-started guide in R:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">browseVignettes</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>)</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">vignette</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">package =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tidycreel"</span>)</span></code></pre></div></div>
+<p>The online collection is useful with a GitHub installation too, since that installation does not build local vignettes by default. Recent blog examples identify the 7.0.0 release they used; this announcement marks the 8.0.0 release.</p>
+<p>If you try <code>tidycreel</code> with your own creel data, I would like to hear where the data structures, diagnostics, or examples need more explanation. Questions are welcome in <a href="https://github.com/chrischizinski/tidycreel/discussions">GitHub Discussions</a>, and reproducible bug reports help through the <a href="https://github.com/chrischizinski/tidycreel/issues">issue tracker</a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>tidycreel</category>
+  <category>rstats</category>
+  <category>fisheries</category>
+  <guid>https://chrischizinski.com/posts/2026-10-10-tidycreel-on-cran.html</guid>
+  <pubDate>Sat, 10 Oct 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://chrischizinski.com/assets/images/projects/tidycreel-cran-release.png" medium="image" type="image/png" height="81" width="144"/>
+</item>
 <item>
   <title>Zero, Missing, or Unsampled? Reading Creel Diagnostics</title>
   <dc:creator>Christopher Chizinski</dc:creator>
@@ -10444,706 +10533,6 @@ font-style: inherit;">element_blank</span>())</span></code></pre></div></div>
   <category>rstats</category>
   <guid>https://chrischizinski.com/posts/2014-04-13-vegan-ggplot2.html</guid>
   <pubDate>Sun, 13 Apr 2014 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Models by a factor</title>
-  <link>https://chrischizinski.com/posts/2014-04-08-models-by-variable.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Recently, a friend asked a question on ways to run a single model by a grouping variable in a dataset (similar to the BY statement in SAS for those familiar with SAS). This was a list of the multiple different ways that were suggested.</p>
-<p>I will use the <a href="http://www.inside-r.org/packages/cran/plyr/docs/baseball">baseball dataset</a> in the <em>plyr</em> package to go through the different approaches.</p>
-<section id="load-and-display-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="load-and-display-the-data">Load and display the data</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(plyr)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#load the plyr package</span></span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data</span>(baseball)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#load the baseball dataset that comes with plyr</span></span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">head</span>(baseball)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># display the first six lines of the data.frame</span></span></code></pre></div></div>
-<pre><code>##            id year stint team lg  g  ab  r  h X2b X3b hr rbi sb cs bb so
-## 4   ansonca01 1871     1  RC1    25 120 29 39  11   3  0  16  6  2  2  1
-## 44  forceda01 1871     1  WS3    32 162 45 45   9   4  0  29  8  0  4  0
-## 68  mathebo01 1871     1  FW1    19  89 15 24   3   1  0  10  2  1  2  0
-## 99  startjo01 1871     1  NY2    33 161 35 58   5   1  1  34  4  2  3  0
-## 102 suttoez01 1871     1  CL1    29 128 35 45   3   7  3  23  3  1  1  0
-## 106 whitede01 1871     1  CL1    29 146 40 47   6   5  1  21  2  2  4  1
-##     ibb hbp sh sf gidp
-## 4    NA  NA NA NA   NA
-## 44   NA  NA NA NA   NA
-## 68   NA  NA NA NA   NA
-## 99   NA  NA NA NA   NA
-## 102  NA  NA NA NA   NA
-## 106  NA  NA NA NA   NA</code></pre>
-<p>To look at the year-team combinations in the data, use the ddply function</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">baseball<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.character</span>(baseball<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#convert team from a factor to a character</span></span>
-<span id="cb3-2"></span>
-<span id="cb3-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># For the purpose of this excercise we will reduce the dataset to just a few</span></span>
-<span id="cb3-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># teams</span></span>
-<span id="cb3-5">baseball.red <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> baseball[baseball<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%in%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"BOS"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"CHN"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"CIN"</span>), ]</span>
-<span id="cb3-6"></span>
-<span id="cb3-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Use ddply again to create a variable called c_year, which is the number of</span></span>
-<span id="cb3-8"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># years since the first year</span></span>
-<span id="cb3-9">baseball.red <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ddply</span>(baseball.red, .(id), transform, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">c_year =</span> year <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">min</span>(year))</span></code></pre></div></div>
-<p>So the basic idea for the process I am going to use, is that I am going to use a Poisson regression using the <em>glm</em> function in R to look at the hits as a function of year since the first year of data was included in the dataset. Is the model 100% valid? No but for this the actual model is not important.</p>
-<p>Further, the approaches I am describing below, are runnign the same model with same dependent and independent variables across different subsets of data. If you were interested in running different subsets of independent variables there are also many different approaches that could be considered, but I will not go into that at this time.</p>
-</section>
-<section id="subsetting-and-running-each-model-seperate" class="level3">
-<h3 class="anchored" data-anchor-id="subsetting-and-running-each-model-seperate">1. Subsetting and running each model seperate</h3>
-<p>The basic process is to run each model seperately by providing a different subset of the data. Not very difficult to do, but if you had a bunch of models to run, it can very quickly add up. The nice thing about this process though is that you have very clear model outputs (i.e., a specific output for BOS, CHN, and CIN).</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mod.BOS <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> baseball.red[baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"BOS"</span>, ], </span>
-<span id="cb4-2">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># run the model using only team BOS</span></span>
-<span id="cb4-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(mod.BOS)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  Display the model summary</span></span></code></pre></div></div>
-<pre><code>## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     "BOS", ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -14.29  -10.16   -5.28    6.82   17.97  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 3.943280   0.005922   665.9   &lt;2e-16 ***
-## c_year      0.034136   0.000884    38.6   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 72809  on 900  degrees of freedom
-## Residual deviance: 71420  on 899  degrees of freedom
-## AIC: 75179
-## 
-## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"></span>
-<span id="cb6-2">mod.CHN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> baseball.red[baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"CHN"</span>, ], </span>
-<span id="cb6-3">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>)</span>
-<span id="cb6-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(mod.CHN)</span></code></pre></div></div>
-<pre><code>## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     "CHN", ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -13.94   -9.17   -2.72    6.21   16.82  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 4.071993   0.005087   800.5   &lt;2e-16 ***
-## c_year      0.033453   0.000737    45.4   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 80354  on 1178  degrees of freedom
-## Residual deviance: 78403  on 1177  degrees of freedom
-## AIC: 84317
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"></span>
-<span id="cb8-2">mod.CIN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> baseball.red[baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"CIN"</span>, ], </span>
-<span id="cb8-3">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>)</span>
-<span id="cb8-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(mod.CIN)</span></code></pre></div></div>
-<pre><code>## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     "CIN", ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -12.40   -9.48   -2.03    6.35   14.83  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  4.21200    0.00528  797.57  &lt; 2e-16 ***
-## c_year       0.00589    0.00082    7.19  6.6e-13 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 70036  on 1029  degrees of freedom
-## Residual deviance: 69984  on 1028  degrees of freedom
-## AIC: 75122
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-</section>
-<section id="subsetting-and-running-through-a-loop" class="level3">
-<h3 class="anchored" data-anchor-id="subsetting-and-running-through-a-loop">2. Subsetting and running through a loop</h3>
-<p>This process first identifies all the uniqe teams listed in the dataset and then will loop through those teams and store the output in a list. The summary for all the models can be provided by running lapply on that list or running summary on an extracted element of the list. Problem with this method is just the inherent complication of using lists in R and running loops can take quite a long time especially on large datasets. If it is speed you are after there are quicker options.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">uniq.teams <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">unique</span>(baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># find all the unique teams in the dataset</span></span>
-<span id="cb10-2">model.out <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">list</span>()  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># create a list to store each model</span></span>
-<span id="cb10-3"></span>
-<span id="cb10-4"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> (i <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">length</span>(uniq.teams)) {</span>
-<span id="cb10-5">    model.out[[<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste</span>(uniq.teams[i])]] <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> baseball.red[baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> </span>
-<span id="cb10-6">        <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste</span>(uniq.teams[i]), ], <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>)</span>
-<span id="cb10-7">}</span>
-<span id="cb10-8"></span>
-<span id="cb10-9"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(model.out, summary)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># look at all the model outputs, this could be used with outputs on 3 and 5 as well.  </span></span></code></pre></div></div>
-<pre><code>## $CHN
-## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     paste(uniq.teams[i]), ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -13.94   -9.17   -2.72    6.21   16.82  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 4.071993   0.005087   800.5   &lt;2e-16 ***
-## c_year      0.033453   0.000737    45.4   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 80354  on 1178  degrees of freedom
-## Residual deviance: 78403  on 1177  degrees of freedom
-## AIC: 84317
-## 
-## Number of Fisher Scoring iterations: 5
-## 
-## 
-## $CIN
-## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     paste(uniq.teams[i]), ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -12.40   -9.48   -2.03    6.35   14.83  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  4.21200    0.00528  797.57  &lt; 2e-16 ***
-## c_year       0.00589    0.00082    7.19  6.6e-13 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 70036  on 1029  degrees of freedom
-## Residual deviance: 69984  on 1028  degrees of freedom
-## AIC: 75122
-## 
-## Number of Fisher Scoring iterations: 5
-## 
-## 
-## $BOS
-## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     paste(uniq.teams[i]), ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -14.29  -10.16   -5.28    6.82   17.97  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 3.943280   0.005922   665.9   &lt;2e-16 ***
-## c_year      0.034136   0.000884    38.6   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 72809  on 900  degrees of freedom
-## Residual deviance: 71420  on 899  degrees of freedom
-## AIC: 75179
-## 
-## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(model.out[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"CIN"</span>]])  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># or look at a specific model</span></span></code></pre></div></div>
-<pre><code>## 
-## Call:
-## glm(formula = h ~ c_year, family = "poisson", data = baseball.red[baseball.red$team == 
-##     paste(uniq.teams[i]), ])
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -12.40   -9.48   -2.03    6.35   14.83  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  4.21200    0.00528  797.57  &lt; 2e-16 ***
-## c_year       0.00589    0.00082    7.19  6.6e-13 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 70036  on 1029  degrees of freedom
-## Residual deviance: 69984  on 1028  degrees of freedom
-## AIC: 75122
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"></code></pre></div></div>
-</section>
-<section id="using-split-and-lapply" class="level3">
-<h3 class="anchored" data-anchor-id="using-split-and-lapply">3. Using <em>split</em> and <em>lapply</em></h3>
-<p>This process splits the dataset into seperate lists by a variable and then uses <em>lapply</em> to run the glm model across those different datasets.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1">datasets <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">split</span>(baseball.red, baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># splits the dataset into a list by team</span></span>
-<span id="cb15-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">str</span>(datasets)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># look at the structure of the dataset</span></span></code></pre></div></div>
-<pre><code>## List of 3
-##  $ BOS:'data.frame': 901 obs. of  23 variables:
-##   ..$ id    : chr [1:901] "adairje01" "adairje01" "aguilri01" "altroni01" ...
-##   ..$ year  : int [1:901] 1967 1968 1995 1902 1903 1988 1990 1971 1972 1973 ...
-##   ..$ stint : int [1:901] 2 1 2 1 1 1 2 1 1 1 ...
-##   ..$ team  : chr [1:901] "BOS" "BOS" "BOS" "BOS" ...
-##   ..$ lg    : chr [1:901] "AL" "AL" "AL" "AL" ...
-##   ..$ g     : int [1:901] 89 74 30 3 1 41 15 125 110 132 ...
-##   ..$ ab    : int [1:901] 316 208 0 8 3 148 0 491 436 499 ...
-##   ..$ r     : int [1:901] 41 18 0 0 0 14 0 56 47 56 ...
-##   ..$ h     : int [1:901] 92 45 0 0 2 34 0 114 112 135 ...
-##   ..$ X2b   : int [1:901] 13 1 0 0 0 5 0 23 26 17 ...
-##   ..$ X3b   : int [1:901] 1 0 0 0 0 3 0 0 3 1 ...
-##   ..$ hr    : int [1:901] 3 2 0 0 0 0 0 4 3 0 ...
-##   ..$ rbi   : int [1:901] 26 12 0 0 0 12 0 45 39 49 ...
-##   ..$ sb    : int [1:901] 1 0 0 0 0 4 0 6 3 13 ...
-##   ..$ cs    : int [1:901] 4 0 0 NA NA 2 0 4 3 1 ...
-##   ..$ bb    : int [1:901] 13 9 0 0 1 15 0 35 26 43 ...
-##   ..$ so    : int [1:901] 35 28 0 NA NA 35 0 43 28 33 ...
-##   ..$ ibb   : int [1:901] 0 2 0 NA NA 0 0 0 0 1 ...
-##   ..$ hbp   : int [1:901] 2 1 0 0 0 4 0 2 2 0 ...
-##   ..$ sh    : int [1:901] 4 6 0 0 0 4 0 9 5 12 ...
-##   ..$ sf    : int [1:901] 2 0 0 NA NA 1 0 4 5 7 ...
-##   ..$ gidp  : int [1:901] 10 10 0 NA NA 2 0 7 8 12 ...
-##   ..$ c_year: int [1:901] 0 1 0 0 1 0 0 0 1 2 ...
-##  $ CHN:'data.frame': 1179 obs. of  23 variables:
-##   ..$ id    : chr [1:1179] "abernte02" "abernte02" "abernte02" "abernte02" ...
-##   ..$ year  : int [1:1179] 1965 1966 1969 1970 1957 1958 1959 1999 2000 1969 ...
-##   ..$ stint : int [1:1179] 1 1 1 1 1 1 1 2 1 1 ...
-##   ..$ team  : chr [1:1179] "CHN" "CHN" "CHN" "CHN" ...
-##   ..$ lg    : chr [1:1179] "NL" "NL" "NL" "NL" ...
-##   ..$ g     : int [1:1179] 84 20 56 11 60 62 3 41 50 41 ...
-##   ..$ ab    : int [1:1179] 18 4 8 0 187 96 2 1 0 5 ...
-##   ..$ r     : int [1:1179] 1 0 1 0 21 14 0 0 0 2 ...
-##   ..$ h     : int [1:1179] 3 0 2 0 47 27 0 0 0 2 ...
-##   ..$ X2b   : int [1:1179] 0 0 1 0 10 4 0 0 0 0 ...
-##   ..$ X3b   : int [1:1179] 0 0 0 0 2 4 0 0 0 0 ...
-##   ..$ hr    : int [1:1179] 0 0 0 0 1 0 0 0 0 0 ...
-##   ..$ rbi   : int [1:1179] 2 0 1 0 10 4 0 0 0 0 ...
-##   ..$ sb    : int [1:1179] 0 0 0 0 0 2 0 0 0 0 ...
-##   ..$ cs    : int [1:1179] 0 0 0 0 3 0 0 0 0 0 ...
-##   ..$ bb    : int [1:1179] 0 0 0 0 17 6 0 0 0 0 ...
-##   ..$ so    : int [1:1179] 7 2 2 0 28 15 1 0 0 1 ...
-##   ..$ ibb   : int [1:1179] 0 0 0 0 0 0 0 0 0 0 ...
-##   ..$ hbp   : int [1:1179] 1 0 0 0 2 0 0 0 0 0 ...
-##   ..$ sh    : int [1:1179] 3 0 0 0 5 3 0 0 0 0 ...
-##   ..$ sf    : int [1:1179] 0 0 0 0 0 0 0 0 0 0 ...
-##   ..$ gidp  : int [1:1179] 0 0 0 0 2 2 0 0 0 0 ...
-##   ..$ c_year: int [1:1179] 0 1 4 5 11 12 13 4 5 0 ...
-##  $ CIN:'data.frame': 1030 obs. of  23 variables:
-##   ..$ id    : chr [1:1030] "abernte02" "abernte02" "adamsbo03" "adamsbo03" ...
-##   ..$ year  : int [1:1030] 1967 1968 1946 1947 1948 1949 1950 1951 1952 1953 ...
-##   ..$ stint : int [1:1030] 1 1 1 1 1 1 1 1 1 1 ...
-##   ..$ team  : chr [1:1030] "CIN" "CIN" "CIN" "CIN" ...
-##   ..$ lg    : chr [1:1030] "NL" "NL" "NL" "NL" ...
-##   ..$ g     : int [1:1030] 70 78 94 81 87 107 115 125 154 150 ...
-##   ..$ ab    : int [1:1030] 17 17 311 217 262 277 348 403 637 607 ...
-##   ..$ r     : int [1:1030] 0 2 35 39 33 32 57 57 85 99 ...
-##   ..$ h     : int [1:1030] 1 0 76 59 78 70 98 107 180 167 ...
-##   ..$ X2b   : int [1:1030] 0 0 13 11 20 16 21 12 25 14 ...
-##   ..$ X3b   : int [1:1030] 0 0 3 2 3 2 8 5 4 6 ...
-##   ..$ hr    : int [1:1030] 0 0 4 4 1 0 3 5 6 8 ...
-##   ..$ rbi   : int [1:1030] 2 0 24 20 21 25 25 24 48 49 ...
-##   ..$ sb    : int [1:1030] 0 0 16 9 6 4 7 4 11 3 ...
-##   ..$ cs    : int [1:1030] 0 0 NA NA NA NA NA 10 9 2 ...
-##   ..$ bb    : int [1:1030] 0 3 18 25 25 26 43 43 49 58 ...
-##   ..$ so    : int [1:1030] 10 12 32 23 23 36 29 40 67 67 ...
-##   ..$ ibb   : int [1:1030] 0 0 NA NA NA NA NA NA NA NA ...
-##   ..$ hbp   : int [1:1030] 0 0 3 4 1 0 0 1 0 0 ...
-##   ..$ sh    : int [1:1030] 0 0 14 7 7 5 3 3 8 12 ...
-##   ..$ sf    : int [1:1030] 0 0 NA NA NA NA NA NA NA NA ...
-##   ..$ gidp  : int [1:1030] 1 0 7 2 5 6 2 6 15 7 ...
-##   ..$ c_year: int [1:1030] 2 3 0 1 2 3 4 5 6 7 ...</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1">model.out <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(datasets, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(x) <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>, </span>
-<span id="cb17-2">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> x))  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># apply the glm function across the dataset list</span></span>
-<span id="cb17-3"></span>
-<span id="cb17-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># lapply(model.out,summary), # Not run because output is the same as above</span></span></code></pre></div></div>
-</section>
-<section id="using-by" class="level3">
-<h3 class="anchored" data-anchor-id="using-by">4. Using <em>by</em></h3>
-<p>This process is similar to the one directly above but will do it in a single line of code. Essentially what <em>by</em> does is the “data frame is split by row into data frames subsetted by the values of one or more factors, and function FUN is applied to each subset in turn”</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">model.out <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">by</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> baseball.red, baseball.red<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>team, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(x) <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> </span>
-<span id="cb18-2">    c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"poisson"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> x))</span>
-<span id="cb18-3">model.out</span></code></pre></div></div>
-<pre><code>## baseball.red$team: BOS
-## 
-## Call:  glm(formula = h ~ c_year, family = "poisson", data = x)
-## 
-## Coefficients:
-## (Intercept)       c_year  
-##      3.9433       0.0341  
-## 
-## Degrees of Freedom: 900 Total (i.e. Null);  899 Residual
-## Null Deviance:       72800 
-## Residual Deviance: 71400     AIC: 75200
-## -------------------------------------------------------- 
-## baseball.red$team: CHN
-## 
-## Call:  glm(formula = h ~ c_year, family = "poisson", data = x)
-## 
-## Coefficients:
-## (Intercept)       c_year  
-##      4.0720       0.0335  
-## 
-## Degrees of Freedom: 1178 Total (i.e. Null);  1177 Residual
-## Null Deviance:       80400 
-## Residual Deviance: 78400     AIC: 84300
-## -------------------------------------------------------- 
-## baseball.red$team: CIN
-## 
-## Call:  glm(formula = h ~ c_year, family = "poisson", data = x)
-## 
-## Coefficients:
-## (Intercept)       c_year  
-##     4.21200      0.00589  
-## 
-## Degrees of Freedom: 1029 Total (i.e. Null);  1028 Residual
-## Null Deviance:       70000 
-## Residual Deviance: 70000     AIC: 75100</code></pre>
-</section>
-<section id="using-dlply" class="level3">
-<h3 class="anchored" data-anchor-id="using-dlply">5. Using <em>dlply</em></h3>
-<p>One package I use in alot of my analyses is the <a href="http://cran.r-project.org/web/packages/plyr/index.html">plyr package</a> created by <a href="http://had.co.nz/">Hadley Wickham</a> (author of <strong>ggplot2</strong>, another package I use daily). This packages make subsetting and applying functions incredibly easy and are relatively fast.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(plyr)</span>
-<span id="cb20-2">model.out <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dlply</span>(baseball.red, .(team), glm, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">formula =</span> h <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> c_year, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> poisson)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#dlply takes the data as a dataframe and returns the output as a list</span></span>
-<span id="cb20-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">llply</span>(model.out, summary)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#uses llply (list input - list output) to display the summary (instead of lapply, but lapply works as well)</span></span></code></pre></div></div>
-<pre><code>## $BOS
-## 
-## Call:
-## .fun(formula = ..1, family = ..2, data = piece)
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -14.29  -10.16   -5.28    6.82   17.97  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 3.943280   0.005922   665.9   &lt;2e-16 ***
-## c_year      0.034136   0.000884    38.6   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 72809  on 900  degrees of freedom
-## Residual deviance: 71420  on 899  degrees of freedom
-## AIC: 75179
-## 
-## Number of Fisher Scoring iterations: 6
-## 
-## 
-## $CHN
-## 
-## Call:
-## .fun(formula = ..1, family = ..2, data = piece)
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -13.94   -9.17   -2.72    6.21   16.82  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 4.071993   0.005087   800.5   &lt;2e-16 ***
-## c_year      0.033453   0.000737    45.4   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 80354  on 1178  degrees of freedom
-## Residual deviance: 78403  on 1177  degrees of freedom
-## AIC: 84317
-## 
-## Number of Fisher Scoring iterations: 5
-## 
-## 
-## $CIN
-## 
-## Call:
-## .fun(formula = ..1, family = ..2, data = piece)
-## 
-## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -12.40   -9.48   -2.03    6.35   14.83  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  4.21200    0.00528  797.57  &lt; 2e-16 ***
-## c_year       0.00589    0.00082    7.19  6.6e-13 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for poisson family taken to be 1)
-## 
-##     Null deviance: 70036  on 1029  degrees of freedom
-## Residual deviance: 69984  on 1028  degrees of freedom
-## AIC: 75122
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-<p>As in a lot of things in R, there are many different approaches to the same problem. I personally tend to shy away from the use of the <em>lapply</em>, <em>mapply</em>, and <em>tapply</em> approaches but use the <strong>plyr</strong> package in most analysis.</p>
-
-
-</section>
-
- ]]></description>
-  <category>rstats</category>
-  <guid>https://chrischizinski.com/posts/2014-04-08-models-by-variable.html</guid>
-  <pubDate>Tue, 08 Apr 2014 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
