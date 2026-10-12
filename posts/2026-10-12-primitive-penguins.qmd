@@ -27,7 +27,7 @@ The algorithm is simple enough to describe in five steps:
 4. Nudge the best shape around, keeping mutations that improve the score.
 5. Paint the winner onto the canvas and repeat.
 
-That last part matters. Once a triangle is added, it stays. The algorithm does not redraw the whole picture after every step. It makes a long series of small, greedy decisions.
+Once a triangle is added, it stays. The algorithm does not redraw the whole picture after every step. It makes a long series of small, greedy decisions.
 
 I kept the main settings near the top of the script so the experiment is easy to change:
 
@@ -196,5 +196,7 @@ source("primitive_penguins.R")
 ```
 
 The output will be written to an `output/` directory. Change `shape_type` to `"ellipse"`, `"rectangle"`, or `"mixed"` to change the visual language. For a faster test, use the smoke-test values listed near the top of the script. Changing `main_seed` will produce another version of the same picture, as the seed animation above shows.
+
+The eyes remain rough, but the answer to my weekend question was yes: R and ggplot2 can rebuild the picture, one triangle at a time.
 
 The Palmer penguins artwork comes from the [`palmerpenguins` project](https://allisonhorst.github.io/palmerpenguins/), which asks that uses of the artwork be credited **“Artwork by @allison_horst.”** The reconstruction method was inspired by Michael Fogleman's open-source [*Primitive*](https://github.com/fogleman/primitive).
