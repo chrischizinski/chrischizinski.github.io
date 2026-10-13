@@ -5,7 +5,9 @@ date: 2026-10-12
 author: "Christopher Chizinski"
 categories: [rstats, ggplot2, creative coding]
 tags: [rstats, ggplot2, gganimate, image approximation, Palmer penguins]
-description: "I ported the primitive image-approximation idea to R and used 1,000 translucent triangles to rebuild Allison Horst's Palmer penguins artwork."
+description: >-
+  I ported the primitive image-approximation idea to R and used 1,000
+  translucent triangles to rebuild Allison Horst's Palmer penguins artwork.
 draft: false
 image: /assets/images/projects/primitive-penguins-triangles.png
 toc: true
@@ -13,9 +15,20 @@ toc: true
 
 ![](/assets/images/projects/primitive-penguins-build-up.gif){fig-alt="Animation with two panels. On the left, translucent triangles accumulate on an average-color canvas until three penguins appear against purple, teal, and orange backgrounds. On the right, Allison Horst's original Palmer penguins artwork remains visible for comparison." fig-cap="One thousand triangles, added one at a time. The right panel shows the original artwork by [Allison Horst](https://allisonhorst.github.io/palmerpenguins/)."}
 
-Over the weekend, I saw an [Instagram reel from Index Open Source](https://www.instagram.com/reel/Dd5yJWLBOHi/) showing a picture rebuilt one simple shape at a time. The tool was Michael Fogleman's [*Primitive*](https://github.com/fogleman/primitive), written in Go. My first thought was predictable: **could I do that in R and draw the result with ggplot2?**
+Over the weekend, I saw an [Instagram reel from Index Open
+Source](https://www.instagram.com/reel/Dd5yJWLBOHi/) showing a picture rebuilt
+one simple shape at a time. The tool was Michael Fogleman's
+[*Primitive*](https://github.com/fogleman/primitive), written in Go. My first
+thought was predictable: **could I do that in R and draw the result with
+ggplot2?**
 
-I used [Allison Horst's Palmer penguins artwork](https://github.com/allisonhorst/palmerpenguins/blob/main/man/figures/lter_penguins.png) as the target. It has large blocks of color, recognizable silhouettes, and just enough fine detail to make the approximation struggle. The final image above contains 1,000 translucent triangles. There is no image-recognition model underneath it. The code only asks which triangle will make the current canvas a little more like the target.
+I used [Allison Horst's Palmer penguins
+artwork](https://github.com/allisonhorst/palmerpenguins/blob/main/man/figures/lter_penguins.png)
+as the target. It has large blocks of color, recognizable silhouettes, and just
+enough fine detail to make the approximation struggle. The final image above
+contains 1,000 translucent triangles. There is no image-recognition model
+underneath it. The code only asks which triangle will make the current canvas a
+little more like the target.
 
 ## The idea behind Primitive
 
@@ -27,9 +40,11 @@ The algorithm is simple enough to describe in five steps:
 4. Nudge the best shape around, keeping mutations that improve the score.
 5. Paint the winner onto the canvas and repeat.
 
-Once a triangle is added, it stays. The algorithm does not redraw the whole picture after every step. It makes a long series of small, greedy decisions.
+Once a triangle is added, it stays. The algorithm does not redraw the whole
+picture after every step. It makes a long series of small, greedy decisions.
 
-I kept the main settings near the top of the script so the experiment is easy to change:
+I kept the main settings near the top of the script so the experiment is easy to
+change:
 
 ```r
 main_seed    <- 2026
@@ -41,13 +56,21 @@ n_candidates <- 50
 max_age      <- 100
 ```
 
-The search runs against an image only 300 pixels wide. That is enough resolution to recover the large forms while keeping the repeated pixel comparisons manageable. The final object is still a table of polygon coordinates, so ggplot2 can draw it at any output size.
+The search runs against an image only 300 pixels wide. That is enough resolution
+to recover the large forms while keeping the repeated pixel comparisons
+manageable. The final object is still a table of polygon coordinates, so ggplot2
+can draw it at any output size.
 
 ## Turning an image into something R can score
 
-The source artwork is a PNG with red, green, blue, and alpha channels. I first composite its transparent pixels onto white, then average neighboring pixels into a smaller working image. The result is a matrix with one row per pixel and three columns for color.
+The source artwork is a PNG with red, green, blue, and alpha channels. I first
+composite its transparent pixels onto white, then average neighboring pixels
+into a smaller working image. The result is a matrix with one row per pixel and
+three columns for color.
 
-Every proposed triangle is converted into the indices of the pixels it covers. For those pixels, the best fill color can be calculated directly. There is no need to guess colors randomly along with the triangle's position.
+Every proposed triangle is converted into the indices of the pixels it covers.
+For those pixels, the best fill color can be calculated directly. There is no
+need to guess colors randomly along with the triangle's position.
 
 ```r
 evaluate <- function(shape, current, sse) {
@@ -75,9 +98,13 @@ evaluate <- function(shape, current, sse) {
 }
 ```
 
-The score is the sum of squared differences between the current canvas and the target. Because only the covered pixels change, the function updates the score for those pixels rather than comparing every pixel in the image again.
+The score is the sum of squared differences between the current canvas and the
+target. Because only the covered pixels change, the function updates the score
+for those pixels rather than comparing every pixel in the image again.
 
-For each layer, I try 50 random triangles and keep the best starting point. I then hill-climb: move one vertex, keep the move if the error drops, and stop after 100 failed mutations in a row.
+For each layer, I try 50 random triangles and keep the best starting point. I
+then hill-climb: move one vertex, keep the move if the error drops, and stop
+after 100 failed mutations in a row.
 
 ```r
 best_shape <- function(current, sse) {
@@ -103,11 +130,15 @@ best_shape <- function(current, sse) {
 }
 ```
 
-This is the same general hill-climbing strategy described by *Primitive*. My version is deliberately an R experiment, not a line-for-line port of the Go implementation.
+This is the same general hill-climbing strategy described by *Primitive*. My
+version is deliberately an R experiment, not a line-for-line port of the Go
+implementation.
 
 ## Why ggplot2 works well here
 
-After the search, each accepted shape becomes tidy polygon data: an ID, a fill color, and a set of x-y coordinates. Drawing the approximation is then just `geom_polygon()` with the shapes grouped and painted in their original order.
+After the search, each accepted shape becomes tidy polygon data: an ID, a fill
+color, and a set of x-y coordinates. Drawing the approximation is then just
+`geom_polygon()` with the shapes grouped and painted in their original order.
 
 ```r
 plot_primitive <- function(data) {
@@ -129,13 +160,20 @@ plot_primitive <- function(data) {
 }
 ```
 
-This is the same reason I keep returning to ggplot2. Once I can get a problem into a data frame, I can usually control how it is drawn. I was following that instinct when I wrote about [moving igraph objects into ggplot2](/posts/2014-04-04-igraph-ggplotll.html) more than a decade ago; here the data frame just happens to contain a thousand triangles.
+This is one of my favorite things about ggplot2. Once I get the data into a data
+frame, figuring out how to plot it becomes fairly straightforward. I wrote about
+this more than a decade ago in a post on [moving igraph objects into
+ggplot2](/posts/2014-04-04-igraph-ggplotll.html) The same principle applies
+here, except this time the data frame contains a thousand triangles.
 
 ![](/assets/images/projects/primitive-penguins-progress.png){fig-alt="Five views of the triangle approximation after 10, 50, 100, 200, and 1,000 triangles. Broad purple, teal, orange, white, and black regions appear first; the three penguin silhouettes become increasingly distinct as more triangles are added." fig-cap="The large color fields arrive quickly. The remaining 800 triangles sharpen edges and add smaller contrasts."}
 
 ## Watching the penguins emerge
 
-The animation uses `gganimate::transition_manual(cumulative = TRUE)`. Frames are spaced geometrically: the first few triangles appear one at a time, while later frames add larger batches. That keeps the early, dramatic decisions visible without making the GIF unbearably long.
+The animation uses `gganimate::transition_manual(cumulative = TRUE)`. Frames are
+spaced geometrically: the first few triangles appear one at a time, while later
+frames add larger batches. That keeps the early, dramatic decisions visible
+without making the GIF unbearably long.
 
 ```r
 frame_steps <- unique(round(n_shapes^seq(0, 1, length.out = 80)))
@@ -152,36 +190,60 @@ build_up <- shape_tbl |>
   transition_manual(frame, cumulative = TRUE)
 ```
 
-The full animation adds the original artwork in a second panel with `annotation_raster()`, then masks any triangles that extend beyond the reconstructed canvas. It renders 66 frames and pauses on the final comparison.
+The full animation adds the original artwork in a second panel with
+`annotation_raster()`, then masks any triangles that extend beyond the
+reconstructed canvas. It renders 66 frames and pauses on the final comparison.
 
-On my machine, the 1,000-triangle search took about two minutes. Most of the recognizable structure appeared much earlier. The purple, teal, and orange backgrounds arrived first, followed by the white bellies and black heads. The extra shapes refined outlines and contrast, but they never recovered the eyes particularly well. At a working width of 300 pixels, each eye is only a few pixels across, and reducing error in a large background region is usually a better bargain.
+On my machine, the 1,000-triangle search took about two minutes. Most of the
+recognizable structure appeared much earlier. The purple, teal, and orange
+backgrounds arrived first, followed by the white bellies and black heads. The
+extra shapes refined outlines and contrast, but they never recovered the eyes
+particularly well. At a working width of 300 pixels, each eye is only a few
+pixels across, and reducing error in a large background region is usually a
+better bargain.
 
-That is also my favorite part of the result. The algorithm does not know that an eye matters more to us than a patch of background. It only knows pixel error. The recognizable penguins emerge from that much narrower objective.
+That is also my favorite part of the result. The algorithm does not know that an
+eye matters more to us than a patch of background. It only knows pixel error.
+The recognizable penguins emerge from that much narrower objective.
 
 ## Same penguins, different seeds
 
-Every triangle starts as a random proposal, so the seed decides which greedy path the search takes. To see how much that matters, I reran the search with six seeds, stopped each run at 400 triangles, and animated only the finished pictures.
+Every triangle starts as a random proposal, so the seed decides which greedy
+path the search takes. To see how much that matters, I reran the search with six
+seeds, stopped each run at 400 triangles, and animated only the finished
+pictures.
 
 ![](/assets/images/projects/primitive-penguins-seeds.gif){fig-alt="Animation cycling through six finished 400-triangle reconstructions of the Palmer penguins artwork, one per random seed. The purple, teal, and orange backgrounds and the three penguin silhouettes are present in every frame, but the edges, stray slivers, and head details shift from seed to seed." fig-cap="Six seeds, 400 triangles each, with the same target and settings."}
 
-The composition never changes: the large color fields and silhouettes are where most of the error lives, and every run finds them. The differences live at the margins, in which slivers overshoot an edge and how each head gets roughed in. Each run is reproducible on its own, but there is no single "correct" set of triangles.
+The composition never changes: the large color fields and silhouettes are where
+most of the error lives, and every run finds them. The differences live at the
+margins, in which slivers overshoot an edge and how each head gets roughed in.
+Each run is reproducible on its own, but there is no single "correct" set of
+triangles.
 
-The script builds this animation only on request, because it repeats the search five more times:
+The script builds this animation only on request, because it repeats the search
+five more times:
 
 ```r
 Sys.setenv(PRIMITIVE_SEED_GIF = "true")
 source("primitive_penguins.R")
 ```
 
-The seed-2026 frame reuses the first 400 triangles of the main run instead of recomputing them. The seeds and shape count are set by `variation_seeds` and `variation_n_shapes` near the top of the script.
+The seed-2026 frame reuses the first 400 triangles of the main run instead of
+recomputing them. The seeds and shape count are set by `variation_seeds` and
+`variation_n_shapes` near the top of the script.
 
 ## Run the experiment
 
-The complete script downloads the source artwork when needed, runs the search, saves the final and progress images, writes the polygon data to CSV, and renders the GIF.
+The complete script downloads the source artwork when needed, runs the search,
+saves the final and progress images, writes the polygon data to CSV, and renders
+the GIF.
 
-[Download the complete R script](/assets/code/primitive_penguins.R){.btn .btn-primary download="primitive_penguins.R"}
+[Download the complete R
+script](/assets/code/primitive_penguins.R){.btn .btn-primary download="primitive_penguins.R"}
 
-Install the packages once, place the script in an empty project folder, and source it from that folder:
+Install the packages once, place the script in an empty project folder, and
+source it from that folder:
 
 ```r
 install.packages(c(
@@ -195,8 +257,17 @@ install.packages(c(
 source("primitive_penguins.R")
 ```
 
-The output will be written to an `output/` directory. Change `shape_type` to `"ellipse"`, `"rectangle"`, or `"mixed"` to change the visual language. For a faster test, use the smoke-test values listed near the top of the script. Changing `main_seed` will produce another version of the same picture, as the seed animation above shows.
+The output will be written to an `output/` directory. Change `shape_type` to
+`"ellipse"`, `"rectangle"`, or `"mixed"` to change the visual language. For a
+faster test, use the smoke-test values listed near the top of the script.
+Changing `main_seed` will produce another version of the same picture, as the
+seed animation above shows.
 
-The eyes remain rough, but the answer to my weekend question was yes: R and ggplot2 can rebuild the picture, one triangle at a time.
+The eyes remain rough, but the answer to my weekend question was yes: R and
+ggplot2 can rebuild the picture, one triangle at a time.
 
-The Palmer penguins artwork comes from the [`palmerpenguins` project](https://allisonhorst.github.io/palmerpenguins/), which asks that uses of the artwork be credited **“Artwork by @allison_horst.”** The reconstruction method was inspired by Michael Fogleman's open-source [*Primitive*](https://github.com/fogleman/primitive).
+The Palmer penguins artwork comes from the [`palmerpenguins`
+project](https://allisonhorst.github.io/palmerpenguins/), which asks that uses
+of the artwork be credited **"Artwork by @allison_horst."** The reconstruction
+method was inspired by Michael Fogleman's open-source
+[*Primitive*](https://github.com/fogleman/primitive).
