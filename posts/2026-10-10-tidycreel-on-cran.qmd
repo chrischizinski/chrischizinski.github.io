@@ -2,6 +2,7 @@
 title: "tidycreel is now on CRAN"
 subtitle: "Install the release and find your way into the examples"
 date: 2026-10-10
+date-modified: 2026-10-15
 author: "Christopher Chizinski"
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, CRAN, creel survey, fisheries science, rstats]
@@ -32,10 +33,11 @@ install.packages("tidycreel")
 library(tidycreel)
 ```
 
-As of October 10, the source package is available, while Windows and macOS
-binaries are not yet available. I expect those to appear within the next couple
-of days. If a binary is not yet available for your R installation, you can
-install the source release explicitly:
+As of October 15, the 8.0.0 source package and binaries for Windows and macOS
+are available on CRAN. The macOS binaries support both Apple Silicon and Intel
+Macs. Use the command above to install the release.
+
+To install the source release explicitly:
 
 ```r
 install.packages("tidycreel", type = "source")
