@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1030" role="img" aria-labelledby="title desc">
+<title id="title">From source tables to a survey design</title>
+<desc id="desc">A source and a connection profile feed tidycreel.connect. Counts, interviews, catch, and lengths remain separate tables. Those tables and a separately supplied sampling plan feed tidycreel for design declaration and estimation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#14656b"/></marker></defs>
+<style>
+text { font-family: system-ui, -apple-system, sans-serif; fill:#153647; }
+.title { font-size:32px; font-weight:700; text-anchor:middle; }
+.heading { font-size:30px; font-weight:700; }
+.body { font-size:27px; }
+.label { font-size:28px; font-weight:600; text-anchor:middle; }
+.box { fill:#fff; stroke:#14656b; stroke-width:2.5; }
+.arrow { fill:none; stroke:#14656b; stroke-width:3; marker-end:url(#arrow); }
+.grid { fill:none; stroke:#aac7c6; stroke-width:1.5; }
+</style>
+<rect width="720" height="1030" fill="#fbf8f1"/>
+<text x="360" y="42" class="title">From source tables</text>
+<text x="360" y="82" class="title">to a survey design</text>
+<rect x="35" y="115" width="650" height="105" rx="12" class="box"/>
+<text x="60" y="155" class="heading">1  Your source</text>
+<text x="60" y="195" class="body">CSV files, a database, or an API</text>
+<path d="M 210 220 V 312" class="arrow"/>
+<rect x="375" y="242" width="310" height="48" rx="8" fill="#f9ebcc" stroke="#916321" stroke-width="2"/>
+<text x="530" y="275" class="label">Connection profile</text>
+<path d="M 530 290 V 313" class="arrow"/>
+<rect x="35" y="320" width="650" height="120" rx="12" class="box"/>
+<text x="60" y="360" class="heading">2  tidycreel.connect</text>
+<text x="60" y="397" class="body">Read · map names and codes</text>
+<text x="60" y="430" class="body">Check types</text>
+<path d="M 360 440 V 470" class="arrow"/>
+<g transform="translate(35 485)">
+<rect width="310" height="85" class="box"/>
+<rect width="310" height="43" fill="#e6f1ed"/>
+<text x="155" y="32" class="label">Counts</text>
+<path d="M 15 63 H 295 M 100 44 V 85 M 205 44 V 85" class="grid"/>
+</g>
+<g transform="translate(375 485)">
+<rect width="310" height="85" class="box"/>
+<rect width="310" height="43" fill="#e6f1ed"/>
+<text x="155" y="32" class="label">Interviews</text>
+<path d="M 15 63 H 295 M 100 44 V 85 M 205 44 V 85" class="grid"/>
+</g>
+<g transform="translate(35 590)">
+<rect width="310" height="85" class="box"/>
+<rect width="310" height="43" fill="#e6f1ed"/>
+<text x="155" y="32" class="label">Catch</text>
+<path d="M 15 63 H 295 M 100 44 V 85 M 205 44 V 85" class="grid"/>
+</g>
+<g transform="translate(375 590)">
+<rect width="310" height="85" class="box"/>
+<rect width="310" height="43" fill="#e6f1ed"/>
+<text x="155" y="32" class="label">Lengths</text>
+<path d="M 15 63 H 295 M 100 44 V 85 M 205 44 V 85" class="grid"/>
+</g>
+<text x="360" y="710" class="body" text-anchor="middle">Separate tables, with links preserved</text>
+<path d="M 130 725 V 850" class="arrow"/>
+<rect x="245" y="740" width="440" height="90" rx="10" fill="#f9ebcc" stroke="#916321" stroke-width="2"/>
+<text x="265" y="775" class="heading">Sampling plan</text>
+<text x="265" y="811" class="body">Calendar, strata, probabilities</text>
+<path d="M 465 830 V 850" class="arrow"/>
+<rect x="35" y="865" width="650" height="110" rx="12" class="box"/>
+<text x="60" y="906" class="heading">3  tidycreel</text>
+<text x="60" y="947" class="body">Declare design · attach tables · estimate</text>
+<text x="360" y="1013" class="body" text-anchor="middle">Importing data is part of the analysis.</text>
+</svg>
