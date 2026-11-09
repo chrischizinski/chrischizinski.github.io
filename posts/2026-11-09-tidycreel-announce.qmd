@@ -8,7 +8,7 @@ tags: [tidycreel, mailing list, creel survey, rstats]
 description: >-
   Join tidycreel-announce to hear about new CRAN releases and monthly
   development updates. No GitHub or Google account needed.
-draft: true
+draft: false
 toc: false
 ---
 

@@ -6,7 +6,7 @@ author: "Christopher Chizinski"
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, creel survey, development version, rstats]
 description: "A month of tidycreel development: the default total is now the season total, several estimates and standard errors were corrected, and the package now refuses where it used to guess."
-draft: true
+draft: false
 toc: true
 ---
 
