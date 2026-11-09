@@ -5,15 +5,16 @@ date: 2026-11-09
 author: "Christopher Chizinski"
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, mailing list, creel survey, rstats]
-description: "Join tidycreel-announce to hear about new CRAN releases and monthly development updates. No GitHub or Google account needed."
+description: >-
+  Join tidycreel-announce to hear about new CRAN releases and monthly
+  development updates. No GitHub or Google account needed.
 draft: true
 toc: false
 ---
 
 Until now, the only way to hear about a new version of `tidycreel` was to watch
-the repository on GitHub. Many of the people who use the package, including
-agency biologists, students and survey coordinators, do not have a GitHub
-account, and should not need one to know when something changes.
+the repository on GitHub. Many of the people who use the package do not have a
+GitHub account, and should not need one to know when something changes.
 
 So there is now a mailing list:
 **[tidycreel-announce](https://groups.google.com/g/tidycreel-announce)**.
@@ -27,25 +28,24 @@ You do not need a GitHub or Google account. Either:
 - visit the [group page](https://groups.google.com/g/tidycreel-announce) and
   click **Join group**.
 
-To leave, send an email to
-<tidycreel-announce+unsubscribe@googlegroups.com>. Every message includes that
-address.
+To leave, send an email to <tidycreel-announce+unsubscribe@googlegroups.com>.
+Every message includes that address.
 
 ## What you will get
 
-- **[CRAN]**: each new CRAN release, about every two months. Each one
-  covers what changed, and whether any estimates are affected.
-- **[dev]**: a monthly update on the development version, with a link to a
-  post on this blog, like
-  [this month's](/posts/2026-11-09-tidycreel-dev-november.html).
+- **[CRAN]**: each new CRAN release, about every two months. Each one covers
+  what changed, and whether any estimates are affected.
+- **[dev]**: a monthly update on the development version, with a link to a post
+  on this blog, like [this
+  month's](/posts/2026-11-09-tidycreel-dev-november.html).
 
-That's all. Only I post to the list, so it carries no discussion threads and
-no questions from other members. The member list is private. If you
-reply to an announcement, the reply comes to me, not the whole list.
+That's all. Only I post to the list, so it carries no discussion threads and no
+questions from other members. The member list is private. If you reply to an
+announcement, the reply comes to me, not the whole list.
 
-For questions and bug reports, the
-[GitHub issues page](https://github.com/chrischizinski/tidycreel/issues) is
-still the best place.
+For questions and bug reports, the [GitHub issues
+page](https://github.com/chrischizinski/tidycreel/issues) is still the best
+place.
 
 If you prefer RSS, this blog has a feed for tidycreel posts only, at
 <https://chrischizinski.com/blog-tidycreel.xml>.
