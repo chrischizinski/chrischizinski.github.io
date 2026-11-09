@@ -12,7 +12,8 @@ listing:
   categories: true
   sort-ui: false
   filter-ui: false
-  feed: true
+  feed:
+    categories: [rstats, tidycreel]
   page-size: 30
 page-layout: full
 title-block-banner: false
