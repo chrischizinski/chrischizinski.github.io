@@ -1,0 +1,184 @@
+---
+title: "What's changed in tidycreel since 8.0.0"
+subtitle: "The first monthly update on the development version"
+date: 2026-11-09
+author: "Christopher Chizinski"
+categories: [tidycreel, rstats, fisheries]
+tags: [tidycreel, creel survey, development version, rstats]
+description: "A month of tidycreel development: the default total is now the season total, several estimates and standard errors were corrected, and the package now refuses where it used to guess."
+draft: true
+toc: true
+---
+
+This is the first of a monthly series on what has changed in the development
+version of `tidycreel`. CRAN releases come about every two months, and the
+development version on GitHub gets fixes and features in between. These posts
+are for anyone who wants to know what is coming before it reaches CRAN, and in
+particular **whether it changes your numbers**.
+
+The current CRAN release is 8.0.0. Since then, the development version has
+gained about a hundred entries in its
+[NEWS](https://chrischizinski.com/tidycreel/dev/news/). This post does not
+cover them all. It covers the ones that change an estimate or a standard error,
+and the ones that change what you see when you run your code.
+
+To try the development version:
+
+```r
+# install.packages("pak")
+pak::pak("chrischizinski/tidycreel")
+```
+
+## The default total is now the season total
+
+This is the change most users will notice first.
+
+`estimate_effort()`, `estimate_total_catch()`, `estimate_total_harvest()` and
+`estimate_total_release()` used to default to `target = "sampled_days"`: the
+total over the days that were actually counted. They now default to
+`target = "period_total"`: the total for the season. Both printed as
+"Method: Total", so a default call on a partly sampled season quietly reported
+a fraction of it. On the package's example season, 36 of 120 days were sampled,
+and the default effort was 3,066 angler-hours against a season total of 9,994.
+
+Every default total on a design that did not sample every day changes. To get
+the old numbers, ask for them by name with `target = "sampled_days"`.
+
+A related check: `add_counts()` now warns when every day of every stratum has a
+count. The calendar is the population of days, so a calendar built from only
+the sampled dates turns the design into a census, and the season total becomes
+the effort of those days alone. In one example that was 2,380 angler-hours
+against 8,651 for the full 61-day season, with nothing said. If you see this
+warning, pass the full season calendar to `creel_design()`.
+
+## Estimates that change
+
+These fixes move point estimates, not just standard errors.
+
+- **Aerial catch, harvest and release totals were too small.** They were
+  computed from the raw instantaneous count rather than from effort, so they
+  missed the `h_open`, angler-ratio and visibility scaling that
+  `estimate_effort()` applies: 14 times too small with `h_open = 14`. **If you
+  have reported aerial totals from 8.0.0, re-run them.**
+- **Refused interviews were used as real trips.** `add_interviews(refused =)`
+  stored the flag, but no estimator read it, so a refused party usually entered
+  the rate with a catch of 0. Flagging 10 interviews as refused on the example
+  data took the catch rate from 2.29 to 1.03. Refused interviews are now set
+  aside, with a message giving the count.
+- **Roving (mean-of-ratios) rates now weight each party by its size** when
+  `n_anglers` is available. The estimator is defined per angler, but an
+  interview is a party. Weighting parties equally leaned toward small parties'
+  rates; in a simulation where larger parties caught fish faster, the old rate
+  was 23% low. On the example roving data the rate moves from 0.197 to 0.191
+  fish per angler-hour. Designs without `n_anglers`, or with a constant party
+  size, are unchanged.
+- **Catch rows with no species are refused.** They were counted in the
+  all-species total and dropped from every species row, so the species rows did
+  not add up to the total. Label them (for example `"unidentified"`, which is
+  reported as its own species) or drop them on purpose.
+- **Counts dated outside the calendar, or in the wrong stratum, are refused.**
+  A count outside the calendar became a sampled day the population did not
+  contain: four such counts moved a test effort estimate from 151 to 277.
+- **Sectioned catch totals use the stratified sum.** Without `by`, each
+  section's effort was multiplied by one rate pooled across its strata, so a
+  section's total could differ from the sum of its `by = day_type` rows (by up
+  to about 4% on the package fixture).
+- **`summarize_cws_rates()` handles creels that record only harvest and
+  release.** It read only `"caught"` rows, so such creels got a CWS of 0. On
+  the example data, bass moves from 0.052 to 0.185 and walleye from 0.462 to
+  0.629.
+
+## Standard errors that change
+
+Point estimates are unchanged in this group; the uncertainty around them moves.
+
+- **The finite-population correction no longer erases count-timing
+  uncertainty.** On season and stratum totals, a stratum where a sampled day
+  had a single count could have its standard error shrunk to nothing, because
+  sampling more days does not remove the uncertainty about *when in the day*
+  the count fell. With every day sampled, the SE was exactly 0. On the example
+  season the effort SE rises from 1,079 to 1,286 angler-hours, and every catch,
+  harvest and release total built on that effort inherits the change.
+- **Within-day variance is no longer counted twice** on
+  `target = "sampled_days"` with two or more counts a day. On a four-day test
+  fixture the SE falls from 276.9 to 100.
+- **Designs with more than one strata column** (for example
+  `strata = c(day_type, month)`) had their standard errors computed over the
+  first column only. In one season the effort SE was 147.7 where it should have
+  been 187.9.
+- **Sectioned lake totals now account for sections that rise and fall
+  together.** A busy day is busy in every section, and the lake total had
+  treated sections as independent. In simulation, interval coverage went from
+  91.5% to 94.8%.
+- **The bootstrap no longer reports zero variance for a stratum with one
+  sampled day.** That design is now refused, as Taylor and the jackknife
+  already refused it.
+- **An unknown within-day component is reported as `NA`, not `0`.** With one
+  count a day, the within-day part cannot be separated out. The total SE is
+  unchanged, but `se_within` now says "unknown" rather than "measured and found
+  to be zero".
+
+## The package stops instead of guessing
+
+A theme runs through many of these changes: an unknown value is not a zero.
+Where `tidycreel` used to drop something and report the rest, it now stops and
+tells you what is missing:
+
+- A stratum with effort but no catch rate (for example, no complete weekend
+  trips) used to be left out of the catch total, with only a warning. On the
+  package example that left out 54% of the season's effort. It now stops and
+  names the cells. `missing_rate = "exclude"` is the explicit way to leave them
+  out, and the result records what was excluded.
+- On bus-route and ice designs, parties that were counted but not interviewed
+  entered totals as zero effort and zero catch. They are now refused by name.
+- A season total that would silently leave out a never-sampled stratum (a
+  Labor Day stratum, say) is now refused.
+
+If your script stops where it used to run, the error message names the problem
+and the way forward.
+
+## Less noise
+
+Warnings have been sorted into tiers. Warnings that the estimate may be wrong
+still print every time. Data-quality warnings now print once per design rather
+than on every call: one season script went from 216 copies of the same warning
+to one. Information that is not a warning, such as the count of zero-catch
+interviews, is now a message. `get_warnings()` lists everything that was
+raised on a design or an estimate.
+
+## New in the development version
+
+A short list. The [NEWS](https://chrischizinski.com/tidycreel/dev/news/) has
+the details.
+
+- `creel_calendar()` builds the season calendar that `creel_design()` takes.
+- Night creels: schedules and designs whose survey day crosses midnight.
+- `write_design()` and `read_design()` save a design and rebuild it.
+- `summarize_rws_rates()` for released-while-sought rates.
+- `prep_interview_totals()` builds each interview's catch, harvest and release
+  totals from a long catch table, so interviews and catch can come from the
+  same records.
+- A new example dataset, `example_roving_interviews`.
+- The [vignettes](https://chrischizinski.com/tidycreel/dev/articles/) were
+  reorganized into a tutorial, how-to guides, explanations and reference, and
+  checked against the code.
+
+## What to do
+
+- **If you use aerial designs, re-run your catch, harvest and release totals.**
+- If your totals changed and you want the old numbers, add
+  `target = "sampled_days"`. Then check whether the season total is what you
+  meant all along.
+- If you hit a new error, read it: it names the stratum, date or row involved.
+- If something looks wrong, please
+  [open an issue](https://github.com/chrischizinski/tidycreel/issues).
+
+All of this is planned for the next CRAN release in December.
+
+## Stay up to date
+
+To get these updates by email, join the
+[tidycreel-announce](https://groups.google.com/g/tidycreel-announce) mailing
+list. You do not need a GitHub or Google account: send an email to
+<tidycreel-announce+subscribe@googlegroups.com>. The list carries each CRAN
+release and this monthly update, and nothing else.
