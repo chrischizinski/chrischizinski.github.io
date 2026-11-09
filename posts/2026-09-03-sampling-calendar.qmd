@@ -2,6 +2,7 @@
 title: "Why the sampling calendar belongs in the estimate"
 subtitle: "Available days, sampled days, and the population behind a creel result"
 date: 2026-09-03
+date-modified: 2026-10-15
 author: "Christopher Chizinski"
 categories: [tidycreel, rstats, fisheries]
 tags: [
@@ -125,18 +126,25 @@ fishery, staffing, budget, survey objectives, and expected variability. The
 important part here is that the sampling rates and selection are explicit and
 reproducible rather than stored only in a spreadsheet or calendar export.
 
-When it is time to analyze the observations, the selected dates become part of
-the design alongside the field tables:
+When it is time to analyze the observations, pass the full calendar to the
+design. Keep the selected dates separately as the planned visits:
 
 ```r
-sampled_schedule <- schedule[schedule$sampled, ]
+planned_visits <- schedule[schedule$sampled, ]
 
 design <- creel_design(
-  sampled_schedule,
+  schedule,
   date = date,
   strata = day_type
 )
 ```
+
+The design retains every date in the season, including dates without counts.
+Use `planned_visits` to check whether the selected fieldwork occurred; do not
+use it to replace the population calendar. The
+[diagnostics post](/posts/2026-10-09-reading-diagnostics.html) shows how to
+compare planned visits with observed records. This calendar example was
+checked against tidycreel 8.0.0.
 
 The [tidycreel reference site](https://chrischizinski.com/tidycreel/) documents
 the scheduling and design arguments in detail. For a fuller explanation of the

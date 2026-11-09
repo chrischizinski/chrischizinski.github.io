@@ -2,6 +2,7 @@
 title: "Start with the design object"
 subtitle: "How tidycreel connects a creel survey to an analysis"
 date: 2026-08-27
+date-modified: 2026-10-15
 categories: [tidycreel, rstats, fisheries]
 tags: [tidycreel, creel survey, survey design, rstats, fisheries science]
 description: "A practical introduction to the tidycreel design object and the role of tidycreel.connect in a reproducible creel-survey workflow."
@@ -108,11 +109,17 @@ flagged value should be deleted or changed; it gives the analyst a concise
 record to investigate.
 
 `check_completeness()` is the design-aware companion diagnostic. After data are
-attached, it compares the observed tables with the calendar held by the design
-object and can identify scheduled days with no count data and strata with too
-few interviews for a dependable rate estimate. In other words, it asks not
-only, “Is this cell blank?” but also, “What was supposed to have been sampled
-here, and what does its absence mean?”
+attached, it identifies calendar dates without count records and flags
+interview strata below a specified row-count threshold. A date without counts
+may have been intentionally unsampled. To identify missed fieldwork, compare
+the selected visits with the observed records separately.
+
+Likewise, passing an interview-count threshold does not establish that the
+interviews are independent, eligible for the estimator, or sufficient for the
+precision a manager needs. Check every expected stratum, including those with
+no interviews. The [diagnostics post](/posts/2026-10-09-reading-diagnostics.html)
+works through these checks and explains why missing records, unsampled days,
+and observed zeros need different treatment.
 
 Here is a useful diagnostic sequence before estimation:
 
@@ -233,10 +240,10 @@ are not clear, changing estimators rarely fixes the underlying problem.
 
 The [tidycreel reference site](https://chrischizinski.com/tidycreel/) has the
 function-level details. The chapter [Building a Creel Design
-Object](https://modern-creel-surveys.netlify.app/building-a-creel-design-object.html)
+Object](https://modern-creel-surveys.netlify.app/chapters/10-building-a-creel-design-object)
 in *Modern Creel Survey Analysis in R* walks through a fuller example, including
 interviews and species-level catch. The companion chapter on
-[tidycreel.connect](https://modern-creel-surveys.netlify.app/creel-connect.html)
+[tidycreel.connect](https://modern-creel-surveys.netlify.app/chapters/creel-connect)
 shows the connection workflow in more detail.
 
 The [next post looks more closely at the sampling calendar](/posts/2026-09-03-sampling-calendar.html)

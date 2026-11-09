@@ -2,6 +2,7 @@
 title: "How an Instantaneous Count Becomes Angler-Hours"
 subtitle: "Estimating fishing effort across sampled days and the full survey period"
 date: 2026-09-25
+date-modified: 2026-10-15
 author: "Christopher Chizinski"
 categories: [tidycreel, rstats, fisheries]
 tags: [
@@ -130,9 +131,10 @@ sampled days, while the calendar defines the population of days they can
 represent.
 
 Weekday and weekend also remain separate. Weekend counts are higher in this
-example, and weekends were sampled at a different rate. Pooling the days before
-expansion would let the composition of the sample, rather than the sampling
-design, determine the result.
+example, but both strata have a 50% sampling fraction: five of ten weekdays
+and three of six weekend days. Each stratum's mean daily effort is expanded
+to its own number of calendar days. The same approach also handles surveys
+with different sampling fractions across strata.
 
 ## Let `add_counts()` establish the effort unit
 

@@ -28,18 +28,21 @@
 # =============================================================================
 # ACT 0 — INSTALLATION AND SETUP                                        (5 min)
 # =============================================================================
-# tidycreel is not on CRAN. It installs from GitHub. Run ONE of the following
-# (pak is faster and resolves system deps better; devtools is the classic).
+# tidycreel is available on CRAN. Install the release with install.packages().
+# As of October 15, 2026, the CRAN release is 8.0.0, with Windows and macOS
+# binaries available. The GitHub option below installs development changes.
 #
 # Requirements: R >= 4.1.0 (the |> native pipe is used throughout).
 
 if (FALSE) {
   # <- set to TRUE the first time you run this on a new machine
 
-  install.packages("pak")
-  pak::pak("chrischizinski/tidycreel")
+  install.packages("tidycreel")
 
-  # or:
+  # For the development version instead:
+  # install.packages("pak")
+  # pak::pak("chrischizinski/tidycreel")
+  # Or use devtools:
   # install.packages("devtools")
   # devtools::install_github("chrischizinski/tidycreel")
 
