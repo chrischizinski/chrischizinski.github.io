@@ -181,4 +181,5 @@ To get these updates by email, join the
 [tidycreel-announce](https://groups.google.com/g/tidycreel-announce) mailing
 list. You do not need a GitHub or Google account: send an email to
 <tidycreel-announce+subscribe@googlegroups.com>. The list carries each CRAN
-release and this monthly update, and nothing else.
+release and this monthly update, and nothing else. More about the list is in
+[this post](/posts/2026-11-09-tidycreel-announce.html).
