@@ -22,9 +22,3 @@ Guest lectures organized by course and year, beginning with NRES 801.
 ### NRES 323
 
 Course materials will be added here when available.
-
-## Other teaching
-
-### [Special Topics using R (NRES 898)](https://bulletin.unl.edu/courses/NRES/898)
-
-Topics have included ecological detective work, applied multivariate statistics, regression, ecological simulations, Shiny apps, data wrangling, and graphics. Materials from the R group are available on the [SNR R Group site](https://chrischizinski.github.io/SNR_R_Group/).
