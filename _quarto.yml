@@ -22,6 +22,8 @@ website:
         href: blog.qmd
       - text: "Projects"
         href: projects.qmd
+      - text: "Teaching"
+        href: teaching.qmd
       - text: "CV"
         href: cv.qmd
     right:
