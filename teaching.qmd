@@ -7,11 +7,11 @@ description: "Courses taught at the University of Nebraska–Lincoln."
 
 ### [NRES 800: Data Science for Natural Resources](https://bulletin.unl.edu/courses/NRES/800)
 
-Graduate course in data science for natural resources. Course materials are organized by semester.
+Graduate course in data science for natural resources. View the [NRES 800 class slides](https://chrischizinski.com/nres800-slides/).
 
 ### [NRES 315: Human Dimensions of Wildlife and Fisheries](https://bulletin.unl.edu/courses/NRES/315)
 
-An introduction to the theory and methods used to understand human dimensions, with applications and case studies in fisheries and wildlife management.
+An introduction to the theory and methods used to understand human dimensions, with applications and case studies in fisheries and wildlife management. View the [NRES 315 class slides](https://chrischizinski.com/nres315-slides/).
 
 ### [Guest Lectures](https://chrischizinski.github.io/nres-801-guest-lectures/)
 
