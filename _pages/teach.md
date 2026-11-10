@@ -1,32 +1,32 @@
 ---
 permalink: /teach/
 title: "Teaching"
-excerpt: "Courses I teach."
-last_modified_at: 2017-06-02T14:28:13-05:00
-feature_row:
-  - image_path: assets/images/HD1.png
-  - image_path: /assets/images/HD2.png
-  - image_path: /assets/images/HD3.png
-feature_row2:
-  - image_path: /assets/images/Rlogo.svg
+excerpt: "Courses I teach at the University of Nebraska–Lincoln."
+last_modified_at: 2026-11-10T00:00:00-06:00
 ---
 
+Courses I teach at the [University of Nebraska–Lincoln](https://www.unl.edu/).
 
-Courses that I teach at the [University of Nebraska - Lincoln](www.unl.edu).
+## Current and recent courses
 
-# [NRES 315: Human Dimensions of Wildlife and Fisheries](https://bulletin.unl.edu/courses/NRES/315)
+### [NRES 800: Data Science for Natural Resources](https://bulletin.unl.edu/courses/NRES/800)
 
+Graduate course in data science for natural resources. Course materials are organized by semester.
 
-{% include feature_row %}
+### [NRES 315: Human Dimensions of Wildlife and Fisheries](https://bulletin.unl.edu/courses/NRES/315)
 
-Managers and researchers increasingly must contend with the problem of understanding and managing complex, social-ecological systems.
-To be effective in the job requires understanding how people value, experience, use, care for, interact with, and are sustained by the natural environment. 
+An introduction to the theory and methods used to understand human dimensions, with applications and case studies in fisheries and wildlife management.
 
-This course provides an introduction to the theory and methods necessary to understand human dimensions as well as applications and case studies of human dimensions in fisheries and wildlife management.
+### [Guest Lectures](https://chrischizinski.github.io/nres-801-guest-lectures/)
 
-# [Special topics using R](https://bulletin.unl.edu/courses/NRES/898)
+Guest lectures organized by course and year, beginning with NRES 801.
 
-{% include feature_row id="feature_row2" %}
+### NRES 323
 
-I teach a Special Topics course every semester that covers aspects of using the R statistical language.  We have covered a wide variety of topics including Ecological Detective, applied mutlivariate statitics, regression, ecological simulations, building Shiny apps, data wrangling, and graphics. While graduate students take this for credit, the group is open to faculty, postdocs, graduate students, and agency personnel.  I keep all the lessons in a github repository with its own [project page](https://chrischizinski.github.io/SNR_R_Group/). 
+Course materials will be added here when available.
 
+## Other teaching
+
+### [Special Topics using R (NRES 898)](https://bulletin.unl.edu/courses/NRES/898)
+
+Topics have included ecological detective work, applied multivariate statistics, regression, ecological simulations, Shiny apps, data wrangling, and graphics. Materials from the R group are available on the [SNR R Group site](https://chrischizinski.github.io/SNR_R_Group/).
