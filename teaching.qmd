@@ -3,8 +3,6 @@ title: "Teaching"
 description: "Courses taught at the University of Nebraska–Lincoln."
 ---
 
-Courses I teach at the [University of Nebraska–Lincoln](https://www.unl.edu/).
-
 ## Current and recent courses
 
 ### [NRES 800: Data Science for Natural Resources](https://bulletin.unl.edu/courses/NRES/800)
