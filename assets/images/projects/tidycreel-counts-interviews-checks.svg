@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" role="img" aria-labelledby="title desc">
+  <title id="title">Planning and checking separate creel survey samples</title>
+  <desc id="desc">Three stages: plan count and interview coverage, use tidycreel schedule and completeness functions, then judge whether interviews represent the fishing effort. Software checks cannot establish representativeness.</desc>
+  <rect width="900" height="330" fill="#f7f5ee"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g fill="#fff" stroke="#507a78" stroke-width="2">
+      <rect x="24" y="35" width="260" height="197" rx="14"/>
+      <rect x="320" y="35" width="260" height="197" rx="14"/>
+      <rect x="616" y="35" width="260" height="197" rx="14"/>
+    </g>
+    <g fill="#234b4b" font-size="22" font-weight="700">
+      <text x="44" y="74">Plan coverage</text>
+      <text x="340" y="74">Run checks</text>
+      <text x="636" y="74">Make the judgment</text>
+    </g>
+    <g fill="#303b39" font-size="17">
+      <text x="44" y="111">Which days and shifts</text>
+      <text x="44" y="137">can each sample reach?</text>
+      <text x="340" y="111">generate_schedule()</text>
+      <text x="340" y="139">validate_creel_schedule()</text>
+      <text x="340" y="167">check_completeness()</text>
+      <text x="636" y="111">Do sampled trips represent</text>
+      <text x="636" y="137">the fishing hours being</text>
+      <text x="636" y="163">expanded into a total?</text>
+    </g>
+    <g fill="none" stroke="#ad6c4c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M290 131h22m-8-8 8 8-8 8"/>
+      <path d="M586 131h22m-8-8 8 8-8 8"/>
+    </g>
+    <rect x="24" y="254" width="852" height="52" rx="10" fill="#e7eee9"/>
+    <text x="450" y="286" text-anchor="middle" fill="#234b4b" font-size="17">Passing software checks does not establish representative interview coverage.</text>
+  </g>
+</svg>
